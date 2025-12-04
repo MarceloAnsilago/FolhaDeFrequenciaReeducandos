@@ -1,0 +1,32 @@
+# --- Python básico ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+
+# Arquivos temporários
+*.log
+*.tmp
+
+# --- Ambientes virtuais ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Configs locais / segredos ---
+*.env
+*.env.*
+.envrc
+
+# --- Streamlit ---
+.streamlit/secrets.toml
+.streamlit/config.toml
+
+# --- VS Code ---
+.vscode/
+
+# --- Sistema operacional ---
+.DS_Store
+Thumbs.db
