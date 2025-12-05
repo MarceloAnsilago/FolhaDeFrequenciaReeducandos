@@ -14,7 +14,7 @@ def desenhar_tabela(c, ano, mes):
     }
     nome_mes = MESES_PT.get(mes, "")
 
-    # Por enquanto, valores fixos de exemplo
+    # Valores de exemplo (depois podemos parametrizar)
     nome_reeducando = "ADENIR BELING"
     funcao = "AUXILIAR DE SERVIÇOS GERAIS"
     data_inclusao = "11/11/2019"
@@ -27,11 +27,16 @@ def desenhar_tabela(c, ano, mes):
     # Posição da tabela logo abaixo do cabeçalho
     y_top = altura_pagina - 50 * mm   # ajuste fino
 
-    largura_tabela = 156 * mm         # largura medida no Word
+    # Largura da tabela: 14,8 cm (não estoura a margem)
+    largura_tabela = 148 * mm
     altura_titulo  = 7 * mm           # 1ª linha
     altura_linha   = 6 * mm           # demais linhas
 
+    # Centraliza a tabela na página
     x = (largura_pagina - largura_tabela) / 2
+
+    # padding interno (margem esquerda/direita dentro das células)
+    pad = 1.5 * mm
 
     c.setLineWidth(1)
     c.setStrokeColorRGB(0, 0, 0)
@@ -50,28 +55,37 @@ def desenhar_tabela(c, ano, mes):
         "REGISTRO INDIVIDUAL DE PONTO"
     )
 
-    # y_atual = base da última linha desenhada
     y_atual = y1
 
     # ------------------------------------------------------------
-    # 2ª LINHA – SECRETARIA / ANO
+    # 2ª LINHA – SECRETARIA / ANO  (divisão exata antes do ANO)
     # ------------------------------------------------------------
     y2 = y_atual - altura_linha
     c.rect(x, y2, largura_tabela, altura_linha, fill=0)
 
-    largura_secretaria = largura_tabela * 0.78
-    c.line(x + largura_secretaria, y2, x + largura_secretaria, y2 + altura_linha)
+    c.setFont("Helvetica-Bold", 11)
 
-    c.setFont("Helvetica-Bold", 11)   # Arial 11 ~
+    # Texto ANO
+    texto_ano = f"ANO: {ano}"
+    largura_texto_ano = c.stringWidth(texto_ano, "Helvetica-Bold", 11)
+
+    # posição do ANO alinhado à direita
+    x_ano = x + largura_tabela - pad - largura_texto_ano
+
+    # 🚨 NOVO: linha vertical exatamente antes do texto ANO
+    x_div1 = x_ano - pad
+    c.line(x_div1, y2, x_div1, y2 + altura_linha)
+
+    # texto SECRETARIA (vai até onde der)
     c.drawString(
-        x + 2 * mm,
+        x + pad,
         y2 + (altura_linha / 2) - 3,
         "SECRETARIA: SECRETARIA DE ESTADO DA JUSTIÇA-SEJUS"
     )
 
-    texto_ano = f"ANO: {ano}"
+    # escreve ANO
     c.drawString(
-        x + largura_secretaria + 2 * mm,
+        x_ano,
         y2 + (altura_linha / 2) - 3,
         texto_ano
     )
@@ -84,16 +98,16 @@ def desenhar_tabela(c, ano, mes):
     y3 = y_atual - altura_linha
     c.rect(x, y3, largura_tabela, altura_linha, fill=0)
 
-    largura_reeducando = largura_tabela * 0.78
+    largura_reeducando = largura_tabela * 0.70
     c.line(x + largura_reeducando, y3, x + largura_reeducando, y3 + altura_linha)
 
     c.drawString(
-        x + 2 * mm,
+        x + pad,
         y3 + (altura_linha / 2) - 3,
         f"REEDUCANDO: {nome_reeducando}"
     )
     c.drawString(
-        x + largura_reeducando + 2 * mm,
+        x + largura_reeducando + pad,
         y3 + (altura_linha / 2) - 3,
         f"MÊS: {nome_mes}"
     )
@@ -107,7 +121,7 @@ def desenhar_tabela(c, ano, mes):
     c.rect(x, y4, largura_tabela, altura_linha, fill=0)
 
     c.drawString(
-        x + 2 * mm,
+        x + pad,
         y4 + (altura_linha / 2) - 3,
         f"FUNÇÃO: {funcao}"
     )
@@ -116,20 +130,32 @@ def desenhar_tabela(c, ano, mes):
 
     # ------------------------------------------------------------
     # 5ª LINHA – DATA DA INCLUSÃO / MUNICÍPIO
+    #  (linha vai até o fim do último dígito do ano)
     # ------------------------------------------------------------
     y5 = y_atual - altura_linha
     c.rect(x, y5, largura_tabela, altura_linha, fill=0)
 
-    largura_data = largura_tabela * 0.5
-    c.line(x + largura_data, y5, x + largura_data, y5 + altura_linha)
+    c.setFont("Helvetica-Bold", 11)
 
+    texto_data = f"DATA DA INCLUSÃO: {data_inclusao}"
+    largura_texto_data = c.stringWidth(texto_data, "Helvetica-Bold", 11)
+
+    # posição exata onde termina o texto da data + folguinha
+    x_fim_data = x + pad + largura_texto_data + 2  # 2 px de respiro
+
+    # linha vertical exatamente no fim da data
+    c.line(x_fim_data, y5, x_fim_data, y5 + altura_linha)
+
+    # escreve a data
     c.drawString(
-        x + 2 * mm,
+        x + pad,
         y5 + (altura_linha / 2) - 3,
-        f"DATA DA INCLUSÃO: {data_inclusao}"
+        texto_data
     )
+
+    # escreve o município logo após a linha
     c.drawString(
-        x + largura_data + 2 * mm,
+        x_fim_data + pad,
         y5 + (altura_linha / 2) - 3,
         f"MUNICÍPIO: {municipio}"
     )
@@ -151,17 +177,17 @@ def desenhar_tabela(c, ano, mes):
     c.line(x_bco_fim, y6, x_bco_fim, y6 + altura_linha)
 
     c.drawString(
-        x + 2 * mm,
+        x + pad,
         y6 + (altura_linha / 2) - 3,
         f"CPF: {cpf}"
     )
     c.drawString(
-        x_cpf_fim + 2 * mm,
+        x_cpf_fim + pad,
         y6 + (altura_linha / 2) - 3,
         f"BCO: {banco}"
     )
     c.drawString(
-        x_bco_fim + 2 * mm,
+        x_bco_fim + pad,
         y6 + (altura_linha / 2) - 3,
         f"AG: {agencia} CONTA: {conta}"
     )
@@ -175,12 +201,12 @@ def desenhar_tabela(c, ano, mes):
     c.rect(x, y7, largura_tabela, altura_linha, fill=0)
 
     c.drawString(
-        x + 2 * mm,
+        x + pad,
         y7 + (altura_linha / 2) - 3,
         "TIPO DE CONTA: (X) CORRENTE ( ) SALÁRIO ( ) POUPANÇA"
     )
 
     y_atual = y7
 
-    # Aqui embaixo começaremos o cabeçalho da tabela dos dias/horas
+    # Aqui embaixo começaremos o cabeçalho da tabela de dias/horas depois
     return y_atual
