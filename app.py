@@ -1,31 +1,26 @@
 import streamlit as st
 from io import BytesIO
-import base64
-
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
 from pdf.cabecalho import desenhar_cabecalho
-from pdf.corpo import desenhar_tabela  # vamos usar depois
+from pdf.corpo import desenhar_tabela
+
 
 st.set_page_config(page_title="Folha de Ponto", layout="centered")
 
 
-def gerar_pdf() -> bytes:
-    """
-    Gera o PDF em memória e retorna os bytes.
-    """
+def gerar_pdf():
     buffer = BytesIO()
-
     c = canvas.Canvas(buffer, pagesize=A4)
 
-    # Metadados do PDF
+    # Define título interno do PDF
     c.setTitle("Folha de ponto")
 
-    # Cabeçalho (logo + textos + linha)
+    # Cabeçalho oficial
     desenhar_cabecalho(c)
 
-    # No futuro:
+    # Corpo (quando estiver finalizado)
     # desenhar_tabela(c, ano=2025, mes=12)
 
     c.showPage()
@@ -37,47 +32,23 @@ def gerar_pdf() -> bytes:
 
 st.title("Gerador de Folha de Ponto")
 
-st.write(
-    """
-Clique em **Gerar PDF** para criar a folha de ponto com cabeçalho oficial.
-Depois você pode **abrir em uma nova aba** ou **baixar o arquivo**.
-"""
-)
+st.write("""
+Clique em **Gerar PDF** para criar a Folha de Ponto com cabeçalho oficial.
+Depois use **Baixar PDF** para salvar o arquivo.
+""")
 
+
+# Botão para gerar PDF
 if st.button("Gerar PDF"):
-    pdf_bytes = gerar_pdf()
-    st.session_state["pdf"] = pdf_bytes
-    st.success("✅ PDF gerado com sucesso!")
+    st.session_state["pdf"] = gerar_pdf()
+    st.success("PDF gerado com sucesso!")
 
-# Se já temos um PDF em memória, mostramos as ações
+
+# Apenas botão de download (sem visualização e sem link extra)
 if "pdf" in st.session_state:
-    pdf_bytes = st.session_state["pdf"]
-
-    # -----------------------------
-    # Link para abrir em nova aba
-    # -----------------------------
-    b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
-    pdf_url = f"data:application/pdf;base64,{b64_pdf}"
-
-    st.markdown(
-        f"""
-        <p>
-            👉 <a href="{pdf_url}" target="_blank">
-                <strong>Abrir PDF em nova aba</strong>
-            </a>
-        </p>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # -----------------------------
-    # Botão de download
-    # -----------------------------
     st.download_button(
-        label="⬇ Baixar PDF",
-        data=pdf_bytes,
+        "⬇ Baixar PDF",
+        data=st.session_state["pdf"],
         file_name="folha.pdf",
         mime="application/pdf",
     )
-else:
-    st.info("Ainda não há PDF gerado. Clique em **Gerar PDF**.")
