@@ -21,7 +21,7 @@ def gerar_pdf():
     desenhar_cabecalho(c)
 
     # Corpo (quando estiver finalizado)
-    # desenhar_tabela(c, ano=2025, mes=12)
+    desenhar_tabela(c, ano=2025, mes=12)
 
     c.showPage()
     c.save()
