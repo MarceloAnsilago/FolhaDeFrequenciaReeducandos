@@ -53,16 +53,15 @@ def gerar_relatorio_cabecalho(
     nome_mes = MESES_PT.get(mes, str(mes)).upper()
     linha2 = f"MÊS: {nome_mes}/{ano}"
 
-    # Título logo abaixo do cabeçalho
-    y1 = y_base - 6 * mm  # primeira linha do título
-    y2 = y1 - 5 * mm      # segunda linha (MÊS: ...)
+    # Deixamos tudo mais "colado" para ganhar espaço embaixo
+    y1 = y_base - 3 * mm   # primeira linha do título
+    y2 = y1    - 3 * mm    # segunda linha (MÊS: ...)
 
     c.drawCentredString(x_centro, y1, linha1)
     c.drawCentredString(x_centro, y2, linha2)
 
-    # Espaço entre o título e o cabeçalho da tabela (AGORA MENOR)
-    # Se quiser ainda mais perto, diminua para 3*mm ou 2*mm.
-    y_tabela_top = y2 - 4 * mm
+    # Espaço entre o título e o cabeçalho da tabela (bem pequeno)
+    y_tabela_top = y2 - 2 * mm
 
     return y_tabela_top
 
@@ -96,7 +95,8 @@ def desenhar_tabela_relatorio(
 
     # Caso não venha um y_top do cabeçalho, usa um valor padrão
     if y_top is None:
-        y_top = c._pagesize[1] - 60 * mm
+        # também subimos um pouco o padrão, só por garantia
+        y_top = c._pagesize[1] - 55 * mm
 
     # Centraliza a tabela na horizontal
     x = (largura_pagina - largura_tabela) / 2
@@ -121,8 +121,8 @@ def desenhar_tabela_relatorio(
             linhas.append(atual)
         return linhas or [""]
 
-    # Cabeçalho da tabela
-    cabecalho_alt = 6.5 * mm
+    # Cabeçalho da tabela (um pouco mais baixo para ganhar espaço)
+    cabecalho_alt = 5.5 * mm
     c.setFont(*fonte_header)
     c.rect(x, y - cabecalho_alt, largura_tabela, cabecalho_alt, fill=0)
     c.line(x + largura_col_dia, y - cabecalho_alt, x + largura_col_dia, y)
