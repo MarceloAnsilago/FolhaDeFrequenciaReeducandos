@@ -70,6 +70,34 @@ def _safe_index(options, value, default=0):
         return default
 
 
+def parse_feriados_text(texto):
+    feriados_dict = {}
+    erros = []
+    for raw_bloco in texto.split(","):
+        bloco = raw_bloco.strip()
+        if not bloco:
+            continue
+        if "-" not in bloco:
+            erros.append(f'"{bloco}" (faltou "-")')
+            continue
+        dia_str, _, nome = bloco.partition("-")
+        dia_str = dia_str.strip()
+        nome = nome.strip()
+        try:
+            dia = int(dia_str)
+        except ValueError:
+            erros.append(f'"{bloco}" (dia inválido)')
+            continue
+        if not (1 <= dia <= 31):
+            erros.append(f'"{bloco}" (dia fora de 1-31)')
+            continue
+        if not nome:
+            erros.append(f'"{bloco}" (descrição vazia)')
+            continue
+        feriados_dict[dia] = nome
+    return feriados_dict, erros
+
+
 def _clean_text(texto: str) -> str:
     # normaliza espaços e sobe para maiúsculas para regex
     return re.sub(r"\s+", " ", texto).strip()
@@ -279,14 +307,16 @@ def gerar_relatorio_pdf(
     cep,
     telefone,
     data_preenchimento,
+    feriados=None,
 ):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
 
-    # apenas cabeçalho oficial com logo
-    gerar_relatorio_cabecalho(
+    # cabeçalho oficial com logo e título
+    y_base = gerar_relatorio_cabecalho(
         c,
         secretaria=secretaria,
+        mes=mes,
         ano=ano,
         reeducando=reeducando,
         funcao=funcao,
@@ -295,6 +325,23 @@ def gerar_relatorio_pdf(
         cep=cep,
         telefone=telefone,
         data_preenchimento=data_preenchimento,
+    )
+
+    # tabela de atividades (dias do mês)
+    atividade_base = (
+        "Serviços de limpeza e conservação do prédio, bens materiais e utensílios da "
+        "ULSAV/IDARON de {municipio}. Sob supervisão de um servidor."
+    )
+    from pdf.relatorio import desenhar_tabela_relatorio  # lazy import
+
+    desenhar_tabela_relatorio(
+        c,
+        mes=mes,
+        ano=ano,
+        municipio=municipio,
+        atividade_base=atividade_base,
+        feriados=feriados or {},
+        y_top=y_base,
     )
 
     c.showPage()
@@ -426,34 +473,7 @@ with st.expander("Preencher dados da folha", expanded=True):
     with col_btn[0]:
         if st.button("Gerar Folha de Ponto"):
 
-            def parse_feriados(texto):
-                feriados_dict = {}
-                erros = []
-                for raw_bloco in texto.split(","):
-                    bloco = raw_bloco.strip()
-                    if not bloco:
-                        continue
-                    if "-" not in bloco:
-                        erros.append(f'"{bloco}" (faltou "-")')
-                        continue
-                    dia_str, _, nome = bloco.partition("-")
-                    dia_str = dia_str.strip()
-                    nome = nome.strip()
-                    try:
-                        dia = int(dia_str)
-                    except ValueError:
-                        erros.append(f'"{bloco}" (dia inválido)')
-                        continue
-                    if not (1 <= dia <= 31):
-                        erros.append(f'"{bloco}" (dia fora de 1-31)')
-                        continue
-                    if not nome:
-                        erros.append(f'"{bloco}" (descrição vazia)')
-                        continue
-                    feriados_dict[dia] = nome
-                return feriados_dict, erros
-
-            feriados_dict, erros = parse_feriados(feriados_texto)
+            feriados_dict, erros = parse_feriados_text(feriados_texto)
             if erros:
                 st.error("Revise os feriados informados: " + "; ".join(erros))
             else:
@@ -482,19 +502,25 @@ with st.expander("Preencher dados da folha", expanded=True):
                 st.success("Folha de ponto gerada com sucesso!")
     with col_btn[1]:
         if st.button("Gerar Relatório de Atividades"):
-            st.session_state["relatorio_pdf"] = gerar_relatorio_pdf(
-                ano=ano,
-                mes=MESES[mes_label],
-                secretaria=secretaria_input,
-                reeducando=reeducando_input,
-                funcao=funcao_input,
-                municipio=municipio_input,
-                endereco=endereco_input,
-                cep=cep_input,
-                telefone=telefone_input,
-                data_preenchimento=data_input,
-            )
-            st.success("Relatório de atividades gerado com sucesso!")
+            feriados_dict, erros = parse_feriados_text(feriados_texto)
+            if erros:
+                st.error("Revise os feriados informados: " + "; ".join(erros))
+            else:
+                st.session_state["feriados_texto"] = feriados_texto
+                st.session_state["relatorio_pdf"] = gerar_relatorio_pdf(
+                    ano=ano,
+                    mes=MESES[mes_label],
+                    secretaria=secretaria_input,
+                    reeducando=reeducando_input,
+                    funcao=funcao_input,
+                    municipio=municipio_input,
+                    endereco=endereco_input,
+                    cep=cep_input,
+                    telefone=telefone_input,
+                    data_preenchimento=data_input,
+                    feriados=feriados_dict,
+                )
+                st.success("Relatório de atividades gerado com sucesso!")
 
 # Botões de download
 if "pdf" in st.session_state:
