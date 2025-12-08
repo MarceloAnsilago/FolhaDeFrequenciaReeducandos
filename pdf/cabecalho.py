@@ -5,7 +5,7 @@ from pathlib import Path
 
 LOGO_PATH = Path("assets/logo_ro_horizontal.jpg")
 
-def desenhar_cabecalho(c, margem_topo=0.5*mm, margem_lateral=15*mm):
+def desenhar_cabecalho(c, margem_topo=3*mm, margem_lateral=15*mm):
     largura_pagina, altura_pagina = A4
 
     # ---------- LOGO ----------
@@ -38,7 +38,7 @@ def desenhar_cabecalho(c, margem_topo=0.5*mm, margem_lateral=15*mm):
 
     # ---------- TEXTOS ----------
     # menos espaço entre logo e texto (subir bloco de texto)
-    y_texto = y_logo - 0.25*mm
+    y_texto = y_logo - 0.5*mm
     x_centro = largura_pagina / 2
 
     linha1 = "GOVERNO DO ESTADO DE RONDÔNIA"

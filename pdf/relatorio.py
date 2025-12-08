@@ -78,7 +78,7 @@ def desenhar_tabela_relatorio(
     line_h = 8.5
 
     if y_top is None:
-        y_top = c._pagesize[1] - 32 * mm
+        y_top = c._pagesize[1] - 36 * mm
 
     x = (largura_pagina - largura_tabela) / 2
     y = y_top

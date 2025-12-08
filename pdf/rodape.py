@@ -38,8 +38,11 @@ def desenhar_rodape(
     logo_w_dir = 42 * mm
     y_logo = margem_inferior + 4 * mm
 
-    if LOGO_ESQ_PATH.exists():
-        img_esq = ImageReader(str(LOGO_ESQ_PATH))
+    logo_esq_path = LOGO_ESQ_PATH if LOGO_ESQ_PATH.exists() else Path("assets/logo_inferior_esq.jpg")
+    logo_dir_path = LOGO_DIR_PATH if LOGO_DIR_PATH.exists() else Path("assets/logo_inferior_dir.jpg")
+
+    if logo_esq_path.exists():
+        img_esq = ImageReader(str(logo_esq_path))
         c.drawImage(
             img_esq,
             x_esq,
@@ -50,8 +53,8 @@ def desenhar_rodape(
             mask="auto",
         )
 
-    if LOGO_DIR_PATH.exists():
-        img_dir = ImageReader(str(LOGO_DIR_PATH))
+    if logo_dir_path.exists():
+        img_dir = ImageReader(str(logo_dir_path))
         c.drawImage(
             img_dir,
             x_dir - logo_w_dir,
