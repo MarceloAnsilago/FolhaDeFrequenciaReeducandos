@@ -72,10 +72,10 @@ def desenhar_tabela_relatorio(
     largura_tabela = 175 * mm
     largura_col_dia = 12 * mm
     largura_col_atividade = largura_tabela - largura_col_dia
-    pad = 1 * mm
+    pad = 1.5 * mm
     fonte_header = ("Helvetica-Bold", 9)
     fonte_linha = ("Helvetica", 7.5)
-    line_h = 8
+    line_h = 8.5
 
     if y_top is None:
         y_top = c._pagesize[1] - 32 * mm
@@ -100,7 +100,7 @@ def desenhar_tabela_relatorio(
         return linhas or [""]
 
     # Cabeçalho da tabela
-    cabecalho_alt = 6 * mm
+    cabecalho_alt = 6.5 * mm
     c.setFont(*fonte_header)
     c.rect(x, y - cabecalho_alt, largura_tabela, cabecalho_alt, fill=0)
     c.line(x + largura_col_dia, y - cabecalho_alt, x + largura_col_dia, y)
@@ -134,7 +134,7 @@ def desenhar_tabela_relatorio(
             fonte_linha[0],
             fonte_linha[1],
         )
-        altura_row = max(4.5 * mm, len(linhas) * line_h + pad)
+        altura_row = max(5 * mm, len(linhas) * line_h + pad)
 
         # caixa da linha
         c.rect(x, y - altura_row, largura_tabela, altura_row, fill=0)
