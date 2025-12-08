@@ -74,9 +74,13 @@ with col_hs:
     hs = st.selectbox("Horário de saída (HS)", opcoes_hs, index=opcoes_hs.index("13:30") if "13:30" in opcoes_hs else 0)
 
 feriados_texto = st.text_area(
-    "Feriados (ex.: 1-Confraternização Universal, 15-Feriado inventado)",
+    "Feriados (formato: dia-descrição, separados por vírgulas. Ex.: 1-Confraternização Universal, 15-Feriado Inventado, 21-Dia Tal)",
     value="",
-    help="Informe dia-descrição separados por vírgulas. Exemplo: 1-Confraternização Universal, 21-Tiradentes",
+    help=(
+        "Use dia-descrição, separados por vírgulas. Ex.: 1-Confraternização Universal, "
+        "15-Feriado inventado, 21-Dia tal (dia entre 1 e 31). "
+        "Exemplo para colar: 1-Confraternização Universal, 15-Feriado Inventado, 21-Dia Tal."
+    ),
 )
 
 st.write("""
@@ -87,26 +91,37 @@ Selecione o mês e o ano, gere o PDF com o cabeçalho oficial e depois baixe o a
 if st.button("Gerar PDF"):
     def parse_feriados(texto):
         feriados_dict = {}
-        for bloco in texto.split(","):
-            item = bloco.strip()
-            if not item:
+        erros = []
+        for raw_bloco in texto.split(","):
+            bloco = raw_bloco.strip()
+            if not bloco:
                 continue
-            if "-" not in item:
+            if "-" not in bloco:
+                erros.append(f'"{bloco}" (faltou "-")')
                 continue
-            dia_str, _, nome = item.partition("-")
+            dia_str, _, nome = bloco.partition("-")
             dia_str = dia_str.strip()
             nome = nome.strip()
             try:
                 dia = int(dia_str)
             except ValueError:
+                erros.append(f'"{bloco}" (dia inválido)')
                 continue
-            if 1 <= dia <= 31 and nome:
-                feriados_dict[dia] = nome
-        return feriados_dict
+            if not (1 <= dia <= 31):
+                erros.append(f'"{bloco}" (dia fora de 1-31)')
+                continue
+            if not nome:
+                erros.append(f'"{bloco}" (descrição vazia)')
+                continue
+            feriados_dict[dia] = nome
+        return feriados_dict, erros
 
-    feriados_dict = parse_feriados(feriados_texto)
-    st.session_state["pdf"] = gerar_pdf(ano=ano, mes=MESES[mes_label], he=he, hs=hs, feriados=feriados_dict)
-    st.success("PDF gerado com sucesso!")
+    feriados_dict, erros = parse_feriados(feriados_texto)
+    if erros:
+        st.error("Revise os feriados informados: " + "; ".join(erros))
+    else:
+        st.session_state["pdf"] = gerar_pdf(ano=ano, mes=MESES[mes_label], he=he, hs=hs, feriados=feriados_dict)
+        st.success("PDF gerado com sucesso!")
 
 # Botão de download
 if "pdf" in st.session_state:
