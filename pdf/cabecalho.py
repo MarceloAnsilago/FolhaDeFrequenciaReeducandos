@@ -9,30 +9,32 @@ def desenhar_cabecalho(c, margem_topo=0.5*mm, margem_lateral=15*mm):
     largura_pagina, altura_pagina = A4
 
     # ---------- LOGO ----------
-    if not LOGO_PATH.exists():
-        raise FileNotFoundError(f"Logo não encontrado: {LOGO_PATH}")
+    h_pt = 0
+    if LOGO_PATH.exists():
+        logo = ImageReader(str(LOGO_PATH))
+        w_px, h_px = logo.getSize()
 
-    logo = ImageReader(str(LOGO_PATH))
-    w_px, h_px = logo.getSize()
+        largura_mm = 24  # menor para subir conjunto logo/texto
+        w_pt = largura_mm * mm
+        proporcao = w_pt / w_px
+        h_pt = h_px * proporcao
 
-    largura_mm = 24  # menor para subir conjunto logo/texto
-    w_pt = largura_mm * mm
-    proporcao = w_pt / w_px
-    h_pt = h_px * proporcao
+        x_logo = (largura_pagina - w_pt) / 2
+        y_logo = altura_pagina - margem_topo - h_pt
 
-    # Logo MUITO mais alto
-    x_logo = (largura_pagina - w_pt) / 2
-    y_logo = altura_pagina - margem_topo - h_pt
-
-    c.drawImage(
-        logo,
-        x_logo,
-        y_logo,
-        w_pt,
-        h_pt,
-        preserveAspectRatio=True,
-        mask="auto"
-    )
+        c.drawImage(
+            logo,
+            x_logo,
+            y_logo,
+            w_pt,
+            h_pt,
+            preserveAspectRatio=True,
+            mask="auto"
+        )
+    else:
+        # se logo não existir, posiciona textos a partir do topo
+        h_pt = 0
+        y_logo = altura_pagina - margem_topo
 
     # ---------- TEXTOS ----------
     # menos espaço entre logo e texto (subir bloco de texto)
