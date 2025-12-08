@@ -49,8 +49,8 @@ def gerar_relatorio_cabecalho(
     nome_mes = MESES_PT.get(mes, str(mes)).upper()
     linha2 = f"MÊS: {nome_mes}/{ano}"
 
-    # título com um pouco mais de folga abaixo do cabeçalho
-    y1 = y_base + 4 * mm
+    # título com folga abaixo do cabeçalho
+    y1 = y_base + 3 * mm
     y2 = y1 - 4 * mm
 
     c.drawCentredString(x_centro, y1, linha1)
@@ -83,8 +83,8 @@ def desenhar_tabela_relatorio(
         y_top = c._pagesize[1] - 36 * mm
 
     x = (largura_pagina - largura_tabela) / 2
-    # desce um pouco o início da tabela para não encostar no cabeçalho
-    y = y_top - 6 * mm
+    # sobe a tabela para ficar mais próxima do mês/título
+    y = y_top - 2 * mm
 
     def wrap_text(texto, max_width, font_name, font_size):
         palavras = texto.split()
