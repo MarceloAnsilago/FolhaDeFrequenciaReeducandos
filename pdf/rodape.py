@@ -11,6 +11,11 @@ def desenhar_rodape(
     c,
     margem_inferior=8 * mm,
     margem_lateral=15 * mm,
+    titulo="ULSAV - UNIDADE LOCAL DE SANIDADE ANIMAL E VEGETAL",
+    linha_endereco="Av. São Paulo, 436 – Bairro Centro",
+    linha_fone="Fone/Fax: (69) 3642-1026/8479-9229",
+    linha_cep="CEP 76.932-000 – São Miguel do Guaporé/RO",
+    linha_email="saomiguel@idaron.ro.gov.br",
 ):
     """
     Desenha rodapé com linha superior, logos esquerdo/direito (se existirem)
@@ -29,7 +34,8 @@ def desenhar_rodape(
 
     # logos (se existirem)
     logo_h = 14 * mm
-    logo_w = 38 * mm
+    logo_w_esq = 38 * mm
+    logo_w_dir = 42 * mm
     y_logo = margem_inferior + 4 * mm
 
     if LOGO_ESQ_PATH.exists():
@@ -38,7 +44,7 @@ def desenhar_rodape(
             img_esq,
             x_esq,
             y_logo,
-            logo_w,
+            logo_w_esq,
             logo_h,
             preserveAspectRatio=True,
             mask="auto",
@@ -48,9 +54,9 @@ def desenhar_rodape(
         img_dir = ImageReader(str(LOGO_DIR_PATH))
         c.drawImage(
             img_dir,
-            x_dir - logo_w,
+            x_dir - logo_w_dir,
             y_logo,
-            logo_w,
+            logo_w_dir,
             logo_h,
             preserveAspectRatio=True,
             mask="auto",
@@ -58,11 +64,11 @@ def desenhar_rodape(
 
     # bloco de texto central
     texto = [
-        "ULSAV - UNIDADE LOCAL DE SANIDADE ANIMAL E VEGETAL",
-        "Av. São Paulo, 436 – Bairro Centro",
-        "Fone/Fax: (69) 3642-1026/8479-9229",
-        "CEP 76.932-000 – São Miguel do Guaporé/RO",
-        "saomiguel@idaron.ro.gov.br",
+        titulo,
+        linha_endereco,
+        linha_fone,
+        linha_cep,
+        linha_email,
     ]
     c.setFont("Helvetica-Bold", 9)
     x_centro = largura_pagina / 2

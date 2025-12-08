@@ -53,6 +53,11 @@ DEFAULTS = {
     "cep": "",
     "telefone": "",
     "data_preenchimento": "__/__/____",
+    "rodape_titulo": "ULSAV - UNIDADE LOCAL DE SANIDADE ANIMAL E VEGETAL",
+    "rodape_endereco": "Av. São Paulo, 436 – Bairro Centro",
+    "rodape_fone": "Fone/Fax: (69) 3642-1026/8479-9229",
+    "rodape_cep": "CEP 76.932-000 – São Miguel do Guaporé/RO",
+    "rodape_email": "saomiguel@idaron.ro.gov.br",
     "mes_label": list(MESES.keys())[0],
     "ano": list(range(2026, 2036))[0],
     "he": "07:30",
@@ -309,6 +314,11 @@ def gerar_relatorio_pdf(
     telefone,
     data_preenchimento,
     feriados=None,
+    rodape_titulo=None,
+    rodape_endereco=None,
+    rodape_fone=None,
+    rodape_cep=None,
+    rodape_email=None,
 ):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
@@ -346,7 +356,14 @@ def gerar_relatorio_pdf(
     )
 
     # rodapé
-    desenhar_rodape(c)
+    desenhar_rodape(
+        c,
+        titulo=rodape_titulo or "ULSAV - UNIDADE LOCAL DE SANIDADE ANIMAL E VEGETAL",
+        linha_endereco=rodape_endereco or "Av. São Paulo, 436 – Bairro Centro",
+        linha_fone=rodape_fone or "Fone/Fax: (69) 3642-1026/8479-9229",
+        linha_cep=rodape_cep or "CEP 76.932-000 – São Miguel do Guaporé/RO",
+        linha_email=rodape_email or "saomiguel@idaron.ro.gov.br",
+    )
 
     c.showPage()
     c.save()
@@ -410,6 +427,13 @@ with st.expander("Dados do Reeducando", expanded=True):
         telefone_input = st.text_input("Telefone", key="telefone")
     with col_contato[2]:
         data_input = st.text_input("Data", key="data_preenchimento")
+
+with st.expander("Rodapé (ULSAV/IDARON)", expanded=True):
+    rodape_titulo_input = st.text_input("Título do rodapé", key="rodape_titulo")
+    rodape_endereco_input = st.text_input("Endereço (rodapé)", key="rodape_endereco")
+    rodape_fone_input = st.text_input("Fone/Fax (rodapé)", key="rodape_fone")
+    rodape_cep_input = st.text_input("CEP / Cidade (rodapé)", key="rodape_cep")
+    rodape_email_input = st.text_input("Email (rodapé)", key="rodape_email")
 
 with st.expander("Preencher dados da folha", expanded=True):
     # saneia valores de mês/ano antes de criar os widgets
@@ -523,6 +547,11 @@ with st.expander("Preencher dados da folha", expanded=True):
                     telefone=telefone_input,
                     data_preenchimento=data_input,
                     feriados=feriados_dict,
+                    rodape_titulo=rodape_titulo_input,
+                    rodape_endereco=rodape_endereco_input,
+                    rodape_fone=rodape_fone_input,
+                    rodape_cep=rodape_cep_input,
+                    rodape_email=rodape_email_input,
                 )
                 st.success("Relatório de atividades gerado com sucesso!")
 
