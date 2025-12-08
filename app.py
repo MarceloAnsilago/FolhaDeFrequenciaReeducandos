@@ -9,8 +9,23 @@ from pdf.corpo import desenhar_tabela
 
 st.set_page_config(page_title="Folha de Ponto", layout="centered")
 
+MESES = {
+    "JANEIRO": 1,
+    "FEVEREIRO": 2,
+    "MARÇO": 3,
+    "ABRIL": 4,
+    "MAIO": 5,
+    "JUNHO": 6,
+    "JULHO": 7,
+    "AGOSTO": 8,
+    "SETEMBRO": 9,
+    "OUTUBRO": 10,
+    "NOVEMBRO": 11,
+    "DEZEMBRO": 12,
+}
 
-def gerar_pdf():
+
+def gerar_pdf(ano, mes, he, hs):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
 
@@ -18,10 +33,10 @@ def gerar_pdf():
     c.setTitle("Folha de ponto")
 
     # Cabeçalho oficial
-    desenhar_cabecalho(c)
+    y_top = desenhar_cabecalho(c)
 
-    # Corpo (quando estiver finalizado)
-    desenhar_tabela(c, ano=2025, mes=12)
+    # Corpo
+    desenhar_tabela(c, ano=ano, mes=mes, he=he, hs=hs, y_top=y_top)
 
     c.showPage()
     c.save()
@@ -32,22 +47,45 @@ def gerar_pdf():
 
 st.title("Gerador de Folha de Ponto")
 
-st.write("""
-Clique em **Gerar PDF** para criar a Folha de Ponto com cabeçalho oficial.
-Depois use **Baixar PDF** para salvar o arquivo.
-""")
+col_mes, col_ano = st.columns(2)
+with col_mes:
+    mes_label = st.selectbox("Mês", list(MESES.keys()), index=0)
+with col_ano:
+    ano = st.selectbox("Ano", list(range(2026, 2036)), index=0)
 
+# opções de horário
+opcoes_he = [
+    f"{h:02d}:{m:02d}"
+    for h in range(5, 10)
+    for m in (0, 30)
+    if (h < 9 or (h == 9 and m == 0))
+]
+opcoes_hs = [
+    f"{h:02d}:{m:02d}"
+    for h in range(10, 18)
+    for m in (0, 30)
+    if not (h == 10 and m == 0)  # começa em 10:30
+]
+
+col_he, col_hs = st.columns(2)
+with col_he:
+    he = st.selectbox("Horário de entrada (HE)", opcoes_he, index=opcoes_he.index("07:30") if "07:30" in opcoes_he else 0)
+with col_hs:
+    hs = st.selectbox("Horário de saída (HS)", opcoes_hs, index=opcoes_hs.index("13:30") if "13:30" in opcoes_hs else 0)
+
+st.write("""
+Selecione o mês e o ano, gere o PDF com o cabeçalho oficial e depois baixe o arquivo.
+""")
 
 # Botão para gerar PDF
 if st.button("Gerar PDF"):
-    st.session_state["pdf"] = gerar_pdf()
+    st.session_state["pdf"] = gerar_pdf(ano=ano, mes=MESES[mes_label], he=he, hs=hs)
     st.success("PDF gerado com sucesso!")
 
-
-# Apenas botão de download (sem visualização e sem link extra)
+# Botão de download
 if "pdf" in st.session_state:
     st.download_button(
-        "⬇ Baixar PDF",
+        "⬇️ Baixar PDF",
         data=st.session_state["pdf"],
         file_name="folha.pdf",
         mime="application/pdf",

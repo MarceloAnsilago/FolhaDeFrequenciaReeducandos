@@ -2,7 +2,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 import calendar
 
-def desenhar_tabela(c, ano, mes):
+def desenhar_tabela(c, ano, mes, he=None, hs=None, y_top=None):
     largura_pagina, altura_pagina = A4
 
     # ------------------------------
@@ -19,19 +19,23 @@ def desenhar_tabela(c, ano, mes):
     nome_reeducando = "ADENIR BELING"
     funcao = "AUXILIAR DE SERVIÇOS GERAIS"
     data_inclusao = "11/11/2019"
+    endereco = "RUA CECILIA PINHEIRO S/Nº, SOB ESQUINA MAL RONDON, SAO MIGUEL DO GUAPORÉ"
+    cep = "76.932-000"
+    telefone = "69 99245-2646"
     municipio = "SÃO MIGUEL DO GUAPORÉ"
     cpf = "753.210.922-49"
     banco = "01"
     agencia = "2292-6"
     conta = "23.061-8"
 
-    # Posição da tabela logo abaixo do cabeçalho
-    y_top = altura_pagina - 50 * mm   # ajuste fino
+    # Posição da tabela: usa valor fornecido pelo cabeçalho ou cai no padrão
+    if y_top is None:
+        y_top = altura_pagina - 34 * mm   # margem padrão caso não venha coordenada do cabeçalho
 
     # Largura da tabela: 14,8 cm (não estoura a margem)
     largura_tabela = 148 * mm
-    altura_titulo  = 7 * mm           # 1ª linha
-    altura_linha   = 6 * mm           # demais linhas
+    altura_titulo  = 6 * mm           # 1ª linha
+    altura_linha   = 5 * mm           # demais linhas
 
     # Centraliza a tabela na página
     x = (largura_pagina - largura_tabela) / 2
@@ -74,7 +78,7 @@ def desenhar_tabela(c, ano, mes):
     c.drawString(
         x + pad,
         y2 + (altura_linha / 2) - 3,
-        "SECRETARIA: SECRETARIA DE ESTADO DA JUSTIÇA-SEJUS"
+        "SECRETARIA: SECRETARIA DE ESTADO DA JUSTIÇA - SEJUS"
     )
     c.drawString(
         x_ano,
@@ -188,14 +192,14 @@ def desenhar_tabela(c, ano, mes):
     # ------------------------------------------------------------
     # Espaço entre a primeira tabela e a segunda tabela
     # ------------------------------------------------------------
-    espaco_entre_tabelas = 2 * mm
+    espaco_entre_tabelas = 1 * mm
     y_atual = y7 - espaco_entre_tabelas
 
     # ============================================================
     # CABEÇALHO DA SEGUNDA TABELA
     # DIA | HE | ENTRADA MANHA | HS | SAÍDA TARDE | (coluna OBS)
     # ============================================================
-    altura_cabecalho_dias = 6 * mm
+    altura_cabecalho_dias = 5 * mm
 
     # --------------------------------------------------------
     # larguras das colunas (ultima mais estreita, ganho vai
@@ -206,7 +210,7 @@ def desenhar_tabela(c, ano, mes):
     largura_col_hs2 = 10 * mm
 
     # largura fixa (mais estreita) para a coluna de observações
-    largura_col_extra = 20 * mm
+    largura_col_extra = 14 * mm  # coluna de observações mais estreita
 
     # o que sobra será dividido entre ENTRADA MANHA e SAÍDA TARDE
     largura_restante = (
@@ -256,7 +260,8 @@ def desenhar_tabela(c, ano, mes):
     # LINHAS DOS DIAS (última coluna SEM linhas internas)
     # ============================================================
     dias_no_mes = calendar.monthrange(ano, mes)[1]
-    altura_linha_dia = 6 * mm
+    total_linhas = 31
+    altura_linha_dia = 5 * mm
 
     c.setFont("Helvetica-Bold", 9)
 
@@ -264,7 +269,7 @@ def desenhar_tabela(c, ano, mes):
     y_top_tabela = y_header
     y_ultima_linha = y_top_tabela
 
-    for dia in range(1, dias_no_mes + 1):
+    for dia in range(1, total_linhas + 1):
         y_row = y_ultima_linha - altura_linha_dia
 
         # retângulo DA LINHA até SAÍDA TARDE (não entra na última coluna)
@@ -274,13 +279,42 @@ def desenhar_tabela(c, ano, mes):
         for xv in (x1, x2, x3, x4, x5):
             c.line(xv, y_row, xv, y_row + altura_linha_dia)
 
-        # DIA centralizado
-        dia_str = f"{dia:02d}"
+        # DIA centralizado + marcação de fins de semana e horários
+        if dia <= dias_no_mes:
+            dia_str = f"{dia:02d}"
+            dow = calendar.weekday(ano, mes, dia)
+            if dow == 5:  # sábado
+                he_text = "S"
+                hs_text = "S"
+            elif dow == 6:  # domingo
+                he_text = "D"
+                hs_text = "D"
+            else:
+                he_text = he or ""
+                hs_text = hs or ""
+        else:
+            dia_str = "---"
+            he_text = ""
+            hs_text = ""
+
         c.drawCentredString(
             (x0 + x1) / 2,
             y_row + (altura_linha_dia / 2) - 3,
             dia_str
         )
+
+        if he_text:
+            c.drawCentredString(
+                (x1 + x2) / 2,
+                y_row + (altura_linha_dia / 2) - 3,
+                he_text
+            )
+        if hs_text:
+            c.drawCentredString(
+                (x3 + x4) / 2,
+                y_row + (altura_linha_dia / 2) - 3,
+                hs_text
+            )
 
         y_ultima_linha = y_row
 
@@ -328,5 +362,50 @@ def desenhar_tabela(c, ano, mes):
         y_texto -= line_h
         if y_texto < y_ultima_linha + line_h:
             break
+
+    # ------------------------------------------------------------
+    # RODAPÉ COM ENDEREÇO / CONTATOS / ASSINATURAS
+    # ------------------------------------------------------------
+    altura_footer = 5 * mm
+
+    # linha 1: endereço (largura total)
+    y_footer1 = y_ultima_linha - altura_footer
+    c.rect(x, y_footer1, largura_tabela, altura_footer, fill=0)
+    c.drawString(
+        x + pad,
+        y_footer1 + (altura_footer / 2) - 3,
+        f"ENDEREÇO: {endereco}"
+    )
+
+    # linha 2: CEP | TELEFONE | DATA
+    y_footer2 = y_footer1 - altura_footer
+    c.rect(x, y_footer2, largura_tabela, altura_footer, fill=0)
+    col1 = largura_tabela * 0.35
+    col2 = largura_tabela * 0.30
+    x_col1 = x + col1
+    x_col2 = x_col1 + col2
+    c.line(x_col1, y_footer2, x_col1, y_footer2 + altura_footer)
+    c.line(x_col2, y_footer2, x_col2, y_footer2 + altura_footer)
+    c.drawString(x + pad, y_footer2 + (altura_footer / 2) - 3, f"CEP: {cep}")
+    c.drawString(x_col1 + pad, y_footer2 + (altura_footer / 2) - 3, f"TELEFONE: {telefone}")
+    c.drawString(x_col2 + pad, y_footer2 + (altura_footer / 2) - 3, "DATA: ____/____/_____")
+
+    # linha 3: assinaturas
+    y_footer3 = y_footer2 - altura_footer
+    c.rect(x, y_footer3, largura_tabela, altura_footer, fill=0)
+    x_meio = x + (largura_tabela / 2)
+    c.line(x_meio, y_footer3, x_meio, y_footer3 + altura_footer)
+    c.drawCentredString(
+        x + (largura_tabela / 4),
+        y_footer3 + (altura_footer / 2) - 3,
+        "ASSINATURA DO REEDUCANDO"
+    )
+    c.drawCentredString(
+        x + (3 * largura_tabela / 4),
+        y_footer3 + (altura_footer / 2) - 3,
+        "VISTO DO CHEFE"
+    )
+
+    y_ultima_linha = y_footer3
 
     return y_ultima_linha
