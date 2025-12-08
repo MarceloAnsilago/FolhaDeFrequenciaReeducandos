@@ -39,7 +39,7 @@ def gerar_relatorio_cabecalho(
     Desenha o cabeçalho oficial (logo) e o título do relatório,
     devolvendo a coordenada Y onde a tabela deve começar.
     """
-    # y_base deve ser o "pé" do cabeçalho com o brasão e textos padrão
+    # y_base = pé do cabeçalho com brasão + textos padrão
     y_base = desenhar_cabecalho(c)
 
     largura_pagina, _ = A4
@@ -53,15 +53,16 @@ def gerar_relatorio_cabecalho(
     nome_mes = MESES_PT.get(mes, str(mes)).upper()
     linha2 = f"MÊS: {nome_mes}/{ano}"
 
-    # Posiciona o título ABAIXO do cabeçalho (subtrai mm do y_base)
+    # Título logo abaixo do cabeçalho
     y1 = y_base - 6 * mm  # primeira linha do título
-    y2 = y1 - 5 * mm      # segunda linha do título (mês/ano)
+    y2 = y1 - 5 * mm      # segunda linha (MÊS: ...)
 
     c.drawCentredString(x_centro, y1, linha1)
     c.drawCentredString(x_centro, y2, linha2)
 
-    # Deixa um espaço de respiro entre o título e o cabeçalho da tabela
-    y_tabela_top = y2 - 8 * mm
+    # Espaço entre o título e o cabeçalho da tabela (AGORA MENOR)
+    # Se quiser ainda mais perto, diminua para 3*mm ou 2*mm.
+    y_tabela_top = y2 - 4 * mm
 
     return y_tabela_top
 
