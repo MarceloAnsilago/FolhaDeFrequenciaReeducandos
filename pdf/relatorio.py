@@ -49,8 +49,8 @@ def gerar_relatorio_cabecalho(
     nome_mes = MESES_PT.get(mes, str(mes)).upper()
     linha2 = f"MÊS: {nome_mes}/{ano}"
 
-    # título segue abaixo do bloco FUNDO PENITENCIÁRIO (mais folga para não encostar)
-    y1 = y_base + 2 * mm
+    # título com um pouco mais de folga abaixo do cabeçalho
+    y1 = y_base + 4 * mm
     y2 = y1 - 4 * mm
 
     c.drawCentredString(x_centro, y1, linha1)
@@ -74,16 +74,17 @@ def desenhar_tabela_relatorio(
     largura_tabela = 175 * mm
     largura_col_dia = 12 * mm
     largura_col_atividade = largura_tabela - largura_col_dia
-    pad = 1.5 * mm
+    pad = 1.2 * mm
     fonte_header = ("Helvetica-Bold", 9)
     fonte_linha = ("Helvetica", 7.5)
-    line_h = 8.5
+    line_h = 8.0
 
     if y_top is None:
         y_top = c._pagesize[1] - 36 * mm
 
     x = (largura_pagina - largura_tabela) / 2
-    y = y_top
+    # desce um pouco o início da tabela para não encostar no cabeçalho
+    y = y_top - 6 * mm
 
     def wrap_text(texto, max_width, font_name, font_size):
         palavras = texto.split()
@@ -136,7 +137,7 @@ def desenhar_tabela_relatorio(
             fonte_linha[0],
             fonte_linha[1],
         )
-        altura_row = max(5 * mm, len(linhas) * line_h + pad)
+        altura_row = max(4.8 * mm, len(linhas) * line_h + pad)
 
         # caixa da linha
         c.rect(x, y - altura_row, largura_tabela, altura_row, fill=0)
