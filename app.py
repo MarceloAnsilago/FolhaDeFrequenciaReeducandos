@@ -2,6 +2,7 @@ import streamlit as st
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
+from datetime import datetime
 import re
 
 try:
@@ -37,6 +38,10 @@ MESES = {
     "DEZEMBRO": 12,
 }
 
+ANO_INICIO = 2025
+ANOS_OPCOES = list(range(ANO_INICIO, ANO_INICIO + 11))
+ANO_ATUAL = datetime.now().year
+
 # session state defaults
 DEFAULTS = {
     "secretaria": "",
@@ -59,7 +64,7 @@ DEFAULTS = {
     "rodape_cep": "CEP 76.932-000 – São Miguel do Guaporé/RO",
     "rodape_email": "saomiguel@idaron.ro.gov.br",
     "mes_label": list(MESES.keys())[0],
-    "ano": list(range(2026, 2036))[0],
+    "ano": ANO_ATUAL if ANO_ATUAL in ANOS_OPCOES else ANOS_OPCOES[0],
     "he": "07:30",
     "hs": "13:30",
     "feriados_texto": "",
@@ -439,7 +444,7 @@ with st.expander("Preencher dados da folha", expanded=True):
     # saneia valores de mês/ano antes de criar os widgets
     if st.session_state.get("mes_label") not in MESES:
         st.session_state["mes_label"] = list(MESES.keys())[0]
-    anos_opcoes = list(range(2026, 2036))
+    anos_opcoes = ANOS_OPCOES
     ano_atual_ss = st.session_state.get("ano", anos_opcoes[0])
     if not isinstance(ano_atual_ss, int):
         try:
