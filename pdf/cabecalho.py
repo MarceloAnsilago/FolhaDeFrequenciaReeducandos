@@ -13,7 +13,7 @@ def desenhar_cabecalho(
     c,
     margem_topo: float = 18 * mm,
     margem_lateral: float = 15 * mm,
-    deslocar_logo_para_cima: float = 10 * mm,
+    deslocar_logo_para_cima: float = 14 * mm,
 ) -> float:
     """
     Desenha o cabeçalho oficial com o brasão e devolve a coordenada Y logo abaixo dele.
