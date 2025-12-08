@@ -55,7 +55,8 @@ def gerar_relatorio_cabecalho(
     c.drawCentredString(x_centro, y1, linha1)
     c.drawCentredString(x_centro, y2, linha2)
 
-    return y2 - 2 * mm
+    # sobe o ponto de início da tabela do relatório em 10 mm
+    return y2 + 8 * mm
 
 
 def desenhar_tabela_relatorio(
