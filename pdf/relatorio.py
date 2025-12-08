@@ -39,30 +39,25 @@ def gerar_relatorio_cabecalho(
     Desenha o cabeçalho oficial (logo) e o título do relatório,
     devolvendo a coordenada Y onde a tabela deve começar.
     """
-    # y_base = pé do cabeçalho com brasão + textos padrão
     y_base = desenhar_cabecalho(c)
 
     largura_pagina, _ = A4
     x_centro = largura_pagina / 2
 
     c.setFont("Helvetica-Bold", 12)
-
-    linha1 = (
-        f"RELATÓRIO DE ATIVIDADES EXECUTADAS PELO APENADO {reeducando}"
-    ).upper()
+    linha1 = f"RELATÓRIO DE ATIVIDADES EXECUTADAS PELO APENADO {reeducando}".upper()
     nome_mes = MESES_PT.get(mes, str(mes)).upper()
     linha2 = f"MÊS: {nome_mes}/{ano}"
 
-    # Deixamos tudo mais "colado" para ganhar espaço embaixo
-    y1 = y_base - 3 * mm   # primeira linha do título
-    y2 = y1    - 3 * mm    # segunda linha (MÊS: ...)
+    # Sobe a primeira linha e aumenta a folga para não grudar na linha de baixo
+    y1 = y_base - 2 * mm   # primeira linha do título
+    y2 = y1 - 4 * mm       # segunda linha (MÊS: ...)
 
     c.drawCentredString(x_centro, y1, linha1)
     c.drawCentredString(x_centro, y2, linha2)
 
-    # Espaço entre o título e o cabeçalho da tabela (bem pequeno)
+    # Espaço entre o título e o cabeçalho da tabela
     y_tabela_top = y2 - 2 * mm
-
     return y_tabela_top
 
 
@@ -95,7 +90,6 @@ def desenhar_tabela_relatorio(
 
     # Caso não venha um y_top do cabeçalho, usa um valor padrão
     if y_top is None:
-        # também subimos um pouco o padrão, só por garantia
         y_top = c._pagesize[1] - 55 * mm
 
     # Centraliza a tabela na horizontal
@@ -103,9 +97,7 @@ def desenhar_tabela_relatorio(
     y = y_top
 
     def wrap_text(texto, max_width, font_name, font_size):
-        """
-        Quebra o texto em múltiplas linhas respeitando uma largura máxima.
-        """
+        """Quebra o texto em múltiplas linhas respeitando uma largura máxima."""
         palavras = texto.split()
         linhas = []
         atual = ""
@@ -121,7 +113,7 @@ def desenhar_tabela_relatorio(
             linhas.append(atual)
         return linhas or [""]
 
-    # Cabeçalho da tabela (um pouco mais baixo para ganhar espaço)
+    # Cabeçalho da tabela
     cabecalho_alt = 5.5 * mm
     c.setFont(*fonte_header)
     c.rect(x, y - cabecalho_alt, largura_tabela, cabecalho_alt, fill=0)
@@ -144,9 +136,9 @@ def desenhar_tabela_relatorio(
     for dia in range(1, dias_no_mes + 1):
         dow = calendar.weekday(ano, mes, dia)
 
-        if dow == 5:  # sábado
+        if dow == 5:
             atividade = "SÁBADO"
-        elif dow == 6:  # domingo
+        elif dow == 6:
             atividade = "DOMINGO"
         elif dia in feriados:
             atividade = feriados[dia].strip().upper()
