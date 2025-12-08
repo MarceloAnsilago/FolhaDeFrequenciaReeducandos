@@ -63,7 +63,6 @@ def desenhar_cabecalho(
     c.drawCentredString(x_centro, y_texto - espacamento, linha2)
     c.drawCentredString(x_centro, y_texto - 2 * espacamento, linha3)
 
-    # devolve posição logo abaixo do cabeçalho, compensando deslocamentos do logo
+    # devolve posição logo abaixo do cabeçalho
     y_base_cabecalho = y_texto - 2 * espacamento
-    desloc_base = 14 * mm  # referência para manter o nível do conteúdo
-    return y_base_cabecalho - 4 * mm + (deslocar_logo_para_cima - desloc_base)
+    return y_base_cabecalho - 2 * mm

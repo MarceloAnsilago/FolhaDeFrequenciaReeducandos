@@ -84,7 +84,7 @@ def desenhar_tabela_relatorio(
 
     x = (largura_pagina - largura_tabela) / 2
     # sobe a tabela para ficar mais próxima do mês/título
-    y = y_top - 2 * mm
+    y = y_top
 
     def wrap_text(texto, max_width, font_name, font_size):
         palavras = texto.split()
