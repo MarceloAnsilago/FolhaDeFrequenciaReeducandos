@@ -5,7 +5,7 @@ from pathlib import Path
 
 LOGO_PATH = Path("assets/logo_ro_horizontal.jpg")
 
-def desenhar_cabecalho(c, margem_topo=3*mm, margem_lateral=15*mm):
+def desenhar_cabecalho(c, margem_topo=6*mm, margem_lateral=15*mm):
     largura_pagina, altura_pagina = A4
 
     # ---------- LOGO ----------
