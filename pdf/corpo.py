@@ -1,8 +1,31 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 import calendar
+from textwrap import wrap
 
-def desenhar_tabela(c, ano, mes, he=None, hs=None, y_top=None, feriados=None):
+def desenhar_tabela(
+    c,
+    ano,
+    mes,
+    he=None,
+    hs=None,
+    y_top=None,
+    feriados=None,
+    endereco=None,
+    cep=None,
+    telefone=None,
+    data_preenchimento=None,
+    secretaria=None,
+    reeducando=None,
+    funcao=None,
+    data_inclusao=None,
+    municipio=None,
+    cpf=None,
+    banco=None,
+    agencia=None,
+    conta=None,
+    tipo_conta=None,
+):
     largura_pagina, altura_pagina = A4
     feriados = feriados or {}
 
@@ -16,18 +39,21 @@ def desenhar_tabela(c, ano, mes, he=None, hs=None, y_top=None, feriados=None):
     }
     nome_mes = MESES_PT.get(mes, "")
 
-    # Valores de exemplo (depois parametrizamos)
-    nome_reeducando = "ADENIR BELING"
-    funcao = "AUXILIAR DE SERVIÇOS GERAIS"
-    data_inclusao = "11/11/2019"
-    endereco = "RUA CECILIA PINHEIRO S/Nº, SOB ESQUINA MAL RONDON, SAO MIGUEL DO GUAPORÉ"
-    cep = "76.932-000"
-    telefone = "69 99245-2646"
-    municipio = "SÃO MIGUEL DO GUAPORÉ"
-    cpf = "753.210.922-49"
-    banco = "01"
-    agencia = "2292-6"
-    conta = "23.061-8"
+    # Valores padrão (podem ser sobrescritos pelos parâmetros)
+    secretaria = secretaria or ""
+    nome_reeducando = reeducando or ""
+    funcao = funcao or ""
+    data_inclusao = data_inclusao or ""
+    endereco = endereco or ""
+    cep = cep or ""
+    telefone = telefone or ""
+    municipio = municipio or ""
+    cpf = cpf or ""
+    banco = banco or ""
+    agencia = agencia or ""
+    conta = conta or ""
+    tipo_conta = tipo_conta or ""
+    data_preenchimento = data_preenchimento or ""
 
     # Posição da tabela: usa valor fornecido pelo cabeçalho ou cai no padrão
     if y_top is None:
@@ -79,7 +105,7 @@ def desenhar_tabela(c, ano, mes, he=None, hs=None, y_top=None, feriados=None):
     c.drawString(
         x + pad,
         y2 + (altura_linha / 2) - 3,
-        "SECRETARIA: SECRETARIA DE ESTADO DA JUSTIÇA - SEJUS"
+        f"SECRETARIA: {secretaria}"
     )
     c.drawString(
         x_ano,
@@ -187,7 +213,7 @@ def desenhar_tabela(c, ano, mes, he=None, hs=None, y_top=None, feriados=None):
     c.drawString(
         x + pad,
         y7 + (altura_linha / 2) - 3,
-        "TIPO DE CONTA: (X) CORRENTE ( ) SALÁRIO ( ) POUPANÇA"
+        f"TIPO DE CONTA: {tipo_conta}"
     )
 
     # ------------------------------------------------------------
@@ -456,7 +482,7 @@ def desenhar_tabela(c, ano, mes, he=None, hs=None, y_top=None, feriados=None):
     c.line(x_col2, y_footer2, x_col2, y_footer2 + altura_footer)
     c.drawString(x + pad, y_footer2 + (altura_footer / 2) - 3, f"CEP: {cep}")
     c.drawString(x_col1 + pad, y_footer2 + (altura_footer / 2) - 3, f"TELEFONE: {telefone}")
-    c.drawString(x_col2 + pad, y_footer2 + (altura_footer / 2) - 3, "DATA: ____/____/_____")
+    c.drawString(x_col2 + pad, y_footer2 + (altura_footer / 2) - 3, f"DATA: {data_preenchimento}")
 
     # linha 3: assinaturas
     y_footer3 = y_footer2 - altura_footer
