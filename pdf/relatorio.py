@@ -49,8 +49,8 @@ def gerar_relatorio_cabecalho(
     nome_mes = MESES_PT.get(mes, str(mes)).upper()
     linha2 = f"MÊS: {nome_mes}/{ano}"
 
-    # sobe título/logo 10 mm e mantém a tabela na mesma altura
-    y1 = y_base + 4 * mm
+    # título segue abaixo do bloco FUNDO PENITENCIÁRIO (mais folga para não encostar)
+    y1 = y_base + 2 * mm
     y2 = y1 - 4 * mm
 
     c.drawCentredString(x_centro, y1, linha1)

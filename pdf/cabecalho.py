@@ -9,9 +9,16 @@ LOGO_PATH = Path("assets/logo_ro_horizontal.jpg")
 LOGO_PATH_ALT = Path("assets/logo_ro_horizontal.JPG")
 
 
-def desenhar_cabecalho(c, margem_topo: float = 18 * mm, margem_lateral: float = 15 * mm) -> float:
+def desenhar_cabecalho(
+    c,
+    margem_topo: float = 18 * mm,
+    margem_lateral: float = 15 * mm,
+    deslocar_logo_para_cima: float = 10 * mm,
+) -> float:
     """
     Desenha o cabeçalho oficial com o brasão e devolve a coordenada Y logo abaixo dele.
+    O logo/texto sobem deslocar_logo_para_cima mm, mas o retorno é compensado para
+    manter a posição do conteúdo (título/tabela) estável.
     """
     largura_pagina, altura_pagina = A4
 
@@ -30,7 +37,7 @@ def desenhar_cabecalho(c, margem_topo: float = 18 * mm, margem_lateral: float = 
         h_pt = h_px * proporcao
 
         x_logo = (largura_pagina - w_pt) / 2
-        y_logo = altura_pagina - margem_topo - h_pt
+        y_logo = altura_pagina - margem_topo - h_pt - deslocar_logo_para_cima
 
         c.drawImage(
             logo,
@@ -56,6 +63,7 @@ def desenhar_cabecalho(c, margem_topo: float = 18 * mm, margem_lateral: float = 
     c.drawCentredString(x_centro, y_texto - espacamento, linha2)
     c.drawCentredString(x_centro, y_texto - 2 * espacamento, linha3)
 
-    # devolve posição logo abaixo do cabeçalho
+    # devolve posição logo abaixo do cabeçalho (compensa o deslocamento aplicado)
     y_base_cabecalho = y_texto - 2 * espacamento
-    return y_base_cabecalho - 2 * mm
+    # sem compensar o deslocamento do logo, deixando mais espaço entre textos e título
+    return y_base_cabecalho - 4 * mm
