@@ -72,6 +72,9 @@ DEFAULTS = {
 
 for chave, valor in DEFAULTS.items():
     st.session_state.setdefault(chave, valor)
+# flags de controle do upload (para não sobrescrever após a primeira aplicação)
+st.session_state.setdefault("_upload_aplicado", False)
+st.session_state.setdefault("_ultimo_upload", "")
 
 
 def _safe_index(options, value, default=0):
@@ -380,15 +383,22 @@ def gerar_relatorio_pdf(
 st.title("📄 Gerador de Folha de Ponto de Reeducandos")
 
 with st.expander("Importar dados (PDF ou DOCX)", expanded=False):
-    arquivo = st.file_uploader("Selecione o PDF ou DOCX da última folha", type=["pdf", "docx"])
+    arquivo = st.file_uploader("Selecione o PDF ou DOCX da ?ltima folha", type=["pdf", "docx"])
     if arquivo:
-        texto = _ler_upload(arquivo)
-        if not texto:
-            st.warning("Não consegui ler o arquivo enviado.")
-        else:
-            campos = _parse_campos(texto)
-            st.session_state.update({k: v for k, v in campos.items() if v})
-            st.success("Campos preenchidos a partir do arquivo.")
+        # aplica os campos apenas uma vez por arquivo para permitir edi??es depois
+        if st.session_state.get("_ultimo_upload") != arquivo.name:
+            st.session_state["_upload_aplicado"] = False
+            st.session_state["_ultimo_upload"] = arquivo.name
+
+        if not st.session_state.get("_upload_aplicado", False):
+            texto = _ler_upload(arquivo)
+            if not texto:
+                st.warning("N?o consegui ler o arquivo enviado.")
+            else:
+                campos = _parse_campos(texto)
+                st.session_state.update({k: v for k, v in campos.items() if v})
+                st.session_state["_upload_aplicado"] = True
+                st.success("Campos preenchidos a partir do arquivo.")
 
 with st.expander("Dados do Reeducando", expanded=True):
     secretaria_input = st.text_input("Secretaria", key="secretaria")
