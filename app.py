@@ -50,7 +50,7 @@ DEFAULTS = {
     "endereco": "",
     "cep": "",
     "telefone": "",
-    "data_preenchimento": "",
+    "data_preenchimento": "__/__/____",
     "mes_label": list(MESES.keys())[0],
     "ano": list(range(2026, 2036))[0],
     "he": "07:30",
@@ -79,14 +79,34 @@ def _parse_campos(texto: str) -> dict:
     norm = _clean_text(texto).upper()
     campos = {}
 
+    def normaliza_data(txt: str) -> str:
+        if "_" in txt:
+            return "__/__/____"
+        bruto = txt.strip()
+        digitos = re.sub(r"\D", "", bruto)
+        if len(digitos) == 8:
+            return f"{digitos[:2]}/{digitos[2:4]}/{digitos[4:]}"
+        if not digitos:
+            return "__/__/____"
+        return "__/__/____"
+
     def normaliza_tipo_conta(txt: str) -> str:
         t = txt.upper()
-        if "CORRENTE" in t:
+        t_norm = re.sub(r"\s+", " ", t)
+        # prioridade: opção marcada com (X)
+        if re.search(r"\(\s*X\s*\)\s*CORRENTE", t_norm):
             return "Corrente"
-        if "SAL" in t:  # SALÁRIO
+        if re.search(r"\(\s*X\s*\)\s*SAL[AA]RIO", t_norm):
             return "Salário"
+        if re.search(r"\(\s*X\s*\)\s*POUPAN[CC]A", t_norm):
+            return "Poupança"
+        # fallback por palavra-chave
         if "POUP" in t:
             return "Poupança"
+        if "SAL" in t:  # SALÁRIO
+            return "Salário"
+        if "CORRENTE" in t:
+            return "Corrente"
         return txt
 
     def pega(padrao, grupo=1):
@@ -108,7 +128,7 @@ def _parse_campos(texto: str) -> dict:
     campos["endereco"] = pega(r"ENDEREÇO:\s*(.+?)(?:\s+CEP:|$)")
     campos["cep"] = pega(r"CEP:\s*([\d.\-]+)")
     campos["telefone"] = pega(r"TELEFONE:\s*([0-9\s\-]+)")
-    campos["data_preenchimento"] = pega(r"DATA:\s*([0-9_/]+)")
+    campos["data_preenchimento"] = normaliza_data(pega(r"DATA:\s*([0-9_/]+)"))
 
     # remove repetições quando o texto veio duplicado no DOCX/PDF
     repetidos = {
