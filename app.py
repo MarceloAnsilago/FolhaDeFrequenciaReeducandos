@@ -20,7 +20,7 @@ from pdf.relatorio import gerar_relatorio_cabecalho
 from pdf.rodape import desenhar_rodape
 
 
-st.set_page_config(page_title="Folha de Ponto", layout="centered")
+st.set_page_config(page_title="Folha de Ponto de Reeducandos", page_icon="📄", layout="centered")
 
 MESES = {
     "JANEIRO": 1,
@@ -372,7 +372,7 @@ def gerar_relatorio_pdf(
     return buffer.getvalue()
 
 
-st.title("Gerador de Folha de Ponto")
+st.title("📄 Gerador de Folha de Ponto de Reeducandos")
 
 with st.expander("Importar dados (PDF ou DOCX)", expanded=False):
     arquivo = st.file_uploader("Selecione o PDF ou DOCX da última folha", type=["pdf", "docx"])
@@ -482,18 +482,19 @@ with st.expander("Preencher dados da folha", expanded=True):
         hs = st.selectbox("Horário de saída (HS)", opcoes_hs, index=hs_index, key="hs")
 
     feriados_texto = st.text_area(
-        "Feriados (formato: dia-descri??o, separados por v?rgulas. Ex.: 1-Confraterniza??o Universal, 15-Feriado Inventado, 21-Dia Tal)",
+        "Feriados (formato: dia-descrição, separados por vírgulas)",
         value=st.session_state.get("feriados_texto", ""),
+        placeholder="1-Feriado, 2-Feriado2, 3-Feriado3",
         help=(
-            "Use dia-descri??o, separados por v?rgulas. Ex.: 1-Confraterniza??o Universal, "
+            "Use dia-descrição separados por vírgulas. Ex.: 1-Confraternização Universal, "
             "15-Feriado inventado, 21-Dia tal (dia entre 1 e 31). "
-            "Exemplo para colar: 1-Confraterniza??o Universal, 15-Feriado Inventado, 21-Dia Tal."
+            "Exemplo para colar: 1-Feriado, 2-Feriado2, 3-Feriado3."
         ),
     )
 
     st.write(
         """
-    Selecione o m?s e o ano, gere o PDF com o cabe?alho oficial e depois baixe o arquivo.
+    Selecione o mês e o ano, gere o PDF com o cabeçalho oficial e depois baixe o arquivo.
     """
     )
 
