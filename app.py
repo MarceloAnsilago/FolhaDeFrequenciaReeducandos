@@ -16,6 +16,7 @@ except ImportError:
 
 from pdf.cabecalho import desenhar_cabecalho
 from pdf.corpo import desenhar_tabela
+from pdf.relatorio import gerar_relatorio_cabecalho
 
 
 st.set_page_config(page_title="Folha de Ponto", layout="centered")
@@ -267,6 +268,42 @@ def gerar_pdf(
     return buffer.getvalue()
 
 
+def gerar_relatorio_pdf(
+    ano,
+    mes,
+    secretaria,
+    reeducando,
+    funcao,
+    municipio,
+    endereco,
+    cep,
+    telefone,
+    data_preenchimento,
+):
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+
+    # apenas cabeçalho oficial com logo
+    gerar_relatorio_cabecalho(
+        c,
+        secretaria=secretaria,
+        ano=ano,
+        reeducando=reeducando,
+        funcao=funcao,
+        municipio=municipio,
+        endereco=endereco,
+        cep=cep,
+        telefone=telefone,
+        data_preenchimento=data_preenchimento,
+    )
+
+    c.showPage()
+    c.save()
+
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
 st.title("Gerador de Folha de Ponto")
 
 with st.expander("Importar dados (PDF ou DOCX)", expanded=False):
@@ -370,81 +407,107 @@ with st.expander("Preencher dados da folha", expanded=True):
         hs = st.selectbox("Horário de saída (HS)", opcoes_hs, index=hs_index, key="hs")
 
     feriados_texto = st.text_area(
-        "Feriados (formato: dia-descrição, separados por vírgulas. Ex.: 1-Confraternização Universal, 15-Feriado Inventado, 21-Dia Tal)",
+        "Feriados (formato: dia-descri??o, separados por v?rgulas. Ex.: 1-Confraterniza??o Universal, 15-Feriado Inventado, 21-Dia Tal)",
         value=st.session_state.get("feriados_texto", ""),
         help=(
-            "Use dia-descrição, separados por vírgulas. Ex.: 1-Confraternização Universal, "
+            "Use dia-descri??o, separados por v?rgulas. Ex.: 1-Confraterniza??o Universal, "
             "15-Feriado inventado, 21-Dia tal (dia entre 1 e 31). "
-            "Exemplo para colar: 1-Confraternização Universal, 15-Feriado Inventado, 21-Dia Tal."
+            "Exemplo para colar: 1-Confraterniza??o Universal, 15-Feriado Inventado, 21-Dia Tal."
         ),
     )
 
-    st.write("""
-    Selecione o mês e o ano, gere o PDF com o cabeçalho oficial e depois baixe o arquivo.
-    """)
+    st.write(
+        """
+    Selecione o m?s e o ano, gere o PDF com o cabe?alho oficial e depois baixe o arquivo.
+    """
+    )
 
-    # Botão para gerar PDF
-    if st.button("Gerar PDF"):
-        def parse_feriados(texto):
-            feriados_dict = {}
-            erros = []
-            for raw_bloco in texto.split(","):
-                bloco = raw_bloco.strip()
-                if not bloco:
-                    continue
-                if "-" not in bloco:
-                    erros.append(f'"{bloco}" (faltou "-")')
-                    continue
-                dia_str, _, nome = bloco.partition("-")
-                dia_str = dia_str.strip()
-                nome = nome.strip()
-                try:
-                    dia = int(dia_str)
-                except ValueError:
-                    erros.append(f'"{bloco}" (dia inválido)')
-                    continue
-                if not (1 <= dia <= 31):
-                    erros.append(f'"{bloco}" (dia fora de 1-31)')
-                    continue
-                if not nome:
-                    erros.append(f'"{bloco}" (descrição vazia)')
-                    continue
-                feriados_dict[dia] = nome
-            return feriados_dict, erros
+    col_btn = st.columns(2)
+    with col_btn[0]:
+        if st.button("Gerar Folha de Ponto"):
 
-        feriados_dict, erros = parse_feriados(feriados_texto)
-        if erros:
-            st.error("Revise os feriados informados: " + "; ".join(erros))
-        else:
-            st.session_state["feriados_texto"] = feriados_texto
-            st.session_state["pdf"] = gerar_pdf(
+            def parse_feriados(texto):
+                feriados_dict = {}
+                erros = []
+                for raw_bloco in texto.split(","):
+                    bloco = raw_bloco.strip()
+                    if not bloco:
+                        continue
+                    if "-" not in bloco:
+                        erros.append(f'"{bloco}" (faltou "-")')
+                        continue
+                    dia_str, _, nome = bloco.partition("-")
+                    dia_str = dia_str.strip()
+                    nome = nome.strip()
+                    try:
+                        dia = int(dia_str)
+                    except ValueError:
+                        erros.append(f'"{bloco}" (dia inválido)')
+                        continue
+                    if not (1 <= dia <= 31):
+                        erros.append(f'"{bloco}" (dia fora de 1-31)')
+                        continue
+                    if not nome:
+                        erros.append(f'"{bloco}" (descrição vazia)')
+                        continue
+                    feriados_dict[dia] = nome
+                return feriados_dict, erros
+
+            feriados_dict, erros = parse_feriados(feriados_texto)
+            if erros:
+                st.error("Revise os feriados informados: " + "; ".join(erros))
+            else:
+                st.session_state["feriados_texto"] = feriados_texto
+                st.session_state["pdf"] = gerar_pdf(
+                    ano=ano,
+                    mes=MESES[mes_label],
+                    he=he,
+                    hs=hs,
+                    endereco=endereco_input,
+                    cep=cep_input,
+                    telefone=telefone_input,
+                    data_preenchimento=data_input,
+                    secretaria=secretaria_input,
+                    reeducando=reeducando_input,
+                    funcao=funcao_input,
+                    data_inclusao=data_inclusao_input,
+                    municipio=municipio_input,
+                    cpf=cpf_input,
+                    banco=banco_input,
+                    agencia=agencia_input,
+                    conta=conta_input,
+                    tipo_conta=tipo_conta_input,
+                    feriados=feriados_dict,
+                )
+                st.success("Folha de ponto gerada com sucesso!")
+    with col_btn[1]:
+        if st.button("Gerar Relatório de Atividades"):
+            st.session_state["relatorio_pdf"] = gerar_relatorio_pdf(
                 ano=ano,
                 mes=MESES[mes_label],
-                he=he,
-                hs=hs,
+                secretaria=secretaria_input,
+                reeducando=reeducando_input,
+                funcao=funcao_input,
+                municipio=municipio_input,
                 endereco=endereco_input,
                 cep=cep_input,
                 telefone=telefone_input,
                 data_preenchimento=data_input,
-                secretaria=secretaria_input,
-                reeducando=reeducando_input,
-                funcao=funcao_input,
-                data_inclusao=data_inclusao_input,
-                municipio=municipio_input,
-                cpf=cpf_input,
-                banco=banco_input,
-                agencia=agencia_input,
-                conta=conta_input,
-                tipo_conta=tipo_conta_input,
-                feriados=feriados_dict,
             )
-            st.success("PDF gerado com sucesso!")
+            st.success("Relatório de atividades gerado com sucesso!")
 
-# Botão de download
+# Botões de download
 if "pdf" in st.session_state:
     st.download_button(
-        "⬇️ Baixar PDF",
+        "📄 Baixar Folha de Ponto",
         data=st.session_state["pdf"],
         file_name="folha.pdf",
+        mime="application/pdf",
+    )
+if "relatorio_pdf" in st.session_state:
+    st.download_button(
+        "📄 Baixar Relatório de Atividades",
+        data=st.session_state["relatorio_pdf"],
+        file_name="relatorio_atividades.pdf",
         mime="application/pdf",
     )
