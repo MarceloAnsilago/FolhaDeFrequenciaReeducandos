@@ -49,14 +49,15 @@ def gerar_relatorio_cabecalho(
     nome_mes = MESES_PT.get(mes, str(mes)).upper()
     linha2 = f"MÊS: {nome_mes}/{ano}"
 
-    y1 = y_base - 6 * mm
+    # sobe título/logo 10 mm e mantém a tabela na mesma altura
+    y1 = y_base + 4 * mm
     y2 = y1 - 4 * mm
 
     c.drawCentredString(x_centro, y1, linha1)
     c.drawCentredString(x_centro, y2, linha2)
 
-    # sobe o ponto de início da tabela do relatório em 10 mm
-    return y2 + 8 * mm
+    # início da tabela permanece em y_base - 2 mm (mesmo nível anterior)
+    return y_base - 2 * mm
 
 
 def desenhar_tabela_relatorio(
