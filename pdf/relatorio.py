@@ -1,6 +1,7 @@
+import calendar
+
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
-import calendar
 
 from pdf.cabecalho import desenhar_cabecalho
 
@@ -37,7 +38,6 @@ def gerar_relatorio_cabecalho(
     """
     Desenha o cabeçalho oficial (logo) e o título do relatório.
     """
-    # usa o mesmo cabeçalho oficial da folha de ponto
     y_base = desenhar_cabecalho(c)
 
     # título do relatório
