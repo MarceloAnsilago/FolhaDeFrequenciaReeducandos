@@ -17,6 +17,7 @@ except ImportError:
 from pdf.cabecalho import desenhar_cabecalho
 from pdf.corpo import desenhar_tabela
 from pdf.relatorio import gerar_relatorio_cabecalho
+from pdf.rodape import desenhar_rodape
 
 
 st.set_page_config(page_title="Folha de Ponto", layout="centered")
@@ -343,6 +344,9 @@ def gerar_relatorio_pdf(
         feriados=feriados or {},
         y_top=y_base,
     )
+
+    # rodapé
+    desenhar_rodape(c)
 
     c.showPage()
     c.save()
