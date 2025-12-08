@@ -13,7 +13,7 @@ def desenhar_cabecalho(
     c,
     margem_topo: float = 18 * mm,
     margem_lateral: float = 15 * mm,
-    deslocar_logo_para_cima: float = 8 * mm,
+    deslocar_logo_para_cima: float = 12 * mm,
 ) -> float:
     """
     Desenha o cabeçalho oficial com o brasão e devolve a coordenada Y logo abaixo dele.
@@ -63,6 +63,6 @@ def desenhar_cabecalho(
     c.drawCentredString(x_centro, y_texto - espacamento, linha2)
     c.drawCentredString(x_centro, y_texto - 2 * espacamento, linha3)
 
-    # devolve posição logo abaixo do cabeçalho
+    # devolve posição logo abaixo do cabeçalho, compensando o deslocamento do logo
     y_base_cabecalho = y_texto - 2 * espacamento
-    return y_base_cabecalho - 2 * mm
+    return y_base_cabecalho - 2 * mm - deslocar_logo_para_cima
