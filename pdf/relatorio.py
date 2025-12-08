@@ -36,28 +36,34 @@ def gerar_relatorio_cabecalho(
     data_preenchimento,
 ):
     """
-    Desenha o cabeçalho oficial (logo) e o título do relatório.
+    Desenha o cabeçalho oficial (logo) e o título do relatório,
+    devolvendo a coordenada Y onde a tabela deve começar.
     """
+    # y_base deve ser o "pé" do cabeçalho com o brasão e textos padrão
     y_base = desenhar_cabecalho(c)
 
-    # título do relatório
     largura_pagina, _ = A4
     x_centro = largura_pagina / 2
+
     c.setFont("Helvetica-Bold", 12)
 
-    linha1 = f"RELATÓRIO DE ATIVIDADES EXECUTADAS PELO APENADO {reeducando}".upper()
+    linha1 = (
+        f"RELATÓRIO DE ATIVIDADES EXECUTADAS PELO APENADO {reeducando}"
+    ).upper()
     nome_mes = MESES_PT.get(mes, str(mes)).upper()
     linha2 = f"MÊS: {nome_mes}/{ano}"
 
-    # título com folga abaixo do cabeçalho
-    y1 = y_base + 3 * mm
-    y2 = y1 - 4 * mm
+    # Posiciona o título ABAIXO do cabeçalho (subtrai mm do y_base)
+    y1 = y_base - 6 * mm  # primeira linha do título
+    y2 = y1 - 5 * mm      # segunda linha do título (mês/ano)
 
     c.drawCentredString(x_centro, y1, linha1)
     c.drawCentredString(x_centro, y2, linha2)
 
-    # início da tabela permanece em y_base - 2 mm (mesmo nível anterior)
-    return y_base - 2 * mm
+    # Deixa um espaço de respiro entre o título e o cabeçalho da tabela
+    y_tabela_top = y2 - 8 * mm
+
+    return y_tabela_top
 
 
 def desenhar_tabela_relatorio(
@@ -69,24 +75,36 @@ def desenhar_tabela_relatorio(
     feriados=None,
     y_top=None,
 ):
+    """
+    Desenha a tabela de atividades do mês.
+
+    Se y_top for informado, usa exatamente essa posição como topo da tabela.
+    Caso contrário, calcula um topo padrão com base no tamanho da página.
+    """
     feriados = feriados or {}
+
     largura_pagina, _ = A4
     largura_tabela = 175 * mm
     largura_col_dia = 12 * mm
     largura_col_atividade = largura_tabela - largura_col_dia
+
     pad = 1.2 * mm
     fonte_header = ("Helvetica-Bold", 9)
     fonte_linha = ("Helvetica", 7.5)
-    line_h = 8.0
+    line_h = 8.0  # altura da linha em pontos
 
+    # Caso não venha um y_top do cabeçalho, usa um valor padrão
     if y_top is None:
-        y_top = c._pagesize[1] - 36 * mm
+        y_top = c._pagesize[1] - 60 * mm
 
+    # Centraliza a tabela na horizontal
     x = (largura_pagina - largura_tabela) / 2
-    # sobe a tabela para ficar mais próxima do mês/título
     y = y_top
 
     def wrap_text(texto, max_width, font_name, font_size):
+        """
+        Quebra o texto em múltiplas linhas respeitando uma largura máxima.
+        """
         palavras = texto.split()
         linhas = []
         atual = ""
@@ -107,6 +125,7 @@ def desenhar_tabela_relatorio(
     c.setFont(*fonte_header)
     c.rect(x, y - cabecalho_alt, largura_tabela, cabecalho_alt, fill=0)
     c.line(x + largura_col_dia, y - cabecalho_alt, x + largura_col_dia, y)
+
     c.drawCentredString(
         x + largura_col_dia / 2,
         y - cabecalho_alt / 2 - 3,
@@ -120,11 +139,13 @@ def desenhar_tabela_relatorio(
     y -= cabecalho_alt
 
     dias_no_mes = calendar.monthrange(ano, mes)[1]
+
     for dia in range(1, dias_no_mes + 1):
         dow = calendar.weekday(ano, mes, dia)
-        if dow == 5:
+
+        if dow == 5:  # sábado
             atividade = "SÁBADO"
-        elif dow == 6:
+        elif dow == 6:  # domingo
             atividade = "DOMINGO"
         elif dia in feriados:
             atividade = feriados[dia].strip().upper()
@@ -137,13 +158,15 @@ def desenhar_tabela_relatorio(
             fonte_linha[0],
             fonte_linha[1],
         )
+
         altura_row = max(4.8 * mm, len(linhas) * line_h + pad)
 
-        # caixa da linha
+        # Caixa da linha (borda externa)
         c.rect(x, y - altura_row, largura_tabela, altura_row, fill=0)
+        # Linha vertical separando coluna do dia
         c.line(x + largura_col_dia, y - altura_row, x + largura_col_dia, y)
 
-        # dia
+        # Coluna "Dia"
         c.setFont(*fonte_header)
         c.drawCentredString(
             x + largura_col_dia / 2,
@@ -151,7 +174,7 @@ def desenhar_tabela_relatorio(
             f"{dia:02d}",
         )
 
-        # atividade
+        # Coluna "Atividade"
         c.setFont(*fonte_linha)
         start_y = y - pad - fonte_linha[1]
         for i, linha in enumerate(linhas):
@@ -163,4 +186,5 @@ def desenhar_tabela_relatorio(
 
         y -= altura_row
 
+    # devolve a última posição Y, caso precise continuar o desenho depois
     return y
