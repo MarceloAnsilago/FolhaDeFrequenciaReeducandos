@@ -163,13 +163,19 @@ def desenhar_tabela_relatorio(
         c.setFont(*fonte_header)
         c.drawCentredString(
             x + largura_col_dia / 2,
-            y - (altura_row / 2) - 3,
+            # PosiÇõÇœ intermediÇ­ria entre o ajuste antigo e o centrado total (levemente mais baixa)
+            y - (altura_row / 2) + 1.0,
             f"{dia:02d}",
         )
 
         # Coluna "Atividade"
         c.setFont(*fonte_linha)
-        start_y = y - pad - fonte_linha[1]
+        bloco_altura = len(linhas) * line_h
+        margem_superior = (altura_row - bloco_altura) / 2
+        # Usa a mÇ®dia entre a posiÇõÇœ original e a centrada para nÇœo subir demais
+        offset_antigo = pad + fonte_linha[1]
+        offset_centrado = margem_superior + (line_h - fonte_linha[1]) / 2
+        start_y = y - (offset_antigo + offset_centrado) / 2 - 0.5
         for i, linha in enumerate(linhas):
             c.drawString(
                 x + largura_col_dia + pad,
