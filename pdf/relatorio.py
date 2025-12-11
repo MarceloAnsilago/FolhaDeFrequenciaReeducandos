@@ -148,7 +148,7 @@ def desenhar_tabela_relatorio(
         dow = calendar.weekday(ano, mes, dia)
 
         if dow == 5:
-            atividade = "SÁBADO"
+            atividade = "SABADO"
         elif dow == 6:
             atividade = "DOMINGO"
         elif dia in feriados:
@@ -156,11 +156,15 @@ def desenhar_tabela_relatorio(
         else:
             atividade = atividade_base.replace("{municipio}", municipio)
 
+        # usa negrito apenas para sabado, domingo e feriados
+        is_especial = (dow in (5, 6)) or (dia in feriados)
+        font_nome_linha = "Helvetica-Bold" if is_especial else fonte_linha[0]
+        font_tam_linha = 8 if is_especial else fonte_linha[1]
         linhas = wrap_text(
             atividade,
             largura_col_atividade - pad * 2,
-            fonte_linha[0],
-            fonte_linha[1],
+            font_nome_linha,
+            font_tam_linha,
         )
 
         altura_row = max(altura_minima, len(linhas) * line_h + pad)
@@ -180,12 +184,12 @@ def desenhar_tabela_relatorio(
         )
 
         # Coluna "Atividade"
-        c.setFont(*fonte_linha)
+        c.setFont(font_nome_linha, font_tam_linha)
         bloco_altura = len(linhas) * line_h
         margem_superior = (altura_row - bloco_altura) / 2
         # Usa a mÇ®dia entre a posiÇõÇœ original e a centrada para nÇœo subir demais
-        offset_antigo = pad + fonte_linha[1]
-        offset_centrado = margem_superior + (line_h - fonte_linha[1]) / 2
+        offset_antigo = pad + font_tam_linha
+        offset_centrado = margem_superior + (line_h - font_tam_linha) / 2
         start_y = y - (offset_antigo + offset_centrado) / 2 - 0.5
         for i, linha in enumerate(linhas):
             c.drawString(
