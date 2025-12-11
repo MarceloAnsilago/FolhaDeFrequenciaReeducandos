@@ -325,6 +325,8 @@ def desenhar_tabela(
     y_ultima_linha = y_top_tabela
 
     for dia in range(1, total_linhas + 1):
+        # reset fonte padrÇœo da linha para evitar heranÓas do feriado anterior
+        c.setFont("Helvetica-Bold", 9)
         y_row = y_ultima_linha - altura_linha_dia
 
         # retângulo DA LINHA até SAÍDA TARDE (não entra na última coluna)
@@ -369,6 +371,7 @@ def desenhar_tabela(
             entrada_texto = ""
             saida_texto = ""
 
+        c.setFont("Helvetica-Bold", 9)
         c.drawCentredString(
             (x0 + x1) / 2,
             y_row + (altura_linha_dia / 2) - 3,
@@ -376,14 +379,16 @@ def desenhar_tabela(
         )
 
         if he_text:
+            c.setFont("Helvetica-Bold", 9)
             c.drawCentredString(
                 (x1 + x2) / 2,
                 y_row + (altura_linha_dia / 2) - 3,
                 he_text
             )
         if entrada_texto:
-            fonte = "Helvetica-Bold"
-            tamanho = 7 if feriados.get(dia) else 9
+            is_feriado = bool(feriados.get(dia))
+            fonte = "Helvetica" if is_feriado else "Helvetica-Bold"
+            tamanho = 5 if is_feriado else 9
             draw_wrapped_centered(
                 entrada_texto,
                 (x2 + x3) / 2,
@@ -393,14 +398,16 @@ def desenhar_tabela(
                 tamanho,
             )
         if hs_text:
+            c.setFont("Helvetica-Bold", 9)
             c.drawCentredString(
                 (x3 + x4) / 2,
                 y_row + (altura_linha_dia / 2) - 3,
                 hs_text
             )
         if saida_texto:
-            fonte = "Helvetica-Bold"
-            tamanho = 7 if feriados.get(dia) else 9
+            is_feriado = bool(feriados.get(dia))
+            fonte = "Helvetica" if is_feriado else "Helvetica-Bold"
+            tamanho = 5 if is_feriado else 9
             draw_wrapped_centered(
                 saida_texto,
                 (x4 + x5) / 2,
