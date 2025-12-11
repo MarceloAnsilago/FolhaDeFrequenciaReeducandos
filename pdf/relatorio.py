@@ -49,15 +49,15 @@ def gerar_relatorio_cabecalho(
     nome_mes = MESES_PT.get(mes, str(mes)).upper()
     linha2 = f"MÊS: {nome_mes}/{ano}"
 
-    # Sobe a primeira linha e aumenta a folga para não grudar na linha de baixo
-    y1 = y_base - 2 * mm   # primeira linha do título
-    y2 = y1 - 4 * mm       # segunda linha (MÊS: ...)
+    # Sobe a primeira linha e aumenta a folga para n?o grudar na linha de baixo
+    y1 = y_base - 4 * mm   # primeira linha do t?tulo (mais afastada do cabe?alho)
+    y2 = y1 - 4 * mm       # segunda linha (M?S: ...)
 
     c.drawCentredString(x_centro, y1, linha1)
     c.drawCentredString(x_centro, y2, linha2)
 
-    # Espaço entre o título e o cabeçalho da tabela
-    y_tabela_top = y2 - 2 * mm
+    # Espa?o entre o t?tulo e o cabe?alho da tabela (reduzido)
+    y_tabela_top = y2 - 1 * mm
     return y_tabela_top
 
 
@@ -133,6 +133,17 @@ def desenhar_tabela_relatorio(
 
     dias_no_mes = calendar.monthrange(ano, mes)[1]
 
+    # Altura padr�o de linha baseada no texto de atividade normal
+    texto_base = atividade_base.replace("{municipio}", municipio)
+    linhas_base = wrap_text(
+        texto_base,
+        largura_col_atividade - pad * 2,
+        fonte_linha[0],
+        fonte_linha[1],
+    )
+    altura_base = len(linhas_base) * line_h + pad
+    altura_minima = min(8 * mm, max(4.8 * mm, altura_base))
+
     for dia in range(1, dias_no_mes + 1):
         dow = calendar.weekday(ano, mes, dia)
 
@@ -152,7 +163,7 @@ def desenhar_tabela_relatorio(
             fonte_linha[1],
         )
 
-        altura_row = max(4.8 * mm, len(linhas) * line_h + pad)
+        altura_row = max(altura_minima, len(linhas) * line_h + pad)
 
         # Caixa da linha (borda externa)
         c.rect(x, y - altura_row, largura_tabela, altura_row, fill=0)
@@ -161,10 +172,10 @@ def desenhar_tabela_relatorio(
 
         # Coluna "Dia"
         c.setFont(*fonte_header)
+        text_y = y - (altura_row / 2) + 0.5  # leve ajuste para o dia n�o encostar nas bordas
         c.drawCentredString(
             x + largura_col_dia / 2,
-            # PosiÇõÇœ intermediÇ­ria entre o ajuste antigo e o centrado total (levemente mais baixa)
-            y - (altura_row / 2) + 1.0,
+            text_y,
             f"{dia:02d}",
         )
 

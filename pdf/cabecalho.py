@@ -11,9 +11,9 @@ LOGO_PATH_ALT = Path("assets/logo_ro_horizontal.JPG")
 
 def desenhar_cabecalho(
     c,
-    margem_topo: float = 14 * mm,
+    margem_topo: float = 4 * mm,
     margem_lateral: float = 15 * mm,
-    deslocar_logo_para_cima: float = 8 * mm,
+    deslocar_logo_para_cima: float = 1 * mm,
 ) -> float:
     """
     Desenha o cabeçalho oficial com o brasão e devolve a coordenada Y logo abaixo dele.
