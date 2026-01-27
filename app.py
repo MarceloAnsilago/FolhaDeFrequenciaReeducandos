@@ -5,6 +5,7 @@ from io import BytesIO
 from pathlib import Path
 
 import streamlit as st
+from streamlit_option_menu import option_menu
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
@@ -1240,23 +1241,24 @@ def render_folha_ponto_sugesp():
         )
 
 
-st.title("Selecione o gerador")
-destino = st.selectbox(
-    "Para onde deseja ir?",
-    [
-        "Selecione...",
-        "Gerador de Folha de Ponto de Reeducandos",
-        "Folha de Ponto SUGESP",
-        "Controle de uso e saida de veiculo",
-    ],
-    key="app_destino",
-)
+col_esq, col_meio, col_dir = st.columns([1, 2, 1])
+with col_meio:
+    destino = option_menu(
+        None,
+        [
+            "Folha Reeducandos",
+            "Folha SUGESP",
+            "Controle de Veiculos",
+        ],
+        icons=["file-earmark-text", "file-earmark-ruled", "truck"],
+        menu_icon="cast",
+        default_index=0,
+        orientation="horizontal",
+    )
 
-if destino == "Selecione...":
-    st.info("Escolha uma opcao para continuar.")
-elif destino == "Gerador de Folha de Ponto de Reeducandos":
+if destino == "Folha Reeducandos":
     render_folha_ponto()
-elif destino == "Folha de Ponto SUGESP":
+elif destino == "Folha SUGESP":
     render_folha_ponto_sugesp()
 else:
     render_veiculos()
