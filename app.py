@@ -1274,12 +1274,12 @@ def render_parcelamento():
 
     col_left, col_mid, col_right = st.columns([1, 2, 1])
     with col_mid:
-        st.title("Parcelar Auto de Infracao")
+        st.title("Parcelar Auto de Infração")
         tabs = st.tabs(["Preencher Requerimento", "Tabela de Descontos"])
 
     with tabs[0]:
-        with st.expander("Dados do Auto de Infracao", expanded=True):
-            st.subheader("Dados do Auto de Infracao")
+        with st.expander("Dados do Auto de Infração", expanded=True):
+            st.subheader("Dados do Auto de Infração")
             with st.form("form_auto_info"):
                 col1, col2 = st.columns(2)
                 with col1:
@@ -1289,12 +1289,12 @@ def render_parcelamento():
                     )
                 with col2:
                     st.date_input(
-                        "Data do Auto de Infracao",
+                        "Data do Auto de Infração",
                         key=k("data_auto"),
                     )
 
                 st.text_input(
-                    "Numero do Auto de Infracao:",
+                    "Numero do Auto de Infração:",
                     key=k("N_auto"),
                 )
 
@@ -1348,7 +1348,7 @@ def render_parcelamento():
                     )
 
                 n_animais = st.number_input(
-                    "Numero de Animais/Auto de Infracao:",
+                    "Numero de Animais/Auto de Infração:",
                     min_value=0,
                     step=1,
                     key=k("n_animais"),
@@ -1521,7 +1521,7 @@ def render_parcelamento():
                 f"Eu, {nome_completo}, brasileiro(a), portador(a) do CPF no {cpf}, "
                 f"residente no endereco {endereco}, municipio de {municipio}, "
                 f"venho, por meio deste requerimento datado de {data_req_label}, solicitar o parcelamento "
-                f"do Auto de Infracao no {n_auto}, lavrado em {data_auto_label}, nos termos da legislacao vigente."
+                f"do Auto de Infração no {n_auto}, lavrado em {data_auto_label}, nos termos da legislacao vigente."
             )
 
             if total_upf > 0 and parcelas_selecionadas_df.shape[0] > 0:
@@ -1615,7 +1615,7 @@ def render_parcelamento():
             </head>
             <body>
                 <div class="container">
-                    <h2>Requerimento para Parcelamento de Auto de Infracao - Emitido pela Agencia IDARON</h2>
+                    <h2>Requerimento para Parcelamento de Auto de Infração - Emitido pela Agencia IDARON</h2>
 
                     <div class="texto-requerimento">
                         <p>{texto_requerimento}</p>
@@ -1699,7 +1699,7 @@ with col_meio:
             "Folha Reeducandos",
             "Folha SUGESP",
             "Controle de Veiculos",
-            "Parcelar Auto de Infracao",
+            "Parcelar Auto de Infração",
         ],
         icons=["file-earmark-text", "file-earmark-ruled", "truck", "receipt"],
         menu_icon="cast",
