@@ -24,6 +24,7 @@ from pdf.cabecalho import desenhar_cabecalho
 from pdf.corpo import desenhar_tabela
 from pdf.relatorio import gerar_relatorio_cabecalho
 from pdf.rodape import desenhar_rodape
+from pdf.sugesp import gerar_pdf_sugesp
 
 
 st.set_page_config(page_title="Folha de Ponto de Reeducandos", page_icon="📄", layout="wide")
@@ -73,6 +74,24 @@ DEFAULTS = {
     "he": "07:30",
     "hs": "13:30",
     "feriados_texto": "",
+    "sugesp_unidade": "SUPERINTENDENCIA DE GESTAO DOS GASTOS PUBLICOS ADMINISTRATIVOS - SUGESP",
+    "sugesp_sub_unidade": "",
+    "sugesp_setor_lotacao": "",
+    "sugesp_servidor": "",
+    "sugesp_matricula": "",
+    "sugesp_sigla": "",
+    "sugesp_cargo": "",
+    "sugesp_endereco": "",
+    "sugesp_cep": "",
+    "sugesp_telefone": "",
+    "sugesp_email": "",
+    "sugesp_cpf": "",
+    "sugesp_data_preenchimento": "__/__/____",
+    "sugesp_mes_label": list(MESES.keys())[0],
+    "sugesp_ano": ANO_ATUAL if ANO_ATUAL in ANOS_OPCOES else ANOS_OPCOES[0],
+    "sugesp_he": "07:30",
+    "sugesp_hs": "13:30",
+    "sugesp_feriados_texto": "",
 }
 
 for chave, valor in DEFAULTS.items():
@@ -80,6 +99,8 @@ for chave, valor in DEFAULTS.items():
 # flags de controle do upload (para não sobrescrever após a primeira aplicação)
 st.session_state.setdefault("_upload_aplicado", False)
 st.session_state.setdefault("_ultimo_upload", "")
+st.session_state.setdefault("_sugesp_upload_aplicado", False)
+st.session_state.setdefault("_sugesp_ultimo_upload", "")
 
 
 def _safe_index(options, value, default=0):
@@ -209,6 +230,152 @@ def _parse_campos(texto: str) -> dict:
         for nome in MESES.keys():
             if nome.startswith(mes_upper[:3]):
                 campos["mes_label"] = nome
+                break
+
+    return campos
+
+
+def _parse_campos_sugesp(texto: str) -> dict:
+    norm = _clean_text(texto).upper()
+    campos = {}
+
+    def normaliza_data(txt: str) -> str:
+        if "_" in txt:
+            return "__/__/____"
+        bruto = txt.strip()
+        digitos = re.sub(r"\D", "", bruto)
+        if len(digitos) == 8:
+            return f"{digitos[:2]}/{digitos[2:4]}/{digitos[4:]}"
+        if not digitos:
+            return "__/__/____"
+        return "__/__/____"
+
+    def pega(padrao, grupo=1):
+        m = re.search(padrao, norm)
+        return m.group(grupo).strip() if m else ""
+
+    def remove_prefixo(valor: str, prefixo_regex: str) -> str:
+        if not valor:
+            return valor
+        return re.sub(rf"^{prefixo_regex}\s*", "", valor, flags=re.IGNORECASE).strip()
+
+    def corta_no_rotulo(valor: str, rotulo_regex: str) -> str:
+        if not valor:
+            return valor
+        m = re.search(rotulo_regex, valor, flags=re.IGNORECASE)
+        if not m:
+            return valor
+        # se o rótulo aparece no meio, mantém apenas a parte antes dele
+        if m.start() > 0:
+            return valor[: m.start()].strip()
+        # se por algum motivo começar com rótulo, remove e retorna o restante
+        return re.sub(rf"^{rotulo_regex}\s*", "", valor, flags=re.IGNORECASE).strip()
+
+    campos["sugesp_unidade"] = pega(r"UNIDADE:\s*(.+?)(?:\s+ANO:|$)")
+    campos["sugesp_ano"] = pega(r"ANO:\s*(\d{4})")
+    campos["sugesp_sub_unidade"] = pega(r"SUB\s*UNIDADE:\s*(.+?)(?:\s+M[ÃŠE]S:|$)")
+    campos["sugesp_mes_label"] = pega(r"M[ÃŠE]S:\s*([A-ZÃ‡ÃƒÃ•]+)")
+    campos["sugesp_setor_lotacao"] = pega(r"SETOR DE LOTA[ÇC][ÃA]O:\s*(.+?)(?:\s+SERVIDOR:|$)")
+    campos["sugesp_servidor"] = pega(r"SERVIDOR:\s*(.+?)(?:\s+MATR[IÍ]CULA:|$)")
+    campos["sugesp_matricula"] = pega(r"MATR[IÍ]CULA:\s*([0-9]+)")
+    campos["sugesp_sigla"] = pega(r"MATR[IÍ]CULA:\s*[0-9]+\s*([A-Z]{2,4})\b")
+    campos["sugesp_cargo"] = pega(r"CARGO:\s*(.+?)(?:\s+DIA|$)")
+    campos["sugesp_endereco"] = pega(r"ENDERE[ÇC]O:\s*(.+?)(?:\s+CEP:|$)")
+    campos["sugesp_cep"] = pega(r"CEP:\s*([\d.\-]+)")
+    campos["sugesp_telefone"] = pega(r"TELEFONE:\s*([0-9()\s\-]+)")
+    campos["sugesp_email"] = pega(r"EMAIL:\s*([A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,})")
+    campos["sugesp_cpf"] = pega(r"CPF:\s*([\d.\-]+)")
+    campos["sugesp_data_preenchimento"] = normaliza_data(pega(r"DATA:\s*([0-9_/]+)"))
+
+    # fallback: pega a sigla da celula abaixo do MES (entre MES e CARGO/DIA)
+    sigla = campos.get("sugesp_sigla", "")
+    if not sigla or sigla in {"MATR", "MES", "ANO"}:
+        m = re.search(r"M[ÊE]S:\s*[A-ZÇÃÕ]+(.*?)(?:CARGO:|DIA)", norm)
+        if m:
+            trecho = m.group(1)
+            tokens = re.findall(r"\b[A-Z]{2,4}\b", trecho)
+            for tok in tokens:
+                if tok not in {"MATR", "MES", "ANO"}:
+                    sigla = tok
+            if sigla:
+                campos["sugesp_sigla"] = sigla
+
+    repetidos_regex = {
+        "sugesp_unidade": r"UNIDADE:",
+        "sugesp_sub_unidade": r"SUB\s+UNIDADE:",
+        "sugesp_setor_lotacao": r"SETOR DE LOTA[ÇC][ÃA]O:",
+        "sugesp_servidor": r"SERVIDOR:",
+        "sugesp_cargo": r"CARGO:",
+        "sugesp_endereco": r"ENDERE[ÇC]O:",
+        "sugesp_telefone": r"TELEFONE:",
+        "sugesp_email": r"EMAIL:",
+        "sugesp_cpf": r"CPF:",
+    }
+    for chave, marcador in repetidos_regex.items():
+        val = campos.get(chave, "")
+        if not val:
+            continue
+        up = val.upper()
+        matches = list(re.finditer(marcador, up))
+        if len(matches) > 1:
+            campos[chave] = val[: matches[1].start()].strip()
+        elif len(matches) == 1 and matches[0].start() > 0:
+            campos[chave] = val[: matches[0].start()].strip()
+
+    # remove prefixos duplicados que sobram no valor
+    campos["sugesp_unidade"] = corta_no_rotulo(
+        remove_prefixo(campos.get("sugesp_unidade", ""), r"UNIDADE:"), r"UNIDADE:"
+    )
+    # quando o PDF cola "2026 SUB" na mesma linha, corta antes do ano/sub
+    unidade_val = campos.get("sugesp_unidade", "")
+    if unidade_val:
+        m = re.search(r"\b20\d{2}\b\s*SUB", unidade_val, flags=re.IGNORECASE)
+        if m:
+            unidade_val = unidade_val[: m.start()].strip()
+        m = re.search(r"\bSUB\s+UNIDADE:", unidade_val, flags=re.IGNORECASE)
+        if m:
+            unidade_val = unidade_val[: m.start()].strip()
+        campos["sugesp_unidade"] = unidade_val
+    campos["sugesp_sub_unidade"] = corta_no_rotulo(
+        remove_prefixo(campos.get("sugesp_sub_unidade", ""), r"SUB\s+UNIDADE:"), r"SUB\s+UNIDADE:"
+    )
+    campos["sugesp_setor_lotacao"] = corta_no_rotulo(
+        remove_prefixo(campos.get("sugesp_setor_lotacao", ""), r"SETOR DE LOTA[ÇC][ÃA]O:"),
+        r"SETOR DE LOTA[ÇC][ÃA]O:",
+    )
+    campos["sugesp_servidor"] = corta_no_rotulo(
+        remove_prefixo(campos.get("sugesp_servidor", ""), r"SERVIDOR:"), r"SERVIDOR:"
+    )
+    campos["sugesp_cargo"] = corta_no_rotulo(
+        remove_prefixo(campos.get("sugesp_cargo", ""), r"CARGO:"), r"CARGO:"
+    )
+    campos["sugesp_endereco"] = corta_no_rotulo(
+        remove_prefixo(campos.get("sugesp_endereco", ""), r"ENDERE[ÇC]O:"), r"ENDERE[ÇC]O:"
+    )
+    campos["sugesp_telefone"] = corta_no_rotulo(
+        remove_prefixo(campos.get("sugesp_telefone", ""), r"TELEFONE:"), r"TELEFONE:"
+    )
+    campos["sugesp_email"] = corta_no_rotulo(
+        remove_prefixo(campos.get("sugesp_email", ""), r"EMAIL:"), r"EMAIL:"
+    )
+    campos["sugesp_cpf"] = corta_no_rotulo(
+        remove_prefixo(campos.get("sugesp_cpf", ""), r"CPF:"), r"CPF:"
+    )
+
+    # ano para inteiro, se possivel
+    try:
+        campos["sugesp_ano"] = int(campos["sugesp_ano"])
+    except Exception:
+        campos["sugesp_ano"] = ""
+
+    # saneia mes
+    mes_upper = campos.get("sugesp_mes_label", "")
+    if mes_upper in MESES:
+        campos["sugesp_mes_label"] = mes_upper
+    elif mes_upper:
+        for nome in MESES.keys():
+            if nome.startswith(mes_upper[:3]):
+                campos["sugesp_mes_label"] = nome
                 break
 
     return campos
@@ -947,12 +1114,139 @@ def render_folha_ponto():
             file_name="relatorio_atividades.pdf",
             mime="application/pdf",
         )
+def render_folha_ponto_sugesp():
+    st.title("Gerador de Folha de Ponto - SUGESP")
+
+    with st.expander("Importar dados (PDF ou DOCX)", expanded=False):
+        arquivo = st.file_uploader("Selecione o PDF ou DOCX da ultima folha", type=["pdf", "docx"], key="sugesp_upload")
+        if arquivo:
+            if st.session_state.get("_sugesp_ultimo_upload") != arquivo.name:
+                st.session_state["_sugesp_upload_aplicado"] = False
+                st.session_state["_sugesp_ultimo_upload"] = arquivo.name
+
+            if not st.session_state.get("_sugesp_upload_aplicado", False):
+                texto = _ler_upload(arquivo)
+                if not texto:
+                    st.warning("Nao consegui ler o arquivo enviado.")
+                else:
+                    campos = _parse_campos_sugesp(texto)
+                    st.session_state.update({k: v for k, v in campos.items() if v})
+                    st.session_state["_sugesp_upload_aplicado"] = True
+                    st.success("Campos preenchidos a partir do arquivo.")
+
+    with st.expander("Dados do servidor (SUGESP)", expanded=True):
+        unidade = st.text_input("Unidade", key="sugesp_unidade")
+        sub_unidade = st.text_input("Sub unidade", key="sugesp_sub_unidade")
+        setor_lotacao = st.text_input("Setor de lotacao", key="sugesp_setor_lotacao")
+        servidor = st.text_input("Servidor", key="sugesp_servidor")
+        matricula = st.text_input("Matricula", key="sugesp_matricula")
+        sigla = st.text_input("Sigla/Local", key="sugesp_sigla")
+        cargo = st.text_input("Cargo", key="sugesp_cargo")
+
+    with st.expander("Contato", expanded=True):
+        endereco = st.text_input("Endereco", key="sugesp_endereco")
+        cep = st.text_input("CEP", key="sugesp_cep")
+        telefone = st.text_input("Telefone", key="sugesp_telefone")
+        email = st.text_input("Email", key="sugesp_email")
+        cpf = st.text_input("CPF", key="sugesp_cpf")
+        data_preenchimento = st.text_input("Data", key="sugesp_data_preenchimento")
+
+    with st.expander("Mes, ano e feriados", expanded=True):
+        mes_opcoes = list(MESES.keys())
+        if st.session_state.get("sugesp_mes_label") not in MESES:
+            st.session_state["sugesp_mes_label"] = mes_opcoes[0]
+        anos_opcoes = ANOS_OPCOES
+        ano_atual_ss = st.session_state.get("sugesp_ano", anos_opcoes[0])
+        if not isinstance(ano_atual_ss, int):
+            try:
+                ano_atual_ss = int(ano_atual_ss)
+            except Exception:
+                ano_atual_ss = anos_opcoes[0]
+        if ano_atual_ss not in anos_opcoes:
+            ano_atual_ss = anos_opcoes[0]
+        st.session_state["sugesp_ano"] = ano_atual_ss
+
+        col_mes, col_ano = st.columns(2)
+        with col_mes:
+            mes_label = st.selectbox("Mes", mes_opcoes, key="sugesp_mes_label")
+        with col_ano:
+            ano = st.selectbox("Ano", anos_opcoes, key="sugesp_ano")
+
+        opcoes_he = [
+            f"{h:02d}:{m:02d}"
+            for h in range(5, 10)
+            for m in (0, 30)
+            if (h < 9 or (h == 9 and m == 0))
+        ]
+        opcoes_hs = [
+            f"{h:02d}:{m:02d}"
+            for h in range(10, 18)
+            for m in (0, 30)
+            if not (h == 10 and m == 0)
+        ]
+
+        col_he, col_hs = st.columns(2)
+        with col_he:
+            he_default = st.session_state.get("sugesp_he", "")
+            he_index = _safe_index(opcoes_he, he_default, 0)
+            he = st.selectbox("Horario de entrada", opcoes_he, index=he_index, key="sugesp_he")
+        with col_hs:
+            hs_default = st.session_state.get("sugesp_hs", "")
+            hs_index = _safe_index(opcoes_hs, hs_default, 0)
+            hs = st.selectbox("Horario de saida", opcoes_hs, index=hs_index, key="sugesp_hs")
+
+        feriados_texto = st.text_area(
+            "Feriados (formato: dia-descricao, separados por virgulas)",
+            value=st.session_state.get("sugesp_feriados_texto", ""),
+            placeholder="1-Feriado, 2-Feriado2",
+        )
+
+        if st.button("Gerar Folha SUGESP"):
+            feriados_dict, erros = parse_feriados_text(feriados_texto)
+            if erros:
+                st.error("Revise os feriados informados: " + "; ".join(erros))
+            else:
+                st.session_state["sugesp_feriados_texto"] = feriados_texto
+                data = {
+                    "ano": ano,
+                    "mes": MESES[mes_label],
+                    "mes_label": mes_label,
+                    "unidade": unidade,
+                    "sub_unidade": sub_unidade,
+                    "setor_lotacao": setor_lotacao,
+                    "servidor": servidor,
+                    "matricula": matricula,
+                    "sigla": sigla,
+                    "cargo": cargo,
+                    "he": he,
+                    "hs": hs,
+                    "feriados": feriados_dict,
+                    "endereco": endereco,
+                    "cep": cep,
+                    "telefone": telefone,
+                    "email": email,
+                    "cpf": cpf,
+                    "data_preenchimento": data_preenchimento,
+                }
+                st.session_state["sugesp_pdf"] = gerar_pdf_sugesp(data)
+                st.success("Folha SUGESP gerada com sucesso!")
+
+    if "sugesp_pdf" in st.session_state:
+        st.download_button(
+            "Baixar Folha SUGESP",
+            data=st.session_state["sugesp_pdf"],
+            file_name="folha_sugesp.pdf",
+            mime="application/pdf",
+        )
+
+
 st.title("Selecione o gerador")
 destino = st.selectbox(
     "Para onde deseja ir?",
     [
         "Selecione...",
         "Gerador de Folha de Ponto de Reeducandos",
+        "Folha de Ponto SUGESP",
         "Controle de uso e saida de veiculo",
     ],
     key="app_destino",
@@ -962,5 +1256,7 @@ if destino == "Selecione...":
     st.info("Escolha uma opcao para continuar.")
 elif destino == "Gerador de Folha de Ponto de Reeducandos":
     render_folha_ponto()
+elif destino == "Folha de Ponto SUGESP":
+    render_folha_ponto_sugesp()
 else:
     render_veiculos()
