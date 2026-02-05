@@ -2171,7 +2171,6 @@ def render_declaracao_nada_consta():
             if logo_path.exists():
                 logo_b64 = base64.b64encode(logo_path.read_bytes()).decode("ascii")
 
-            st.markdown("### Pagina na tela")
             st.markdown(
                 f"""
                 <style>
