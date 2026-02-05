@@ -914,7 +914,7 @@ def build_pdf_declaracao_nada_consta(data: dict, logo_path: Path) -> bytes:
         y -= 10 * mm
 
     c.setFont("Helvetica-Bold", 14)
-    c.drawCentredString(page_width / 2, y, "DECLARACAO")
+    c.drawCentredString(page_width / 2, y, "DECLARAÇÃO")
     y -= 12 * mm
 
     c.setFont("Helvetica", 11)
@@ -2237,7 +2237,7 @@ def render_declaracao_nada_consta():
                     <div class="dnc-header">
                         {"<img src='data:image/jpg;base64," + logo_b64 + "' alt='Logo' />" if logo_b64 else ""}
                     </div>
-                    <div class="dnc-title">DECLARACAO</div>
+                    <div class="dnc-title">DECLARAÇÃO</div>
                     <div class="dnc-block">{data.get("destinatario", "")}</div>
                     <div class="dnc-block">Requerente</div>
                     <div class="dnc-block"><strong>{nome_caps}</strong></div>
