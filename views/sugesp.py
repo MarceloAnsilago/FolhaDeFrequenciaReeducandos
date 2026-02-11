@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit.errors import StreamlitAPIException
 
 from services.constants import ANOS_OPCOES, MESES
 from services.parsers import _ler_upload, _parse_campos_sugesp, _safe_index, parse_feriados_text
@@ -124,9 +125,18 @@ def render_folha_ponto_sugesp():
                     st.success("Folha SUGESP gerada com sucesso!")
 
         if "sugesp_pdf" in st.session_state:
+            st.markdown("### Pagina de impressao")
+            pdf_bytes = st.session_state["sugesp_pdf"]
+            try:
+                st.pdf(pdf_bytes)
+            except StreamlitAPIException:
+                st.info(
+                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
+                    "Para habilitar, instale: pip install streamlit[pdf]"
+                )
             st.download_button(
                 "Baixar Folha SUGESP",
-                data=st.session_state["sugesp_pdf"],
+                data=pdf_bytes,
                 file_name="folha_sugesp.pdf",
                 mime="application/pdf",
             )

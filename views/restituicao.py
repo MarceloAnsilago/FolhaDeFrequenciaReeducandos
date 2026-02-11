@@ -3,6 +3,7 @@ from io import BytesIO
 from pathlib import Path
 
 import streamlit as st
+from streamlit.errors import StreamlitAPIException
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
@@ -286,9 +287,18 @@ def render_restituicao():
             st.success("PDF gerado e salvo.")
 
         if "restituicao_pdf" in st.session_state:
+            st.markdown("### Pagina de impressao")
+            pdf_bytes = st.session_state["restituicao_pdf"]
+            try:
+                st.pdf(pdf_bytes)
+            except StreamlitAPIException:
+                st.info(
+                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
+                    "Para habilitar, instale: pip install streamlit[pdf]"
+                )
             st.download_button(
                 "Baixar PDF",
-                data=st.session_state["restituicao_pdf"],
+                data=pdf_bytes,
                 file_name="requerimento_restituicao.pdf",
                 mime="application/pdf",
             )

@@ -1,10 +1,9 @@
-import base64
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-from textwrap import dedent
 
 import streamlit as st
+from streamlit.errors import StreamlitAPIException
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
@@ -200,124 +199,13 @@ def render_declaracao_nada_consta():
         if st.session_state.get("dnc_show_page"):
             data = st.session_state.get("dnc_page_data", {})
             nome_caps = data.get("nome_caps") or "____________________________"
-            nome_caps_bruto = data.get("nome_caps", "").strip()
             cpf = data.get("cpf", "")
             rg = data.get("rg", "")
             servidor_nome = data.get("servidor_nome") or nome_caps
             servidor_cargo = data.get("servidor_cargo", "")
             servidor_matricula = data.get("servidor_matricula", "")
             incluir_assinatura_requerente = data.get("incluir_assinatura_requerente", True)
-            cargo_label = f"Cargo: {servidor_cargo}" if servidor_cargo else ""
-            matricula_label = f"Matricula: {servidor_matricula}" if servidor_matricula else ""
-            requerente_docs = []
-            if cpf:
-                requerente_docs.append(f"CPF: {cpf}")
-            if rg:
-                requerente_docs.append(f"RG: {rg}")
-            requerente_docs_label = " | ".join(requerente_docs)
-            assinatura_requerente_html = ""
-            if incluir_assinatura_requerente and (nome_caps_bruto or cpf or rg):
-                docs_html = (
-                    f'<div class="dnc-muted">{requerente_docs_label}</div>'
-                    if requerente_docs_label
-                    else ""
-                )
-                assinatura_requerente_html = (
-                    f'<div class="dnc-sign"><div>{nome_caps_bruto}</div>'
-                    f"{docs_html}"
-                    '<div class="dnc-muted">Assinatura do requerente</div></div>'
-                )
-
             logo_path = Path(__file__).resolve().parents[1] / "assets" / "logo_inferior_dir.jpg"
-            logo_b64 = ""
-            if logo_path.exists():
-                logo_b64 = base64.b64encode(logo_path.read_bytes()).decode("ascii")
-
-            st.markdown(
-                dedent(
-                    f"""
-                <style>
-                :root {{
-                    --a4-width: 210mm;
-                    --a4-height: 297mm;
-                }}
-                .dnc-page {{
-                    width: min(100%, var(--a4-width));
-                    min-height: var(--a4-height);
-                    border: 1px solid #999;
-                    padding: 20mm;
-                    box-sizing: border-box;
-                    margin: 0 auto;
-                    background: #fff;
-                    font-family: Arial, sans-serif;
-                    font-size: 12pt;
-                    color: #111;
-                }}
-                .dnc-header {{
-                    width: 100%;
-                    height: auto;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    box-sizing: border-box;
-                    margin-bottom: 10mm;
-                }}
-                .dnc-header img {{
-                    max-height: 26mm;
-                    max-width: 80%;
-                    object-fit: contain;
-                }}
-                .dnc-title {{
-                    text-align: center;
-                    font-weight: 700;
-                    letter-spacing: 1px;
-                    margin-bottom: 12mm;
-                }}
-                .dnc-block {{
-                    margin-bottom: 6mm;
-                }}
-                .dnc-body {{
-                    text-align: justify;
-                    text-indent: 2em;
-                    line-height: 1.5;
-                    margin: 10mm 0;
-                }}
-                .dnc-sign {{
-                    margin-top: 22mm;
-                    text-align: center;
-                }}
-                .dnc-muted {{
-                    font-size: 10pt;
-                }}
-                @media screen {{
-                    .dnc-page {{
-                        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-                    }}
-                }}
-                </style>
-                <div class="dnc-page">
-                    <div class="dnc-header">
-                        {"<img src='data:image/jpg;base64," + logo_b64 + "' alt='Logo' />" if logo_b64 else ""}
-                    </div>
-                    <div class="dnc-title">DECLARAÇÃO</div>
-                    <div class="dnc-block">{data.get("destinatario", "")}</div>
-                    <div class="dnc-block">Requerente</div>
-                    <div class="dnc-block"><strong>{nome_caps}</strong></div>
-                    <div class="dnc-block">{data.get("vocativo", "")}</div>
-                    <div class="dnc-body">{data.get("corpo", "")}</div>
-                    <div class="dnc-block">Atenciosamente,</div>
-                    <div class="dnc-sign">
-                        <div>{servidor_nome}</div>
-                        <div class="dnc-muted">{cargo_label}</div>
-                        <div class="dnc-muted">{matricula_label}</div>
-                    </div>
-                    {assinatura_requerente_html}
-                </div>
-                """
-                ),
-                unsafe_allow_html=True,
-            )
-
             st.markdown("### Pagina de impressao")
             pdf_bytes = build_pdf_declaracao_nada_consta(
                 {
@@ -334,6 +222,13 @@ def render_declaracao_nada_consta():
                 },
                 logo_path,
             )
+            try:
+                st.pdf(pdf_bytes)
+            except StreamlitAPIException:
+                st.info(
+                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
+                    "Para habilitar, instale: pip install streamlit[pdf]"
+                )
             st.download_button(
                 "Baixar PDF",
                 data=pdf_bytes,

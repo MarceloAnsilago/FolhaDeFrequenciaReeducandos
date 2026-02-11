@@ -1,4 +1,5 @@
-import streamlit as st
+﻿import streamlit as st
+from streamlit.errors import StreamlitAPIException
 
 from services.constants import (
     ANOS_OPCOES,
@@ -209,18 +210,36 @@ def render_folha_ponto():
                         )
                         st.success("Relatório de atividades gerado com sucesso!")
 
-        # Botões de download
+        # Botoes de download
         if "pdf" in st.session_state:
+            st.markdown("### Pagina de impressao - Folha de Ponto")
+            folha_pdf = st.session_state["pdf"]
+            try:
+                st.pdf(folha_pdf)
+            except StreamlitAPIException:
+                st.info(
+                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
+                    "Para habilitar, instale: pip install streamlit[pdf]"
+                )
             st.download_button(
-                "📄 Baixar Folha de Ponto",
-                data=st.session_state["pdf"],
+                "Baixar Folha de Ponto",
+                data=folha_pdf,
                 file_name="folha.pdf",
                 mime="application/pdf",
             )
         if "relatorio_pdf" in st.session_state:
+            st.markdown("### Pagina de impressao - Relatorio de Atividades")
+            relatorio_pdf = st.session_state["relatorio_pdf"]
+            try:
+                st.pdf(relatorio_pdf)
+            except StreamlitAPIException:
+                st.info(
+                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
+                    "Para habilitar, instale: pip install streamlit[pdf]"
+                )
             st.download_button(
-                "📄 Baixar Relatório de Atividades",
-                data=st.session_state["relatorio_pdf"],
+                "Baixar Relatorio de Atividades",
+                data=relatorio_pdf,
                 file_name="relatorio_atividades.pdf",
                 mime="application/pdf",
             )
