@@ -2,12 +2,12 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 
 from services.constants import DEFAULTS
-from pages.declaracao_nada_consta import render_declaracao_nada_consta
-from pages.parcelamento import render_parcelamento
-from pages.reeducandos import render_folha_ponto
-from pages.restituicao import render_restituicao
-from pages.sugesp import render_folha_ponto_sugesp
-from pages.veiculos import render_veiculos
+from views.declaracao_nada_consta import render_declaracao_nada_consta
+from views.parcelamento import render_parcelamento
+from views.reeducandos import render_folha_ponto
+from views.restituicao import render_restituicao
+from views.sugesp import render_folha_ponto_sugesp
+from views.veiculos import render_veiculos
 
 
 st.set_page_config(page_title="Folha de Ponto de Reeducandos", page_icon="\U0001F4C4", layout="wide")
