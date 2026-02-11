@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
+from textwrap import dedent
 
 import pandas as pd
 import streamlit as st
@@ -942,6 +943,10 @@ def build_pdf_declaracao_nada_consta(data: dict, logo_path: Path) -> bytes:
     servidor_nome = data.get("servidor_nome") or data.get("nome_caps", "")
     servidor_cargo = data.get("servidor_cargo", "")
     servidor_matricula = data.get("servidor_matricula", "")
+    incluir_assinatura_requerente = data.get("incluir_assinatura_requerente", True)
+    requerente_nome = data.get("nome_caps", "").strip()
+    requerente_cpf = data.get("cpf", "").strip()
+    requerente_rg = data.get("rg", "").strip()
 
     if servidor_nome:
         c.setFont("Helvetica", 11)
@@ -955,6 +960,24 @@ def build_pdf_declaracao_nada_consta(data: dict, logo_path: Path) -> bytes:
         c.setFont("Helvetica", 10)
         c.drawCentredString(page_width / 2, y, f"Matricula: {servidor_matricula}")
         y -= 5 * mm
+
+    if incluir_assinatura_requerente and (requerente_nome or requerente_cpf or requerente_rg):
+        y -= 10 * mm
+        if requerente_nome:
+            c.setFont("Helvetica", 11)
+            c.drawCentredString(page_width / 2, y, requerente_nome)
+            y -= 6 * mm
+        docs_requerente = []
+        if requerente_cpf:
+            docs_requerente.append(f"CPF: {requerente_cpf}")
+        if requerente_rg:
+            docs_requerente.append(f"RG: {requerente_rg}")
+        if docs_requerente:
+            c.setFont("Helvetica", 10)
+            c.drawCentredString(page_width / 2, y, " | ".join(docs_requerente))
+            y -= 5 * mm
+        c.setFont("Helvetica", 10)
+        c.drawCentredString(page_width / 2, y, "Assinatura do requerente")
 
     c.showPage()
     c.save()
@@ -2110,6 +2133,11 @@ def render_declaracao_nada_consta():
             st.text_input("Nome do servidor", key="dnc_servidor_nome")
             st.text_input("Cargo", key="dnc_servidor_cargo")
             st.text_input("Matricula", key="dnc_servidor_matricula")
+            st.checkbox(
+                "acrescentar assinatura do requerente",
+                key="dnc_incluir_assinatura_requerente",
+                value=True,
+            )
             submitted = st.form_submit_button("Gerar")
 
         if submitted:
@@ -2125,6 +2153,9 @@ def render_declaracao_nada_consta():
             servidor_nome = st.session_state.get("dnc_servidor_nome", "").strip()
             servidor_cargo = st.session_state.get("dnc_servidor_cargo", "").strip()
             servidor_matricula = st.session_state.get("dnc_servidor_matricula", "").strip()
+            incluir_assinatura_requerente = st.session_state.get(
+                "dnc_incluir_assinatura_requerente", True
+            )
             data_valor = st.session_state.get("dnc_data", datetime.today())
             data_solicitacao = data_valor.strftime("%d/%m/%Y")
             doc_partes = []
@@ -2152,19 +2183,40 @@ def render_declaracao_nada_consta():
                 "servidor_nome": servidor_nome,
                 "servidor_cargo": servidor_cargo,
                 "servidor_matricula": servidor_matricula,
+                "incluir_assinatura_requerente": incluir_assinatura_requerente,
             }
             st.session_state["dnc_show_page"] = True
 
         if st.session_state.get("dnc_show_page"):
             data = st.session_state.get("dnc_page_data", {})
             nome_caps = data.get("nome_caps") or "____________________________"
+            nome_caps_bruto = data.get("nome_caps", "").strip()
             cpf = data.get("cpf", "")
             rg = data.get("rg", "")
             servidor_nome = data.get("servidor_nome") or nome_caps
             servidor_cargo = data.get("servidor_cargo", "")
             servidor_matricula = data.get("servidor_matricula", "")
+            incluir_assinatura_requerente = data.get("incluir_assinatura_requerente", True)
             cargo_label = f"Cargo: {servidor_cargo}" if servidor_cargo else ""
             matricula_label = f"Matricula: {servidor_matricula}" if servidor_matricula else ""
+            requerente_docs = []
+            if cpf:
+                requerente_docs.append(f"CPF: {cpf}")
+            if rg:
+                requerente_docs.append(f"RG: {rg}")
+            requerente_docs_label = " | ".join(requerente_docs)
+            assinatura_requerente_html = ""
+            if incluir_assinatura_requerente and (nome_caps_bruto or cpf or rg):
+                docs_html = (
+                    f'<div class="dnc-muted">{requerente_docs_label}</div>'
+                    if requerente_docs_label
+                    else ""
+                )
+                assinatura_requerente_html = (
+                    f'<div class="dnc-sign"><div>{nome_caps_bruto}</div>'
+                    f"{docs_html}"
+                    '<div class="dnc-muted">Assinatura do requerente</div></div>'
+                )
 
             logo_path = Path(__file__).resolve().parent / "assets" / "logo_inferior_dir.jpg"
             logo_b64 = ""
@@ -2172,7 +2224,8 @@ def render_declaracao_nada_consta():
                 logo_b64 = base64.b64encode(logo_path.read_bytes()).decode("ascii")
 
             st.markdown(
-                f"""
+                dedent(
+                    f"""
                 <style>
                 :root {{
                     --a4-width: 210mm;
@@ -2248,8 +2301,10 @@ def render_declaracao_nada_consta():
                         <div class="dnc-muted">{cargo_label}</div>
                         <div class="dnc-muted">{matricula_label}</div>
                     </div>
+                    {assinatura_requerente_html}
                 </div>
-                """,
+                """
+                ),
                 unsafe_allow_html=True,
             )
 
@@ -2263,6 +2318,9 @@ def render_declaracao_nada_consta():
                     "servidor_nome": servidor_nome,
                     "servidor_cargo": servidor_cargo,
                     "servidor_matricula": servidor_matricula,
+                    "cpf": cpf,
+                    "rg": rg,
+                    "incluir_assinatura_requerente": incluir_assinatura_requerente,
                 },
                 logo_path,
             )
