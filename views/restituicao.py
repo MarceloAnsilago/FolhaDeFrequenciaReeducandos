@@ -39,9 +39,6 @@ def build_pdf_restituicao(data: dict, logo_path: Path) -> bytes:
     rect_x = margin
     rect_y = page_height - margin - rect_h
 
-    c.setLineWidth(0.7)
-    c.rect(rect_x, rect_y, rect_w, rect_h)
-
     if logo_path.exists():
         logo = ImageReader(str(logo_path))
         img_w, img_h = logo.getSize()
@@ -56,8 +53,6 @@ def build_pdf_restituicao(data: dict, logo_path: Path) -> bytes:
 
     title_h = 6 * mm
     title_y = rect_y - title_h
-    c.setLineWidth(0.7)
-    c.rect(rect_x, title_y, rect_w, title_h)
     c.setFont("Helvetica-Bold", 10)
     c.drawCentredString(
         rect_x + rect_w / 2,
