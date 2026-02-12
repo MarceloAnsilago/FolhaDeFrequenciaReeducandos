@@ -100,6 +100,9 @@ def build_pdf_restituicao(data: dict, logo_path: Path) -> bytes:
 
     x_checks = x
     x_checks = draw_checkbox("GTA ONLINE", data.get("taxa_gta", False), x_checks, y)
+    x_checks = draw_checkbox(
+        "GTA PRESENCIAL NA UNIDADE", data.get("taxa_gta_presencial", False), x_checks, y
+    )
     # Quebra a linha longa da multa para não estourar a página
     multa_label = (
         "MULTA DECORRENTES DA ATUAÇÃO DA AGÊNCIA DE DEFESA AGROSILVOPASTORIL "
@@ -208,6 +211,7 @@ def render_restituicao():
             st.text_input("Propiedade", key="rest_propiedade")
             st.markdown("### Taxas")
             st.checkbox("GTA Online", key="rest_taxa_gta")
+            st.checkbox("GTA presencial na unidade", key="rest_taxa_gta_presencial")
             st.checkbox("Multa decorrente da atuação da IDARON", key="rest_taxa_multa")
             st.text_area(
                 "Vem requerer:",
@@ -261,6 +265,7 @@ def render_restituicao():
                 "municipio": st.session_state.get("rest_municipio", ""),
                 "propriedade": st.session_state.get("rest_propiedade", ""),
                 "taxa_gta": st.session_state.get("rest_taxa_gta", False),
+                "taxa_gta_presencial": st.session_state.get("rest_taxa_gta_presencial", False),
                 "taxa_multa": st.session_state.get("rest_taxa_multa", False),
                 "vem_requerer": st.session_state.get("rest_vem_requerer", ""),
                 "justificativa": st.session_state.get("rest_justificativa", ""),
