@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 
 from services.constants import DEFAULTS
+from views.declaracao_residencia import render_declaracao_residencia
 from views.declaracao_nada_consta import render_declaracao_nada_consta
 from views.parcelamento import render_parcelamento
 from views.reeducandos import render_folha_ponto
@@ -48,8 +49,17 @@ with col_meio:
             "Parcelar Auto de Infracao",
             "Requerimento de restituicao de valor recolhido indevidamente",
             "Declaracao de nada consta",
+            "Declaracao de residencia",
         ],
-        icons=["file-earmark-text", "file-earmark-ruled", "truck", "receipt", "cash-coin", "file-text"],
+        icons=[
+            "file-earmark-text",
+            "file-earmark-ruled",
+            "truck",
+            "receipt",
+            "cash-coin",
+            "file-text",
+            "house",
+        ],
         menu_icon="cast",
         default_index=0,
         orientation="horizontal",
@@ -69,5 +79,7 @@ elif destino == "Parcelar Auto de Infracao":
     render_parcelamento()
 elif destino == "Declaracao de nada consta":
     render_declaracao_nada_consta()
+elif destino == "Declaracao de residencia":
+    render_declaracao_residencia()
 else:
     render_restituicao()
