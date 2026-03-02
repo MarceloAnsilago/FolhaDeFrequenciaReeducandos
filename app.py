@@ -12,7 +12,12 @@ from views.sugesp import render_folha_ponto_sugesp
 from views.veiculos import render_veiculos
 
 
-st.set_page_config(page_title="Folha de Ponto de Reeducandos", page_icon="\U0001F4C4", layout="wide")
+st.set_page_config(
+    page_title="Folha de Ponto de Reeducandos",
+    page_icon="\U0001F4C4",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 for chave, valor in DEFAULTS.items():
     st.session_state.setdefault(chave, valor)
@@ -24,18 +29,17 @@ st.session_state.setdefault("_sugesp_ultimo_upload", "")
 
 
 with st.sidebar:
-    st.markdown("### Menu")
     destino = option_menu(
-        "Navegacao",
+        "Navegação",
         [
             "Folha Reeducandos",
             "Folha SUGESP",
             "Controle de Veiculos",
-            "Cadastro de Emissao de GTA",
+            "Cadastro de Emissão de GTA",
             "Parcelar Auto de Infracao",
-            "Requerimento de restituicao de valor recolhido indevidamente",
-            "Declaracao de nada consta",
-            "Declaracao de residencia",
+            "Requerimento de restituição de valor recolhido indevidamente",
+            "Declaração de nada consta",
+            "Declaração de residencia",
         ],
         icons=[
             "file-earmark-text",
@@ -57,13 +61,13 @@ elif destino == "Folha SUGESP":
     render_folha_ponto_sugesp()
 elif destino == "Controle de Veiculos":
     render_veiculos()
-elif destino == "Cadastro de Emissao de GTA":
+elif destino == "Cadastro de Emissão de GTA":
     render_cadastro_emissao_gta()
 elif destino == "Parcelar Auto de Infracao":
     render_parcelamento()
-elif destino == "Declaracao de nada consta":
+elif destino == "Declaração de nada consta":
     render_declaracao_nada_consta()
-elif destino == "Declaracao de residencia":
+elif destino == "Declaração de residencia":
     render_declaracao_residencia()
 else:
     render_restituicao()
