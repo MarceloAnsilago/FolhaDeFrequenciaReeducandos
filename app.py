@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 
 from services.constants import DEFAULTS
+from views.cadastro_emissao_gta import render_cadastro_emissao_gta
 from views.declaracao_residencia import render_declaracao_residencia
 from views.declaracao_nada_consta import render_declaracao_nada_consta
 from views.parcelamento import render_parcelamento
@@ -22,30 +23,15 @@ st.session_state.setdefault("_sugesp_upload_aplicado", False)
 st.session_state.setdefault("_sugesp_ultimo_upload", "")
 
 
-col_esq, col_meio, col_dir = st.columns([1, 2, 1])
-with col_meio:
-    st.markdown(
-        """
-        <style>
-        /* Forca texto em minusculas no option menu */
-        .nav-link, .nav-link span, .nav-link p {
-            text-transform: lowercase !important;
-            font-variant: normal !important;
-            letter-spacing: normal !important;
-            font-weight: 500 !important;
-            font-size: 0.95rem !important;
-            line-height: 1.2 !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+with st.sidebar:
+    st.markdown("### Menu")
     destino = option_menu(
-        None,
+        "Navegacao",
         [
             "Folha Reeducandos",
             "Folha SUGESP",
             "Controle de Veiculos",
+            "Cadastro de Emissao de GTA",
             "Parcelar Auto de Infracao",
             "Requerimento de restituicao de valor recolhido indevidamente",
             "Declaracao de nada consta",
@@ -55,6 +41,7 @@ with col_meio:
             "file-earmark-text",
             "file-earmark-ruled",
             "truck",
+            "person-vcard",
             "receipt",
             "cash-coin",
             "file-text",
@@ -62,11 +49,6 @@ with col_meio:
         ],
         menu_icon="cast",
         default_index=0,
-        orientation="horizontal",
-        styles={
-            "nav-link": {"text-transform": "none"},
-            "nav-link-selected": {"text-transform": "none"},
-        },
     )
 
 if destino == "Folha Reeducandos":
@@ -75,6 +57,8 @@ elif destino == "Folha SUGESP":
     render_folha_ponto_sugesp()
 elif destino == "Controle de Veiculos":
     render_veiculos()
+elif destino == "Cadastro de Emissao de GTA":
+    render_cadastro_emissao_gta()
 elif destino == "Parcelar Auto de Infracao":
     render_parcelamento()
 elif destino == "Declaracao de nada consta":
