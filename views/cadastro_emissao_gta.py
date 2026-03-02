@@ -10,11 +10,42 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 from streamlit.errors import StreamlitAPIException
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
+
+PERMISSAO_COLUNAS = [
+    ("novo", "NOVO"),
+    ("editar", "EDITAR"),
+    ("cancelar", "CANCELAR"),
+    ("consultar", "CONSULTAR"),
+]
+
+PERMISSAO_ITENS = [
+    (1, "CADASTRO PESSOA FISICA"),
+    (2, "CADASTRO PROPRIEDADE RURAL"),
+    (3, "CADASTRO FICHA DE BOVIDEOS"),
+    (4, "CADASTRO DE LOGRADOURO"),
+    (5, "SETOR MUNICIPIO/EPIDEMIOLOGICO"),
+    (6, "CAD. FRIGORIFICO/MATADOURO..."),
+    (7, "CAD. REVENDEDOR DE VACINAS"),
+    (8, "DECLARACAO DE VACINAS"),
+    (9, "GTA / TTRB / D. CONS./ ETC e outras\nformas de entrada e saida de bovideos"),
+]
+
+PERMISSAO_DEFAULTS = {
+    1: {"novo": True, "editar": True, "cancelar": False, "consultar": True},
+    2: {"novo": True, "editar": True, "cancelar": False, "consultar": True},
+    3: {"novo": True, "editar": True, "cancelar": False, "consultar": True},
+    4: {"novo": False, "editar": False, "cancelar": False, "consultar": True},
+    5: {"novo": False, "editar": False, "cancelar": False, "consultar": True},
+    6: {"novo": False, "editar": False, "cancelar": False, "consultar": True},
+    7: {"novo": False, "editar": False, "cancelar": False, "consultar": True},
+    8: {"novo": True, "editar": True, "cancelar": False, "consultar": True},
+    9: {"novo": True, "editar": True, "cancelar": False, "consultar": True},
+}
 
 
 def _fmt_date(value) -> str:
@@ -427,6 +458,187 @@ def build_pdf_cadastro_gta(data: dict, logo_path: Path) -> bytes:
     return buffer.read()
 
 
+def build_pdf_permissoes_gta(data: dict, logo_path: Path, permissoes: dict) -> bytes:
+    buffer = BytesIO()
+    page_width, page_height = landscape(A4)
+    c = canvas.Canvas(buffer, pagesize=(page_width, page_height))
+
+    page_margin = 8 * mm
+    c.setLineWidth(0.7)
+    c.rect(page_margin, page_margin, page_width - 2 * page_margin, page_height - 2 * page_margin)
+
+    x = 18 * mm
+    w = page_width - 36 * mm
+    y_top = page_height - 12 * mm
+
+    if logo_path.exists():
+        logo = ImageReader(str(logo_path))
+        img_w, img_h = logo.getSize()
+        max_size = 11 * mm
+        scale = min(max_size / img_w, max_size / img_h)
+        draw_w = img_w * scale
+        draw_h = img_h * scale
+        c.drawImage(
+            logo,
+            x + (w - draw_w) / 2,
+            y_top - draw_h,
+            width=draw_w,
+            height=draw_h,
+            mask="auto",
+        )
+
+    c.setFont("Helvetica-Bold", 8.5)
+    c.drawCentredString(x + w / 2, y_top - 13 * mm, "GOVERNO DO ESTADO DE RONDONIA")
+    c.setFont("Helvetica", 6.2)
+    c.drawCentredString(
+        x + w / 2,
+        y_top - 16.5 * mm,
+        "Agencia de Defesa Sanitaria Agrosilvopastoril do Estado de Rondonia - IDARON",
+    )
+    c.setFont("Helvetica-Bold", 11)
+    c.drawCentredString(x + w / 2, y_top - 24.5 * mm, "NIVEIS DE PERMISSOES PARA USUARIOS DO SISTEMA SISIDARON")
+
+    info_y = y_top - 33 * mm
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(x + 2 * mm, info_y, f"Nome do Servidor:  {data.get('nome', '')}")
+    c.drawString(x + 112 * mm, info_y, f"Lotacao: {data.get('unidade_lotacao', '')}")
+
+    c.drawString(x + 2 * mm, info_y - 8 * mm, f"Funcao:  {data.get('cargo', '')}")
+    c.drawString(x + 94 * mm, info_y - 8 * mm, f"CPF: {data.get('cpf', '')}")
+    c.drawString(x + 150 * mm, info_y - 8 * mm, f"Matricula: {data.get('matricula', '')}")
+
+    table_w = 200 * mm
+    table_x = x + (w - table_w) / 2
+    table_top = info_y - 14 * mm
+    col_ws = [18 * mm, 74 * mm, 27 * mm, 27 * mm, 27 * mm, 27 * mm]
+    body_row_hs = []
+    for _, item_nome in PERMISSAO_ITENS:
+        body_row_hs.append(5.4 * mm)  # linha com dados
+        body_row_hs.append(5.4 * mm if "\n" in item_nome else 3.1 * mm)  # linha em branco abaixo
+    row_hs = [7.2 * mm, 6.2 * mm] + body_row_hs
+
+    c.setFillColorRGB(0.05, 0.1, 0.85)
+    c.rect(table_x, table_top - row_hs[0], table_w, row_hs[0], stroke=1, fill=1)
+    c.rect(table_x, table_top - row_hs[0] - row_hs[1], table_w, row_hs[1], stroke=1, fill=1)
+    c.setFillColorRGB(0, 0, 0)
+
+    total_h = sum(row_hs)
+    c.setLineWidth(0.8)
+    c.rect(table_x, table_top - total_h, table_w, total_h)
+
+    y_line = table_top
+    for h in row_hs:
+        y_line -= h
+        c.line(table_x, y_line, table_x + table_w, y_line)
+
+    x_line = table_x
+    for w_col in col_ws:
+        x_line += w_col
+        c.line(x_line, table_top - total_h, x_line, table_top)
+
+    x_perm_start = table_x + col_ws[0] + col_ws[1]
+    c.setLineWidth(1.0)
+    c.line(x_perm_start, table_top - row_hs[0], x_perm_start + sum(col_ws[2:]), table_top - row_hs[0])
+    c.setLineWidth(0.6)
+
+    c.setFillColorRGB(1, 1, 1)
+    c.setFont("Helvetica-Bold", 10)
+    c.drawCentredString(table_x + col_ws[0] / 2, table_top - 5.1 * mm, "ITEM")
+    c.drawCentredString(table_x + col_ws[0] + col_ws[1] / 2, table_top - 5.1 * mm, "DOCUMENTO")
+    c.drawCentredString(x_perm_start + sum(col_ws[2:]) / 2, table_top - 3.5 * mm, "PERMISSOES")
+
+    y_head2 = table_top - row_hs[0] - 4.6 * mm
+    for idx, (_, label) in enumerate(PERMISSAO_COLUNAS):
+        x_c = x_perm_start + sum(col_ws[2 : 2 + idx]) + col_ws[2 + idx] / 2
+        c.drawCentredString(x_c, y_head2, label)
+    c.setFillColorRGB(0, 0, 0)
+
+    def _draw_cell_lines(text: str, x_left: float, x_right: float, y_top_row: float, row_h: float, align: str = "left"):
+        lines = text.split("\n")
+        font_size = 9
+        line_step = 11  # points
+        y_center = y_top_row - (row_h / 2)
+        y_first = y_center + ((len(lines) - 1) * line_step / 2) - (font_size * 0.32)
+        for idx_line, line in enumerate(lines):
+            y_line = y_first - (idx_line * line_step)
+            if align == "center":
+                c.drawCentredString((x_left + x_right) / 2, y_line, line)
+            else:
+                c.drawString(x_left + 1.2 * mm, y_line, line)
+
+    y_cursor = table_top - row_hs[0] - row_hs[1]
+    c.setFont("Helvetica", 9)
+    body_row_idx = 2
+    for item_num, item_nome in PERMISSAO_ITENS:
+        data_h = row_hs[body_row_idx]
+        blank_h = row_hs[body_row_idx + 1]
+        body_row_idx += 2
+
+        item_lines = item_nome.split("\n")
+        first_line = item_lines[0]
+        second_line = item_lines[1] if len(item_lines) > 1 else ""
+
+        _draw_cell_lines(
+            str(item_num),
+            table_x,
+            table_x + col_ws[0],
+            y_cursor,
+            data_h,
+            align="center",
+        )
+        _draw_cell_lines(
+            first_line,
+            table_x + col_ws[0],
+            table_x + col_ws[0] + col_ws[1],
+            y_cursor,
+            data_h,
+            align="left",
+        )
+
+        checks = permissoes.get(item_num, {})
+        for col_idx, (perm_key, _) in enumerate(PERMISSAO_COLUNAS):
+            if checks.get(perm_key):
+                x_left = x_perm_start + sum(col_ws[2 : 2 + col_idx])
+                x_right = x_left + col_ws[2 + col_idx]
+                _draw_cell_lines("X", x_left, x_right, y_cursor, data_h, align="center")
+
+        if second_line:
+            _draw_cell_lines(
+                second_line,
+                table_x + col_ws[0],
+                table_x + col_ws[0] + col_ws[1],
+                y_cursor - data_h,
+                blank_h,
+                align="left",
+            )
+
+        y_cursor -= data_h + blank_h
+
+    c.setFont("Helvetica", 10)
+    c.drawString(table_x + 1 * mm, table_top - total_h - 8 * mm, "Marcar com X a permissao que o servidor tera acesso no SISIDARON")
+
+    sig_y = table_top - total_h - 43 * mm
+    sig_w = 70 * mm
+    left_sig_x = table_x + 20 * mm
+    right_sig_x = table_x + table_w - 20 * mm - sig_w
+
+    c.line(left_sig_x, sig_y, left_sig_x + sig_w, sig_y)
+    c.drawCentredString(left_sig_x + sig_w / 2, sig_y - 4.2 * mm, "Assinatura do Funcionario")
+    c.line(right_sig_x, sig_y, right_sig_x + sig_w, sig_y)
+    c.drawCentredString(right_sig_x + sig_w / 2, sig_y - 4.2 * mm, "Assinatura do Chefe de ULSAV")
+
+    via_y = sig_y - 13 * mm
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(table_x + 1 * mm, via_y, "1a via: SEINF/GID SA")
+    c.drawCentredString(table_x + table_w / 2, via_y, "2a via: REGIONAL")
+    c.drawRightString(table_x + table_w - 1 * mm, via_y, "3a via: ULSAV")
+
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+    return buffer.read()
+
+
 def render_cadastro_emissao_gta():
     st.session_state.setdefault("gta_autorizado_transito", "Intramunicipal, Intermunicipal, Intraestadual")
     st.session_state.setdefault("gta_municipio_estado", "Todo o Estado")
@@ -435,6 +647,10 @@ def render_cadastro_emissao_gta():
         "gta_outros_documentos",
         "Todos os documentos, exceto CIS-E, CTC, GTR, Auto de Infracao",
     )
+    for item_num, _ in PERMISSAO_ITENS:
+        defaults_item = PERMISSAO_DEFAULTS.get(item_num, {})
+        for perm_key, _ in PERMISSAO_COLUNAS:
+            st.session_state.setdefault(f"gta_perm_{item_num}_{perm_key}", defaults_item.get(perm_key, False))
 
     col_left, col_mid, col_right = st.columns([1, 2, 1])
     with col_mid:
@@ -536,3 +752,62 @@ def render_cadastro_emissao_gta():
                 st.caption(f"Salvo em: {st.session_state['cadastro_gta_pdf_path']}")
             if "cadastro_gta_docx_path" in st.session_state:
                 st.caption(f"DOCX salvo em: {st.session_state['cadastro_gta_docx_path']}")
+
+        st.divider()
+        st.subheader("Formulario de Permissoes SISIDARON (PDF Paisagem)")
+        st.caption("Este PDF usa os mesmos dados do cadastro acima (nome, funcao, CPF, matricula e lotacao).")
+
+        with st.form("form_permissoes_sisidaron"):
+            for item_num, item_nome in PERMISSAO_ITENS:
+                st.markdown(f"**{item_num}. {item_nome.replace(chr(10), ' / ')}**")
+                cols = st.columns(4)
+                for col_idx, (perm_key, perm_label) in enumerate(PERMISSAO_COLUNAS):
+                    with cols[col_idx]:
+                        st.checkbox(perm_label, key=f"gta_perm_{item_num}_{perm_key}")
+
+            submit_permissoes = st.form_submit_button("Gerar PDF de Permissoes")
+
+        if submit_permissoes:
+            logo_path = Path(__file__).resolve().parents[1] / "assets" / "logo_ro_horizontal.JPG"
+            data = {
+                "nome": st.session_state.get("gta_nome", ""),
+                "cargo": st.session_state.get("gta_cargo", ""),
+                "matricula": st.session_state.get("gta_matricula", ""),
+                "cpf": st.session_state.get("gta_cpf", ""),
+                "unidade_lotacao": st.session_state.get("gta_unidade_lotacao", ""),
+            }
+            permissoes = {}
+            for item_num, _ in PERMISSAO_ITENS:
+                permissoes[item_num] = {}
+                for perm_key, _ in PERMISSAO_COLUNAS:
+                    permissoes[item_num][perm_key] = st.session_state.get(f"gta_perm_{item_num}_{perm_key}", False)
+
+            pdf_permissoes = build_pdf_permissoes_gta(data, logo_path, permissoes)
+            st.session_state["cadastro_gta_permissoes_pdf"] = pdf_permissoes
+
+            output_dir = Path(__file__).resolve().parents[1] / "pdf"
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_path = output_dir / "cadastro_emissao_gta_permissoes.pdf"
+            output_path.write_bytes(pdf_permissoes)
+            st.session_state["cadastro_gta_permissoes_pdf_path"] = output_path
+            st.success("PDF de permissoes gerado e salvo.")
+
+        if "cadastro_gta_permissoes_pdf" in st.session_state:
+            st.markdown("### Pagina de impressao - Permissoes")
+            pdf_bytes = st.session_state["cadastro_gta_permissoes_pdf"]
+            try:
+                st.pdf(pdf_bytes)
+            except StreamlitAPIException:
+                st.info(
+                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
+                    "Para habilitar, instale: pip install streamlit[pdf]"
+                )
+
+            st.download_button(
+                "Baixar PDF de Permissoes",
+                data=pdf_bytes,
+                file_name="cadastro_emissao_gta_permissoes.pdf",
+                mime="application/pdf",
+            )
+            if "cadastro_gta_permissoes_pdf_path" in st.session_state:
+                st.caption(f"Salvo em: {st.session_state['cadastro_gta_permissoes_pdf_path']}")
