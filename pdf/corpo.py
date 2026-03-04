@@ -337,6 +337,7 @@ def desenhar_tabela(
             c.line(xv, y_row, xv, y_row + altura_linha_dia)
 
         # DIA centralizado + marcação de fins de semana, feriados e horários
+        placeholder_invalido = False
         if dia <= dias_no_mes:
             dia_str = f"{dia:02d}"
             dow = calendar.weekday(ano, mes, dia)
@@ -366,10 +367,11 @@ def desenhar_tabela(
                 saida_texto = texto_feriado
         else:
             dia_str = "---"
-            he_text = ""
-            hs_text = ""
-            entrada_texto = ""
-            saida_texto = ""
+            he_text = "---"
+            hs_text = "---"
+            entrada_texto = "---"
+            saida_texto = "---"
+            placeholder_invalido = True
 
         c.setFont("Helvetica-Bold", 9)
         c.drawCentredString(
@@ -386,17 +388,25 @@ def desenhar_tabela(
                 he_text
             )
         if entrada_texto:
-            is_feriado = bool(feriados.get(dia))
-            fonte = "Helvetica" if is_feriado else "Helvetica-Bold"
-            tamanho = 5 if is_feriado else 9
-            draw_wrapped_centered(
-                entrada_texto,
-                (x2 + x3) / 2,
-                y_row,
-                largura_col_entra,
-                fonte,
-                tamanho,
-            )
+            if placeholder_invalido:
+                c.setFont("Helvetica-Bold", 9)
+                c.drawCentredString(
+                    (x2 + x3) / 2,
+                    y_row + (altura_linha_dia / 2) - 3,
+                    entrada_texto
+                )
+            else:
+                is_feriado = bool(feriados.get(dia))
+                fonte = "Helvetica" if is_feriado else "Helvetica-Bold"
+                tamanho = 5 if is_feriado else 9
+                draw_wrapped_centered(
+                    entrada_texto,
+                    (x2 + x3) / 2,
+                    y_row,
+                    largura_col_entra,
+                    fonte,
+                    tamanho,
+                )
         if hs_text:
             c.setFont("Helvetica-Bold", 9)
             c.drawCentredString(
@@ -405,17 +415,25 @@ def desenhar_tabela(
                 hs_text
             )
         if saida_texto:
-            is_feriado = bool(feriados.get(dia))
-            fonte = "Helvetica" if is_feriado else "Helvetica-Bold"
-            tamanho = 5 if is_feriado else 9
-            draw_wrapped_centered(
-                saida_texto,
-                (x4 + x5) / 2,
-                y_row,
-                largura_col_saida,
-                fonte,
-                tamanho,
-            )
+            if placeholder_invalido:
+                c.setFont("Helvetica-Bold", 9)
+                c.drawCentredString(
+                    (x4 + x5) / 2,
+                    y_row + (altura_linha_dia / 2) - 3,
+                    saida_texto
+                )
+            else:
+                is_feriado = bool(feriados.get(dia))
+                fonte = "Helvetica" if is_feriado else "Helvetica-Bold"
+                tamanho = 5 if is_feriado else 9
+                draw_wrapped_centered(
+                    saida_texto,
+                    (x4 + x5) / 2,
+                    y_row,
+                    largura_col_saida,
+                    fonte,
+                    tamanho,
+                )
 
         y_ultima_linha = y_row
 
