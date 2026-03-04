@@ -146,26 +146,46 @@ def _set_cell_width(cell, width_mm: float):
     tc_w.set(qn("w:w"), str(_mm_to_twips(width_mm)))
 
 
-def build_docx_cadastro_gta(data: dict) -> bytes:
+def _add_docx_header(section, logo_path: Path):
+    header = section.header
+
+    p_logo = header.paragraphs[0]
+    p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_logo.paragraph_format.space_before = Pt(0)
+    p_logo.paragraph_format.space_after = Pt(2)
+    if logo_path.exists():
+        run = p_logo.add_run()
+        run.add_picture(str(logo_path), width=Mm(24))
+
+    p = header.add_paragraph("GOVERNO DO ESTADO DE RONDONIA")
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(0)
+    run = p.runs[0]
+    run.bold = True
+    run.font.size = Pt(8.5)
+
+    p = header.add_paragraph("Agencia de Defesa Sanitaria Agrosilvopastoril do Estado de Rondonia - IDARON")
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(0)
+    p.runs[0].font.size = Pt(7)
+
+
+def build_docx_cadastro_gta(data: dict, logo_path: Path) -> bytes:
     doc = Document()
     section = doc.sections[0]
     section.page_height = Mm(297)
     section.page_width = Mm(210)
     section.left_margin = Mm(20)
     section.right_margin = Mm(20)
-    section.top_margin = Mm(15)
+    section.top_margin = Mm(36)
     section.bottom_margin = Mm(15)
+    section.header_distance = Mm(6)
+
+    _add_docx_header(section, logo_path)
 
     content_w = 170  # 210 - 20 - 20 mm
-
-    p = doc.add_paragraph("GOVERNO DO ESTADO DE RONDONIA")
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.runs[0].bold = True
-    p.runs[0].font.size = Pt(10)
-
-    p = doc.add_paragraph("Agencia de Defesa Sanitaria Agrosilvopastoril do Estado de Rondonia - IDARON")
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.runs[0].font.size = Pt(8)
 
     p = doc.add_paragraph("CADASTRO DE SERVIDOR PARA EMISSAO DE GTA")
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -499,9 +519,10 @@ def build_pdf_permissoes_gta(data: dict, logo_path: Path, permissoes: dict) -> b
     c.drawCentredString(x + w / 2, y_top - 24.5 * mm, "NIVEIS DE PERMISSOES PARA USUARIOS DO SISTEMA SISIDARON")
 
     info_y = y_top - 33 * mm
+    unidade_lotacao = (data.get("unidade_lotacao", "") or "").strip()
     c.setFont("Helvetica-Bold", 9)
     c.drawString(x + 2 * mm, info_y, f"Nome do Servidor:  {data.get('nome', '')}")
-    c.drawString(x + 112 * mm, info_y, f"Lotacao: {data.get('unidade_lotacao', '')}")
+    c.drawString(x + 112 * mm, info_y, f"Unidade de Lotacao: {unidade_lotacao}")
 
     c.drawString(x + 2 * mm, info_y - 8 * mm, f"Funcao:  {data.get('cargo', '')}")
     c.drawString(x + 94 * mm, info_y - 8 * mm, f"CPF: {data.get('cpf', '')}")
@@ -710,7 +731,7 @@ def render_cadastro_emissao_gta():
             }
 
             pdf_bytes = build_pdf_cadastro_gta(data, logo_path)
-            docx_bytes = build_docx_cadastro_gta(data)
+            docx_bytes = build_docx_cadastro_gta(data, logo_path)
             st.session_state["cadastro_gta_pdf"] = pdf_bytes
             st.session_state["cadastro_gta_docx"] = docx_bytes
 
