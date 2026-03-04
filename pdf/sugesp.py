@@ -235,7 +235,7 @@ def desenhar_tabela_sugesp(
             c.line(xv, y_row, xv, y_row + altura_linha_dia)
 
         c.setFont("Helvetica-Bold", 8)
-        dia_str = f"{dia:02d}" if is_valido else ""
+        dia_str = f"{dia:02d}" if is_valido else "---"
         c.drawCentredString((x0 + x1) / 2, y_row + 1.5 * mm, dia_str)
 
         texto_hr1 = ""
@@ -262,6 +262,11 @@ def desenhar_tabela_sugesp(
             else:
                 texto_hr1 = he or ""
                 texto_hr2 = hs or ""
+        else:
+            texto_hr1 = "---"
+            texto_hr2 = "---"
+            texto_entrada = "---"
+            texto_saida = "---"
 
         c.setFont("Helvetica-Bold", 8)
         if texto_hr1:
@@ -270,17 +275,23 @@ def desenhar_tabela_sugesp(
             c.drawCentredString((x3 + x4) / 2, y_row + 1.5 * mm, texto_hr2)
 
         if texto_entrada:
-            linhas = _wrap_text(c, texto_entrada, (x3 - x2) - 2 * mm, "Helvetica-Bold", 7)
-            y_text = y_row + 2.5 * mm + (len(linhas) - 1) * 3
-            for linha in linhas:
-                c.drawCentredString((x2 + x3) / 2, y_text, linha)
-                y_text -= 3
+            if not is_valido:
+                c.drawCentredString((x2 + x3) / 2, y_row + 1.5 * mm, texto_entrada)
+            else:
+                linhas = _wrap_text(c, texto_entrada, (x3 - x2) - 2 * mm, "Helvetica-Bold", 7)
+                y_text = y_row + 2.5 * mm + (len(linhas) - 1) * 3
+                for linha in linhas:
+                    c.drawCentredString((x2 + x3) / 2, y_text, linha)
+                    y_text -= 3
         if texto_saida:
-            linhas = _wrap_text(c, texto_saida, (x6 - x4) - 2 * mm, "Helvetica-Bold", 7)
-            y_text = y_row + 2.5 * mm + (len(linhas) - 1) * 3
-            for linha in linhas:
-                c.drawCentredString((x4 + x6) / 2, y_text, linha)
-                y_text -= 3
+            if not is_valido:
+                c.drawCentredString((x4 + x6) / 2, y_row + 1.5 * mm, texto_saida)
+            else:
+                linhas = _wrap_text(c, texto_saida, (x6 - x4) - 2 * mm, "Helvetica-Bold", 7)
+                y_text = y_row + 2.5 * mm + (len(linhas) - 1) * 3
+                for linha in linhas:
+                    c.drawCentredString((x4 + x6) / 2, y_text, linha)
+                    y_text -= 3
 
     # rodape
     y_footer_top = y_dias_bottom - 2 * mm
