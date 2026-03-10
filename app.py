@@ -13,7 +13,7 @@ from views.veiculos import render_veiculos
 
 
 st.set_page_config(
-    page_title="Folha de Ponto de Reeducandos",
+    page_title="Utilitarios IDARON",
     page_icon="\U0001F4C4",
     layout="wide",
     initial_sidebar_state="expanded",
