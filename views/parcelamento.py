@@ -429,6 +429,9 @@ def render_parcelamento():
                         break-inside: avoid-page;
                         page-break-inside: avoid;
                     }}
+                    .signature-identification {{
+                        margin-top: 8px !important;
+                    }}
                     .signature-date {{
                         min-width: 240px;
                         text-align: right;
@@ -487,8 +490,7 @@ def render_parcelamento():
                             <p>Segue assinado</p>
                             <br><br>
                             <div class="signature-line"></div>
-                            <p>{nome_completo}</p>
-                            <p>{cpf}</p>
+                            <p class="signature-identification">{nome_completo} - {cpf}</p>
                         </div>
                         <div class="signature-date">
                             <p>____________________, {data_req_label}</p>
