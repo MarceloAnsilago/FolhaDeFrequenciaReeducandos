@@ -342,7 +342,7 @@ def render_parcelamento():
             <html lang="pt-BR">
             <head>
                 <meta charset="UTF-8">
-                <title>Requerimento de Parcelamento</title>
+                <title>REQUERIMENTO DE PARCELAMENTO DE AUTO DE INFRAÇÃO IDARON – LEI COMPLEMENTAR Nº 759/2014</title>
                 <style>
                     @page {{
                         margin: 20mm;
@@ -426,7 +426,7 @@ def render_parcelamento():
             </head>
             <body>
                 <div class="container">
-                    <h2>Requerimento para Parcelamento de Auto de Infração - Emitido pela Agencia IDARON</h2>
+                    <h2>REQUERIMENTO DE PARCELAMENTO DE AUTO DE INFRAÇÃO<br>IDARON – LEI COMPLEMENTAR Nº 759/2014</h2>
 
                     <div class="texto-requerimento">
                         <p>{texto_requerimento}</p>
