@@ -71,6 +71,13 @@ def render_parcelamento():
         texto = texto.replace(",", "X").replace(".", ",").replace("X", ".")
         return f"R$ {texto}"
 
+    def formatar_percentual(valor):
+        try:
+            valor = float(valor)
+        except (TypeError, ValueError):
+            return "0"
+        return f"{valor:.2f}".rstrip("0").rstrip(".")
+
     col_left, col_mid, col_right = st.columns([1, 2, 1])
     with col_mid:
         st.title("Parcelar Auto de Infração")
@@ -117,8 +124,8 @@ def render_parcelamento():
             with st.form("form_requerimento"):
                 nome_completo = st.text_input("Nome completo:", key=k("nome_completo"))
                 cpf = st.text_input("No do CPF:", key=k("cpf"))
-                endereco = st.text_input("Endereco:", key=k("endereco"))
-                municipio = st.text_input("Municipio:", key=k("municipio"))
+                endereco = st.text_input("Endereço:", key=k("endereco"))
+                municipio = st.text_input("Município:", key=k("municipio"))
 
                 colA, colB, colC = st.columns(3)
                 with colA:
@@ -318,23 +325,23 @@ def render_parcelamento():
 
             texto_requerimento = (
                 f"Eu, {nome_completo}, brasileiro(a), portador(a) do CPF no {cpf}, "
-                f"residente no endereco {endereco}, municipio de {municipio}, "
-                f"venho, por meio deste requerimento datado de {data_req_label}, solicitar o parcelamento "
+                f"residente no endereço {endereco}, município de {municipio}, "
+                f"venho, por meio deste requerimento, solicitar o parcelamento "
                 f"do Auto de Infração no {n_auto}, lavrado em {data_auto_label}, com fundamento na Lei Complementar nº 759/2014 e demais disposições legais aplicáveis."
             )
 
             if total_upf > 0 and parcelas_selecionadas_df.shape[0] > 0:
                 texto_parcelamento = (
-                    f"O requerente solicitou o parcelamento em {parcelas_selecionadas_df.shape[0]} vezes, "
-                    f"conforme a tabela de descontos, o que lhe confere o direito a um desconto de "
-                    f"{discount_percentage}% (equivalente a {formatar_moeda_br(desconto_reais)}) sobre o valor inicial. "
+                    f"Solicito o parcelamento em {parcelas_selecionadas_df.shape[0]} vezes, "
+                    f"conforme a tabela de descontos, o que me confere o direito a um desconto de "
+                    f"{formatar_percentual(discount_percentage)}% (equivalente a {formatar_moeda_br(desconto_reais)}) sobre o valor inicial. "
                     f"Assim, o valor total, que originalmente era de {formatar_moeda_br(total_upf)}, "
-                    f"passara a ser de {formatar_moeda_br(valor_com_desconto)}, distribuido em "
+                    f"passará a ser de {formatar_moeda_br(valor_com_desconto)}, distribuído em "
                     f"{parcelas_selecionadas_df.shape[0]} parcelas de {formatar_moeda_br(valor_parcela_final)} cada."
                 )
             else:
                 texto_parcelamento = (
-                    "Nao e possivel parcelar, pois o valor total e inferior ao minimo exigido para uma parcela."
+                    "Não é possível parcelar, pois o valor total é inferior ao mínimo exigido para uma parcela."
                 )
 
             html = f"""
@@ -397,17 +404,22 @@ def render_parcelamento():
                     th {{
                         background-color: #f4f4f4;
                     }}
-                    .signature {{
+                    .signature-section {{
                         margin-top: 40px;
-                        text-align: center;
                         break-inside: avoid-page;
                         page-break-inside: avoid;
-                        display: inline-block;
-                        width: 100%;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-end;
+                        gap: 24px;
                     }}
-                    .signature p {{
-                        margin: 0;
+                    .signature {{
+                        flex: 1;
                         text-align: center;
+                    }}
+                    .signature p,
+                    .signature-date p {{
+                        margin: 0;
                         text-indent: 0;
                     }}
                     .signature-line {{
@@ -416,6 +428,16 @@ def render_parcelamento():
                         border-top: 1px solid #000;
                         break-inside: avoid-page;
                         page-break-inside: avoid;
+                    }}
+                    .signature-date {{
+                        min-width: 240px;
+                        text-align: right;
+                        white-space: nowrap;
+                    }}
+                    .signature-date-field {{
+                        display: inline-block;
+                        min-width: 220px;
+                        text-align: right;
                     }}
                     .print-button {{
                         display: block;
@@ -462,15 +484,20 @@ def render_parcelamento():
 
                     <div class="texto-ciencia">
                         <p>Declaro ciência de que, nos termos do Art. 12-D, inciso III, da Lei Complementar nº 759/2014, o inadimplemento superior a 60 (sessenta) dias implicará o vencimento antecipado da dívida, com atualização monetária e juros previstos na legislação do ICMS/RO.</p>
-                        <p>Documentos anexos: Copia de documento oficial com foto e comprovante de pagamento da 1ª parcela.</p>
+                        <p>Documentos anexos: cópia de documento oficial com foto e comprovante de pagamento da 1ª parcela.</p>
                     </div>
 
-                    <div class="signature">
-                        <p>Segue assinado</p>
-                        <br><br>
-                        <div class="signature-line"></div>
-                        <p>{nome_completo}</p>
-                        <p>{cpf}</p>
+                    <div class="signature-section">
+                        <div class="signature">
+                            <p>Segue assinado</p>
+                            <br><br>
+                            <div class="signature-line"></div>
+                            <p>{nome_completo}</p>
+                            <p>{cpf}</p>
+                        </div>
+                        <div class="signature-date">
+                            <p class="signature-date-field">____________________, {data_req_label}</p>
+                        </div>
                     </div>
 
                     <div class="print-button no-print">
