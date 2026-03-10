@@ -408,34 +408,27 @@ def render_parcelamento():
                         margin-top: 40px;
                         break-inside: avoid-page;
                         page-break-inside: avoid;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: flex-end;
-                        gap: 24px;
-                    }}
-                    .signature {{
-                        flex: 1;
                         text-align: center;
                     }}
+                    .signature-row {{
+                        display: inline-flex;
+                        align-items: flex-end;
+                        gap: 12px;
+                    }}
                     .signature p,
-                    .signature-date p {{
+                    .signature-date {{
                         margin: 0;
                         text-indent: 0;
                     }}
                     .signature-line {{
-                        margin: 24px auto 0;
-                        width: 60%;
+                        width: 320px;
                         border-top: 1px solid #000;
                         break-inside: avoid-page;
                         page-break-inside: avoid;
                     }}
                     .signature-identification {{
                         margin-top: 8px !important;
-                    }}
-                    .signature-date {{
-                        min-width: 240px;
-                        text-align: right;
-                        white-space: nowrap;
+                        text-align: center;
                     }}
                     .print-button {{
                         display: block;
@@ -486,15 +479,13 @@ def render_parcelamento():
                     </div>
 
                     <div class="signature-section">
-                        <div class="signature">
-                            <p>Segue assinado</p>
-                            <br><br>
+                        <p>Segue assinado</p>
+                        <br><br>
+                        <div class="signature-row">
                             <div class="signature-line"></div>
-                            <p class="signature-identification">{nome_completo} - {cpf}</p>
+                            <p class="signature-date">{data_req_label}</p>
                         </div>
-                        <div class="signature-date">
-                            <p>____________________, {data_req_label}</p>
-                        </div>
+                        <p class="signature-identification">{nome_completo}<br>{cpf}</p>
                     </div>
 
                     <div class="print-button no-print">
