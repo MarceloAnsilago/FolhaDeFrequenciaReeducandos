@@ -327,18 +327,30 @@ def render_parcelamento():
                 f"Eu, {nome_completo}, brasileiro(a), portador(a) do CPF no {cpf}, "
                 f"residente no endereço {endereco}, município de {municipio}, "
                 f"venho, por meio deste requerimento, solicitar o parcelamento "
-                f"do Auto de Infração no {n_auto}, lavrado em {data_auto_label}, com fundamento na Lei Complementar nº 759/2014 e demais disposições legais aplicáveis."
+                f"do Auto de Infração n° {n_auto}, lavrado em {data_auto_label}, com fundamento na Lei Complementar nº 759/2014 e demais disposições legais aplicáveis."
             )
 
             if total_upf > 0 and parcelas_selecionadas_df.shape[0] > 0:
-                texto_parcelamento = (
-                    f"Solicito o parcelamento em {parcelas_selecionadas_df.shape[0]} vezes, "
-                    f"conforme a tabela de descontos, o que me confere o direito a um desconto de "
-                    f"{formatar_percentual(discount_percentage)}% (equivalente a {formatar_moeda_br(desconto_reais)}) sobre o valor inicial. "
-                    f"Assim, o valor total, que originalmente era de {formatar_moeda_br(total_upf)}, "
-                    f"passará a ser de {formatar_moeda_br(valor_com_desconto)}, distribuído em "
-                    f"{parcelas_selecionadas_df.shape[0]} parcelas de {formatar_moeda_br(valor_parcela_final)} cada."
-                )
+                quantidade_parcelas = parcelas_selecionadas_df.shape[0]
+                texto_vezes = "uma vez" if quantidade_parcelas == 1 else f"{quantidade_parcelas} vezes"
+                texto_parcelas = "1 parcela" if quantidade_parcelas == 1 else f"{quantidade_parcelas} parcelas"
+                if quantidade_parcelas == 30:
+                    texto_parcelamento = (
+                        f"Solicito o parcelamento em {texto_vezes}, "
+                        f"conforme a tabela de descontos, sem desconto sobre o valor inicial. "
+                        f"Assim, o valor total, que originalmente era de {formatar_moeda_br(total_upf)}, "
+                        f"será mantido em {formatar_moeda_br(valor_com_desconto)}, distribuído em "
+                        f"{texto_parcelas} de {formatar_moeda_br(valor_parcela_final)}."
+                    )
+                else:
+                    texto_parcelamento = (
+                        f"Solicito o parcelamento em {texto_vezes}, "
+                        f"conforme a tabela de descontos, correspondendo a um desconto de "
+                        f"{formatar_percentual(discount_percentage)}% (equivalente a {formatar_moeda_br(desconto_reais)}) sobre o valor inicial. "
+                        f"Assim, o valor total, que originalmente era de {formatar_moeda_br(total_upf)}, "
+                        f"passará a ser de {formatar_moeda_br(valor_com_desconto)}, distribuído em "
+                        f"{texto_parcelas} de {formatar_moeda_br(valor_parcela_final)}."
+                    )
             else:
                 texto_parcelamento = (
                     "Não é possível parcelar, pois o valor total é inferior ao mínimo exigido para uma parcela."
