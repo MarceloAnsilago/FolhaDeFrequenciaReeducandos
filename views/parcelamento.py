@@ -379,6 +379,11 @@ def render_parcelamento():
                         font-weight: bold;
                         text-align: justify;
                     }}
+                    .texto-ciencia {{
+                        margin-top: 24px;
+                        line-height: 1.5;
+                        text-align: justify;
+                    }}
                     table {{
                         width: 100%;
                         border-collapse: collapse;
@@ -454,6 +459,11 @@ def render_parcelamento():
                 """
             html += f"""
                     </table>
+
+                    <div class="texto-ciencia">
+                        <p>Declaro ciência de que, nos termos do Art. 12-D, inciso III, da Lei Complementar nº 759/2014, o inadimplemento superior a 60 (sessenta) dias implicará o vencimento antecipado da dívida, com atualização monetária e juros previstos na legislação do ICMS/RO.</p>
+                        <p>Documentos anexos: Copia de documento oficial com foto e comprovante de pagamento da 1ª parcela.</p>
+                    </div>
 
                     <div class="signature">
                         <p>Segue assinado</p>
