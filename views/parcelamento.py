@@ -320,7 +320,7 @@ def render_parcelamento():
                 f"Eu, {nome_completo}, brasileiro(a), portador(a) do CPF no {cpf}, "
                 f"residente no endereco {endereco}, municipio de {municipio}, "
                 f"venho, por meio deste requerimento datado de {data_req_label}, solicitar o parcelamento "
-                f"do Auto de Infração no {n_auto}, lavrado em {data_auto_label}, nos termos da legislacao vigente."
+                f"do Auto de Infração no {n_auto}, lavrado em {data_auto_label}, nos termos da LC 759/2014."
             )
 
             if total_upf > 0 and parcelas_selecionadas_df.shape[0] > 0:
@@ -395,10 +395,22 @@ def render_parcelamento():
                     .signature {{
                         margin-top: 40px;
                         text-align: center;
+                        break-inside: avoid-page;
+                        page-break-inside: avoid;
+                        display: inline-block;
+                        width: 100%;
                     }}
                     .signature p {{
                         margin: 0;
                         text-align: center;
+                        text-indent: 0;
+                    }}
+                    .signature-line {{
+                        margin: 24px auto 0;
+                        width: 60%;
+                        border-top: 1px solid #000;
+                        break-inside: avoid-page;
+                        page-break-inside: avoid;
                     }}
                     .print-button {{
                         display: block;
@@ -446,7 +458,7 @@ def render_parcelamento():
                     <div class="signature">
                         <p>Segue assinado</p>
                         <br><br>
-                        <p>________________________________________</p>
+                        <div class="signature-line"></div>
                         <p>{nome_completo}</p>
                         <p>{cpf}</p>
                     </div>
