@@ -666,7 +666,7 @@ def render_cadastro_emissao_gta():
     st.session_state.setdefault("gta_especies", "Bovinos/Ovinos/Caprinos/Suinos/Equideos")
     st.session_state.setdefault(
         "gta_outros_documentos",
-        "Todos os documentos, exceto CIS-E, CTC, GTR, Auto de Infracao",
+        "Todos os documentos, exceto CIS-E, CTC, GTR, Auto de Infração",
     )
     for item_num, _ in PERMISSAO_ITENS:
         defaults_item = PERMISSAO_DEFAULTS.get(item_num, {})

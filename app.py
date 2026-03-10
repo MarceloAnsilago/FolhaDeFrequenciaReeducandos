@@ -13,7 +13,7 @@ from views.veiculos import render_veiculos
 
 
 st.set_page_config(
-    page_title="Utilitarios IDARON",
+    page_title="Utilitários IDARON",
     page_icon="\U0001F4C4",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -34,12 +34,12 @@ with st.sidebar:
         [
             "Folha Reeducandos",
             "Folha SUGESP",
-            "Controle de Veiculos",
+            "Controle de Veículos",
             "Cadastro de Emissão de GTA",
-            "Parcelar Auto de Infracao",
+            "Parcelar Auto de Infração",
             "Requerimento de restituição de valor recolhido indevidamente",
             "Declaração de nada consta",
-            "Declaração de residencia",
+            "Declaração de residência",
         ],
         icons=[
             "file-earmark-text",
@@ -59,15 +59,15 @@ if destino == "Folha Reeducandos":
     render_folha_ponto()
 elif destino == "Folha SUGESP":
     render_folha_ponto_sugesp()
-elif destino == "Controle de Veiculos":
+elif destino == "Controle de Veículos":
     render_veiculos()
 elif destino == "Cadastro de Emissão de GTA":
     render_cadastro_emissao_gta()
-elif destino == "Parcelar Auto de Infracao":
+elif destino == "Parcelar Auto de Infração":
     render_parcelamento()
 elif destino == "Declaração de nada consta":
     render_declaracao_nada_consta()
-elif destino == "Declaração de residencia":
+elif destino == "Declaração de residência":
     render_declaracao_residencia()
 else:
     render_restituicao()
