@@ -320,7 +320,7 @@ def render_parcelamento():
                 f"Eu, {nome_completo}, brasileiro(a), portador(a) do CPF no {cpf}, "
                 f"residente no endereco {endereco}, municipio de {municipio}, "
                 f"venho, por meio deste requerimento datado de {data_req_label}, solicitar o parcelamento "
-                f"do Auto de Infração no {n_auto}, lavrado em {data_auto_label}, nos termos da LC 759/2014."
+                f"do Auto de Infração no {n_auto}, lavrado em {data_auto_label}, com fundamento na Lei Complementar nº 759/2014 e demais disposições legais aplicáveis."
             )
 
             if total_upf > 0 and parcelas_selecionadas_df.shape[0] > 0:
