@@ -434,11 +434,6 @@ def render_parcelamento():
                         text-align: right;
                         white-space: nowrap;
                     }}
-                    .signature-date-field {{
-                        display: inline-block;
-                        min-width: 220px;
-                        text-align: right;
-                    }}
                     .print-button {{
                         display: block;
                         text-align: center;
@@ -496,7 +491,7 @@ def render_parcelamento():
                             <p>{cpf}</p>
                         </div>
                         <div class="signature-date">
-                            <p class="signature-date-field">____________________, {data_req_label}</p>
+                            <p>____________________, {data_req_label}</p>
                         </div>
                     </div>
 
