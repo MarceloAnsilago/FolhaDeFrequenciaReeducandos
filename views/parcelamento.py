@@ -304,7 +304,6 @@ def render_parcelamento():
                 parcelas_selecionadas_df = pd.DataFrame(dados_parcelas).set_index("Parcela")
 
         if not parcelas_selecionadas_df.empty:
-            data_req_label = st.session_state[k("data_requerimento")].strftime("%d/%m/%Y")
             data_auto_label = st.session_state[k("data_auto")].strftime("%d/%m/%Y")
             n_auto = st.session_state.get(k("N_auto"), "")
             nome_completo = st.session_state.get(k("nome_completo"), "")
@@ -355,6 +354,8 @@ def render_parcelamento():
                 texto_parcelamento = (
                     "Não é possível parcelar, pois o valor total é inferior ao mínimo exigido para uma parcela."
                 )
+
+            local_assinatura = municipio.strip() or "Cidade/Municipio"
 
             html = f"""
             <!DOCTYPE html>
@@ -420,27 +421,61 @@ def render_parcelamento():
                         margin-top: 40px;
                         break-inside: avoid-page;
                         page-break-inside: avoid;
-                        text-align: center;
+                        display: flex;
+                        justify-content: flex-end;
                     }}
-                    .signature-row {{
-                        display: inline-flex;
-                        align-items: flex-end;
-                        gap: 12px;
+                    .signature-block {{
+                        width: 500px;
+                        display: grid;
+                        grid-template-columns: minmax(230px, 1fr) auto auto auto;
+                        column-gap: 4px;
+                        row-gap: 8px;
+                        align-items: end;
                     }}
-                    .signature p,
-                    .signature-date {{
+                    .signature-block p,
+                    .signature-block span {{
                         margin: 0;
                         text-indent: 0;
                     }}
-                    .signature-line {{
-                        width: 320px;
-                        border-top: 1px solid #000;
+                    .signature-field-line {{
+                        display: flex;
+                        align-items: flex-end;
+                        justify-content: center;
+                        border-bottom: 1px solid #000;
+                        height: 1.15em;
+                        line-height: 1;
+                        padding-bottom: 0;
+                        box-sizing: border-box;
+                    }}
+                    .signature-city-line {{
+                        grid-column: 1;
+                        width: 100%;
                         break-inside: avoid-page;
                         page-break-inside: avoid;
                     }}
+                    .signature-date-line {{
+                        grid-column: 3;
+                        width: 72px;
+                        white-space: nowrap;
+                        justify-content: center;
+                        gap: 14px;
+                        padding: 0 6px;
+                    }}
+                    .signature-comma {{
+                        grid-column: 2;
+                        line-height: 1;
+                        margin-left: -2px;
+                    }}
+                    .signature-location {{
+                        grid-column: 4;
+                        white-space: nowrap;
+                        line-height: 1;
+                    }}
                     .signature-identification {{
-                        margin-top: 8px !important;
+                        grid-column: 1;
+                        margin-top: 0 !important;
                         text-align: center;
+                        width: 100%;
                     }}
                     .print-button {{
                         display: block;
@@ -491,13 +526,13 @@ def render_parcelamento():
                     </div>
 
                     <div class="signature-section">
-                        <p>Segue assinado</p>
-                        <br><br>
-                        <div class="signature-row">
-                            <div class="signature-line"></div>
-                            <p class="signature-date">{data_req_label}</p>
+                        <div class="signature-block">
+                            <span class="signature-field-line signature-city-line">&nbsp;</span>
+                            <span class="signature-comma">,</span>
+                            <span class="signature-field-line signature-date-line"><span>/</span><span>/</span></span>
+                            <span class="signature-location">({local_assinatura})</span>
+                            <p class="signature-identification">{nome_completo}<br>{cpf}</p>
                         </div>
-                        <p class="signature-identification">{nome_completo}<br>{cpf}</p>
                     </div>
 
                     <div class="print-button no-print">
