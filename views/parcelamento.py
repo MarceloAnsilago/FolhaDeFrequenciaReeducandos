@@ -356,6 +356,7 @@ def render_parcelamento():
                 )
 
             local_assinatura = municipio.strip() or "Cidade/Municipio"
+            data_requerimento_label = data_requerimento.strftime("%d/%m/%Y")
 
             html = f"""
             <!DOCTYPE html>
@@ -421,61 +422,38 @@ def render_parcelamento():
                         margin-top: 40px;
                         break-inside: avoid-page;
                         page-break-inside: avoid;
+                    }}
+                    .signature-place-date-wrapper {{
                         display: flex;
                         justify-content: flex-end;
                     }}
                     .signature-block {{
-                        width: 500px;
-                        display: grid;
-                        grid-template-columns: minmax(230px, 1fr) auto auto auto;
-                        column-gap: 4px;
-                        row-gap: 8px;
-                        align-items: end;
+                        width: 360px;
                     }}
                     .signature-block p,
-                    .signature-block span {{
+                    .signature-block div {{
                         margin: 0;
                         text-indent: 0;
                     }}
-                    .signature-field-line {{
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: center;
+                    .signature-line {{
+                        width: 360px;
                         border-bottom: 1px solid #000;
-                        height: 1.15em;
-                        line-height: 1;
-                        padding-bottom: 0;
-                        box-sizing: border-box;
-                    }}
-                    .signature-city-line {{
-                        grid-column: 1;
-                        width: 100%;
-                        break-inside: avoid-page;
-                        page-break-inside: avoid;
-                    }}
-                    .signature-date-line {{
-                        grid-column: 3;
-                        width: 72px;
-                        white-space: nowrap;
-                        justify-content: center;
-                        gap: 14px;
-                        padding: 0 6px;
-                    }}
-                    .signature-comma {{
-                        grid-column: 2;
-                        line-height: 1;
-                        margin-left: -2px;
-                    }}
-                    .signature-location {{
-                        grid-column: 4;
-                        white-space: nowrap;
-                        line-height: 1;
+                        margin: 14px auto 4px auto;
                     }}
                     .signature-identification {{
-                        grid-column: 1;
-                        margin-top: 0 !important;
                         text-align: center;
-                        width: 100%;
+                        line-height: 1.5;
+                    }}
+                    .signature-signatory {{
+                        margin-top: 44px;
+                    }}
+                    .signature-place-date {{
+                        text-align: right;
+                    }}
+                    .signature-name,
+                    .signature-cpf {{
+                        display: block;
+                        text-align: center;
                     }}
                     .print-button {{
                         display: block;
@@ -526,12 +504,14 @@ def render_parcelamento():
                     </div>
 
                     <div class="signature-section">
-                        <div class="signature-block">
-                            <span class="signature-field-line signature-city-line">&nbsp;</span>
-                            <span class="signature-comma">,</span>
-                            <span class="signature-field-line signature-date-line"><span>/</span><span>/</span></span>
-                            <span class="signature-location">({local_assinatura})</span>
-                            <p class="signature-identification">{nome_completo}<br>{cpf}</p>
+                        <div class="signature-place-date-wrapper">
+                            <div class="signature-block">
+                                <p class="signature-place-date">{local_assinatura}, {data_requerimento_label}</p>
+                            </div>
+                        </div>
+                        <div class="signature-signatory">
+                            <div class="signature-line"></div>
+                            <p class="signature-identification"><span class="signature-name">{nome_completo}</span><span class="signature-cpf">{cpf}</span></p>
                         </div>
                     </div>
 
