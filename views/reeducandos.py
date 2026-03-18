@@ -13,7 +13,6 @@ from services.parsers import (
 )
 from services.pdf_builders import (
     gerar_pdf,
-    gerar_lista_presenca_pdf,
     gerar_relatorio_pdf,
 )
 
@@ -211,21 +210,6 @@ def render_folha_ponto():
                         )
                         st.success("Relatório de atividades gerado com sucesso!")
 
-            with st.expander("Lista de Presença (novo modelo)", expanded=False):
-                unidade_lista = st.text_input("Unidade", key="lista_unidade")
-                municipio_lista = st.text_input("Município", key="lista_municipio")
-                responsavel_lista = st.text_input("Responsável", key="lista_responsavel")
-
-                if st.button("Gerar Lista de Presença"):
-                    st.session_state["lista_presenca_pdf"] = gerar_lista_presenca_pdf(
-                        mes=MESES[mes_label],
-                        ano=ano,
-                        unidade=unidade_lista,
-                        municipio=municipio_lista,
-                        responsavel=responsavel_lista,
-                    )
-                    st.success("Lista de Presença gerada com sucesso!")
-
         # Botoes de download
         if "pdf" in st.session_state:
             st.markdown("### Pagina de impressao - Folha de Ponto")
@@ -257,21 +241,5 @@ def render_folha_ponto():
                 "Baixar Relatorio de Atividades",
                 data=relatorio_pdf,
                 file_name="relatorio_atividades.pdf",
-                mime="application/pdf",
-            )
-        if "lista_presenca_pdf" in st.session_state:
-            st.markdown("### Pagina de impressao - Lista de Presença")
-            lista_pdf = st.session_state["lista_presenca_pdf"]
-            try:
-                st.pdf(lista_pdf)
-            except StreamlitAPIException:
-                st.info(
-                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
-                    "Para habilitar, instale: pip install streamlit[pdf]"
-                )
-            st.download_button(
-                "Baixar Lista de Presença",
-                data=lista_pdf,
-                file_name="lista_presenca.pdf",
                 mime="application/pdf",
             )
