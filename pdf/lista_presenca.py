@@ -34,9 +34,10 @@ def _draw_header(
 
     # logo e título em topo
     y_top = altura_pagina - 14 * mm
-    h_titulo = 8 * mm
-    h_regional = 8 * mm
-    h_atividade = 10 * mm
+    h_topo = 8 * mm
+    h_titulo = h_topo
+    h_regional = h_topo
+    h_atividade = h_topo
     logo_h = h_titulo + h_regional + h_atividade
     area_campos_x = x + 42 * mm
     area_campos_w = largura_tabela - 42 * mm
@@ -70,44 +71,25 @@ def _draw_header(
     y = bloco_top_y - h_titulo
     c.setLineWidth(0.8)
 
-    # REGIONAL / UNIDADE
+    # REGIONAL
     h = h_regional
-    divisor_regional_unidade_x = area_campos_x + 78 * mm
+    divisor_campo_x = area_campos_x + 23 * mm
     c.rect(area_campos_x, y - h, area_campos_w, h, fill=0)
-    c.line(area_campos_x + 33 * mm, y - h, area_campos_x + 33 * mm, y)
-    c.line(divisor_regional_unidade_x, y - h, divisor_regional_unidade_x, y)
+    c.line(divisor_campo_x, y - h, divisor_campo_x, y)
     c.setFont('Helvetica-Bold', 9)
     c.drawString(area_campos_x + 2 * mm, y - h + 2 * mm, 'REGIONAL:')
-    c.drawString(divisor_regional_unidade_x + 2 * mm, y - h + 2 * mm, 'UNIDADE:')
     c.setFont('Helvetica', 9)
-    c.drawString(area_campos_x + 34 * mm, y - h + 2 * mm, str(regional))
-    c.drawString(divisor_regional_unidade_x + 22 * mm, y - h + 2 * mm, str(unidade))
+    c.drawString(divisor_campo_x + 2 * mm, y - h + 2 * mm, str(regional))
 
     y -= h
-    # ATIVIDADE
+    # UNIDADE
     h = h_atividade
     c.rect(area_campos_x, y - h, area_campos_w, h, fill=0)
-    # colunas
-    col1 = area_campos_x + 23 * mm
-    col2 = area_campos_x + 66 * mm
-    col3 = area_campos_x + 126 * mm
-    col4 = area_campos_x + 166 * mm
-    c.line(col1, y - h, col1, y)
-    c.line(col2, y - h, col2, y)
-    c.line(col3, y - h, col3, y)
-    c.line(col4, y - h, col4, y)
-
-    c.setFont('Helvetica', 8)
-    c.drawString(area_campos_x + 2 * mm, y - h + 2 * mm, 'ATIVIDADE:')
-    c.drawString(col1 + 2 * mm, y - h + 2 * mm, 'PALESTRA')
-    c.drawString(col2 + 2 * mm, y - h + 2 * mm, 'REUNIÃO')
-    c.drawString(col3 + 2 * mm, y - h + 2 * mm, 'CURSO/ TREINAMENTO')
-    c.drawString(col4 + 2 * mm, y - h + 2 * mm, 'ENCONTRO')
-    c.drawString(area_campos_x + 2 * mm, y - h - 4 * mm, str(atividade))
-    c.drawString(col1 + 2 * mm, y - h - 4 * mm, str(atividade_palestra))
-    c.drawString(col2 + 2 * mm, y - h - 4 * mm, str(atividade_reuniao))
-    c.drawString(col3 + 2 * mm, y - h - 4 * mm, str(atividade_curso))
-    c.drawString(col4 + 2 * mm, y - h - 4 * mm, str(atividade_encontro))
+    c.line(divisor_campo_x, y - h, divisor_campo_x, y)
+    c.setFont('Helvetica-Bold', 9)
+    c.drawString(area_campos_x + 2 * mm, y - h + 2 * mm, 'UNIDADE:')
+    c.setFont('Helvetica', 9)
+    c.drawString(divisor_campo_x + 2 * mm, y - h + 2 * mm, str(unidade))
 
     y -= h + 1 * mm
     # OUTRO-QUAL?
