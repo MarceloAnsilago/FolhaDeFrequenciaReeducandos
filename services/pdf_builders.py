@@ -5,6 +5,7 @@ from reportlab.pdfgen import canvas
 
 from pdf.cabecalho import desenhar_cabecalho
 from pdf.corpo import desenhar_tabela
+from pdf.lista_presenca import gerar_pdf_lista_presenca
 from pdf.relatorio import gerar_relatorio_cabecalho
 from pdf.rodape import desenhar_rodape
 
@@ -68,6 +69,50 @@ def gerar_pdf(
 
     buffer.seek(0)
     return buffer.getvalue()
+
+
+def gerar_lista_presenca_pdf(
+    mes,
+    ano,
+    regional,
+    unidade,
+    atividade,
+    atividade_palestra,
+    atividade_reuniao,
+    atividade_curso,
+    atividade_encontro,
+    outro_qual,
+    tema,
+    data,
+    horario_inicio,
+    horario_fim,
+    local,
+    municipio,
+    tipo_publico,
+    tipo_publico_outra,
+    qual,
+):
+    return gerar_pdf_lista_presenca(
+        mes=mes,
+        ano=ano,
+        regional=regional,
+        unidade=unidade,
+        atividade=atividade,
+        atividade_palestra=atividade_palestra,
+        atividade_reuniao=atividade_reuniao,
+        atividade_curso=atividade_curso,
+        atividade_encontro=atividade_encontro,
+        outro_qual=outro_qual,
+        tema=tema,
+        data=data,
+        horario_inicio=horario_inicio,
+        horario_fim=horario_fim,
+        local=local,
+        municipio=municipio,
+        tipo_publico=tipo_publico,
+        tipo_publico_outra=tipo_publico_outra,
+        qual=qual,
+    )
 
 
 def gerar_relatorio_pdf(

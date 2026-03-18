@@ -1,0 +1,332 @@
+from pathlib import Path
+
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
+
+
+LOGO_IDARON = Path("assets/logo_idaron1548x1787px-1.png")
+
+
+def _draw_header(
+    c,
+    regional,
+    unidade,
+    atividade,
+    atividade_palestra,
+    atividade_reuniao,
+    atividade_curso,
+    atividade_encontro,
+    outro_qual,
+    tema,
+    data,
+    horario_inicio,
+    horario_fim,
+    local,
+    municipio,
+    tipo_publico,
+    tipo_publico_outra,
+    qual,
+):
+    largura_pagina, altura_pagina = A4
+    x = 15 * mm
+    largura_tabela = largura_pagina - 2 * x
+
+    # logo e título em topo
+    y_top = altura_pagina - 14 * mm
+    h_titulo = 8 * mm
+    h_regional = 8 * mm
+    h_atividade = 10 * mm
+    logo_h = h_titulo + h_regional + h_atividade
+    area_campos_x = x + 42 * mm
+    area_campos_w = largura_tabela - 42 * mm
+    bloco_top_y = y_top - 18 * mm
+    logo_box_x = x
+    logo_box_y = bloco_top_y - logo_h
+    logo_box_w = area_campos_x - logo_box_x
+    logo_base_y = logo_box_y + 2 * mm
+    if LOGO_IDARON.exists():
+        logo = ImageReader(str(LOGO_IDARON))
+        w_px, h_px = logo.getSize()
+        scale = logo_h / h_px
+        logo_w = w_px * scale
+        c.rect(logo_box_x, logo_box_y, logo_box_w, logo_h, fill=0)
+        c.drawImage(
+            logo,
+            x + 4 * mm,
+            logo_base_y,
+            logo_w,
+            logo_h,
+            preserveAspectRatio=True,
+            mask='auto',
+        )
+    c.rect(area_campos_x, bloco_top_y - h_titulo, area_campos_w, h_titulo, fill=0)
+    c.setFont('Helvetica-Bold', 12)
+    c.drawCentredString(
+        area_campos_x + area_campos_w / 2,
+        bloco_top_y - h_titulo + 2.6 * mm,
+        'LISTA DE PRESENÇA',
+    )
+    y = bloco_top_y - h_titulo
+    c.setLineWidth(0.8)
+
+    # REGIONAL / UNIDADE
+    h = h_regional
+    divisor_regional_unidade_x = area_campos_x + 78 * mm
+    c.rect(area_campos_x, y - h, area_campos_w, h, fill=0)
+    c.line(area_campos_x + 33 * mm, y - h, area_campos_x + 33 * mm, y)
+    c.line(divisor_regional_unidade_x, y - h, divisor_regional_unidade_x, y)
+    c.setFont('Helvetica-Bold', 9)
+    c.drawString(area_campos_x + 2 * mm, y - h + 2 * mm, 'REGIONAL:')
+    c.drawString(divisor_regional_unidade_x + 2 * mm, y - h + 2 * mm, 'UNIDADE:')
+    c.setFont('Helvetica', 9)
+    c.drawString(area_campos_x + 34 * mm, y - h + 2 * mm, str(regional))
+    c.drawString(divisor_regional_unidade_x + 22 * mm, y - h + 2 * mm, str(unidade))
+
+    y -= h
+    # ATIVIDADE
+    h = h_atividade
+    c.rect(area_campos_x, y - h, area_campos_w, h, fill=0)
+    # colunas
+    col1 = area_campos_x + 23 * mm
+    col2 = area_campos_x + 66 * mm
+    col3 = area_campos_x + 126 * mm
+    col4 = area_campos_x + 166 * mm
+    c.line(col1, y - h, col1, y)
+    c.line(col2, y - h, col2, y)
+    c.line(col3, y - h, col3, y)
+    c.line(col4, y - h, col4, y)
+
+    c.setFont('Helvetica', 8)
+    c.drawString(area_campos_x + 2 * mm, y - h + 2 * mm, 'ATIVIDADE:')
+    c.drawString(col1 + 2 * mm, y - h + 2 * mm, 'PALESTRA')
+    c.drawString(col2 + 2 * mm, y - h + 2 * mm, 'REUNIÃO')
+    c.drawString(col3 + 2 * mm, y - h + 2 * mm, 'CURSO/ TREINAMENTO')
+    c.drawString(col4 + 2 * mm, y - h + 2 * mm, 'ENCONTRO')
+    c.drawString(area_campos_x + 2 * mm, y - h - 4 * mm, str(atividade))
+    c.drawString(col1 + 2 * mm, y - h - 4 * mm, str(atividade_palestra))
+    c.drawString(col2 + 2 * mm, y - h - 4 * mm, str(atividade_reuniao))
+    c.drawString(col3 + 2 * mm, y - h - 4 * mm, str(atividade_curso))
+    c.drawString(col4 + 2 * mm, y - h - 4 * mm, str(atividade_encontro))
+
+    y -= h + 1 * mm
+    # OUTRO-QUAL?
+    h = 8 * mm
+    c.rect(x, y - h, largura_tabela, h, fill=0)
+    c.drawString(x + 2 * mm, y - h + 2 * mm, 'OUTRO-QUAL?')
+    c.drawString(x + 28 * mm, y - h + 2 * mm, str(outro_qual))
+
+    y -= h + 1 * mm
+    # TEMA
+    h = 8 * mm
+    c.rect(x, y - h, largura_tabela, h, fill=0)
+    c.drawString(x + 2 * mm, y - h + 2 * mm, 'TEMA:')
+    c.drawString(x + 20 * mm, y - h + 2 * mm, str(tema))
+
+    y -= h + 1 * mm
+    # DATA/HORÁRIO INÍCIO/HORÁRIO FIM
+    h = 8 * mm
+    c.rect(x, y - h, largura_tabela, h, fill=0)
+    c.line(x + 42 * mm, y - h, x + 42 * mm, y)
+    c.line(x + 109 * mm, y - h, x + 109 * mm, y)
+    c.drawString(x + 2 * mm, y - h + 2 * mm, 'DATA:')
+    c.drawString(x + 44 * mm, y - h + 2 * mm, 'HORÁRIO INÍCIO')
+    c.drawString(x + 111 * mm, y - h + 2 * mm, 'HORÁRIO FIM')
+    c.drawString(x + 2 * mm, y - h - 4 * mm, str(data))
+    c.drawString(x + 44 * mm, y - h - 4 * mm, str(horario_inicio))
+    c.drawString(x + 111 * mm, y - h - 4 * mm, str(horario_fim))
+
+    y -= h + 1 * mm
+    # LOCAL / MUNICÍPIO
+    h = 8 * mm
+    c.rect(x, y - h, largura_tabela, h, fill=0)
+    c.line(x + 115 * mm, y - h, x + 115 * mm, y)
+    c.drawString(x + 2 * mm, y - h + 2 * mm, 'LOCAL:')
+    c.drawString(x + 117 * mm, y - h + 2 * mm, 'MUNICÍPIO:')
+    c.drawString(x + 2 * mm, y - h - 4 * mm, str(local))
+    c.drawString(x + 117 * mm, y - h - 4 * mm, str(municipio))
+
+    y -= h + 1 * mm
+    # TIPO DE PÚBLICO
+    h = 12 * mm
+    c.rect(x, y - h, largura_tabela, h, fill=0)
+    row1_y = y - 4 * mm
+    row2_y = y - 8 * mm
+    c.setFont('Helvetica', 8)
+    c.drawString(x + 2 * mm, y - h + 2 * mm, 'TIPO DE PÚBLICO:')
+
+    # colunas para público
+    col0 = x + 34 * mm
+    col1 = x + 70 * mm
+    col2 = x + 112 * mm
+    col3 = x + 149 * mm
+    c.line(col0, y - h, col0, y)
+    c.line(col1, y - h, col1, y)
+    c.line(col2, y - h, col2, y)
+    c.line(col3, y - h, col3, y)
+
+    c.drawString(col0 + 2 * mm, row1_y, 'PRODUTOR')
+    c.drawString(col1 + 2 * mm, row1_y, 'LIDERANÇAS')
+    c.drawString(col2 + 2 * mm, row1_y, 'ESCOLARES')
+    c.drawString(col3 + 2 * mm, row1_y, 'COMERCIANTES')
+    c.drawString(col0 + 2 * mm, row2_y, 'PROFESSORES')
+    c.drawString(col1 + 2 * mm, row2_y, 'AUTORIDADES')
+    c.drawString(col2 + 2 * mm, row2_y, 'SERVIDORES IDARON')
+    c.drawString(col3 + 2 * mm, row2_y, 'OUTRO')
+
+    y -= h + 1 * mm
+    # QUAL
+    h = 8 * mm
+    c.rect(x, y - h, largura_tabela, h, fill=0)
+    c.drawString(x + 2 * mm, y - h + 2 * mm, 'QUAL?')
+    c.drawString(x + 14 * mm, y - h + 2 * mm, str(qual))
+
+    return y - h - 4 * mm
+
+
+def desenhar_lista_presenca(
+    c,
+    mes,
+    ano,
+    regional="",
+    unidade="",
+    atividade="",
+    atividade_palestra="",
+    atividade_reuniao="",
+    atividade_curso="",
+    atividade_encontro="",
+    outro_qual="",
+    tema="",
+    data="",
+    horario_inicio="",
+    horario_fim="",
+    local="",
+    municipio="",
+    tipo_publico="",
+    tipo_publico_outra="",
+    qual="",
+    total_linhas=31,
+):
+    largura_pagina, altura_pagina = A4
+
+    y = _draw_header(
+        c,
+        regional=regional,
+        unidade=unidade,
+        atividade=atividade,
+        atividade_palestra=atividade_palestra,
+        atividade_reuniao=atividade_reuniao,
+        atividade_curso=atividade_curso,
+        atividade_encontro=atividade_encontro,
+        outro_qual=outro_qual,
+        tema=tema,
+        data=data,
+        horario_inicio=horario_inicio,
+        horario_fim=horario_fim,
+        local=local,
+        municipio=municipio,
+        tipo_publico=tipo_publico,
+        tipo_publico_outra=tipo_publico_outra,
+        qual=qual,
+    )
+
+    # tabela
+    largura_tabela = 180 * mm
+    x = (largura_pagina - largura_tabela) / 2
+    y_inicio = y
+
+    # colunas: Nº, NOME, MATRÍCULA, CARGO, DIA, ASSINATURA
+    num_cols = 6
+    largura_igual = largura_tabela / num_cols
+    col_x = [x]
+    for _ in range(num_cols):
+        col_x.append(col_x[-1] + largura_igual)
+
+    altura_header = 7 * mm
+    altura_linha = 6 * mm
+
+    c.setLineWidth(0.7)
+    c.setFont("Helvetica-Bold", 8)
+    c.rect(x, y_inicio - altura_header, largura_tabela, altura_header, fill=0)
+    for x_line in col_x[1:]:
+        c.line(x_line, y_inicio - altura_header, x_line, y_inicio)
+
+    labels = ["Nº", "Nome", "Matrícula", "Cargo", "Dia", "Assinatura"]
+    for i, label in enumerate(labels):
+        x_centro = (col_x[i] + col_x[i + 1]) / 2
+        c.drawCentredString(x_centro, y_inicio - altura_header / 2 - 2, label)
+
+    y_linha = y_inicio - altura_header
+    c.setFont("Helvetica", 8)
+    for i in range(1, total_linhas + 1):
+        y_linha -= altura_linha
+        c.rect(x, y_linha, largura_tabela, altura_linha, fill=0)
+        for x_line in col_x[1:]:
+            c.line(x_line, y_linha, x_line, y_linha + altura_linha)
+        c.drawCentredString((col_x[0] + col_x[1]) / 2, y_linha + 1.8 * mm, str(i))
+
+    # assinaturas de fechamento
+    y_final = y_linha - 15 * mm
+    if y_final > 15 * mm:
+        c.line(x, y_final + 8 * mm, x + largura_tabela, y_final + 8 * mm)
+        c.drawString(x + 2 * mm, y_final + 2 * mm, "Assinatura do responsável:")
+        c.drawString(x + largura_tabela - 70 * mm, y_final + 2 * mm, "Carimbo / Assinatura")
+
+    return y_final
+
+
+def gerar_pdf_lista_presenca(
+    mes,
+    ano,
+    regional,
+    unidade,
+    atividade,
+    atividade_palestra,
+    atividade_reuniao,
+    atividade_curso,
+    atividade_encontro,
+    outro_qual,
+    tema,
+    data,
+    horario_inicio,
+    horario_fim,
+    local,
+    municipio,
+    tipo_publico,
+    tipo_publico_outra,
+    qual,
+):
+    from io import BytesIO
+    from reportlab.pdfgen import canvas
+
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    c.setTitle("Lista de Presenca")
+
+    desenhar_lista_presenca(
+        c,
+        mes=mes,
+        ano=ano,
+        regional=regional,
+        unidade=unidade,
+        atividade=atividade,
+        atividade_palestra=atividade_palestra,
+        atividade_reuniao=atividade_reuniao,
+        atividade_curso=atividade_curso,
+        atividade_encontro=atividade_encontro,
+        outro_qual=outro_qual,
+        tema=tema,
+        data=data,
+        horario_inicio=horario_inicio,
+        horario_fim=horario_fim,
+        local=local,
+        municipio=municipio,
+        tipo_publico=tipo_publico,
+        tipo_publico_outra=tipo_publico_outra,
+        qual=qual,
+    )
+
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+    return buffer.getvalue()

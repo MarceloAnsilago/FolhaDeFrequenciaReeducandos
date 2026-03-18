@@ -5,6 +5,7 @@ from services.constants import DEFAULTS
 from views.cadastro_emissao_gta import render_cadastro_emissao_gta
 from views.declaracao_residencia import render_declaracao_residencia
 from views.declaracao_nada_consta import render_declaracao_nada_consta
+from views.lista_presenca import render_lista_presenca
 from views.parcelamento import render_parcelamento
 from views.reeducandos import render_folha_ponto
 from views.restituicao import render_restituicao
@@ -34,6 +35,7 @@ with st.sidebar:
         [
             "Folha Reeducandos",
             "Folha SUGESP",
+            "Lista de Presença",
             "Controle de Veículos",
             "Cadastro de Emissão de GTA",
             "Parcelar Auto de Infração",
@@ -59,6 +61,8 @@ if destino == "Folha Reeducandos":
     render_folha_ponto()
 elif destino == "Folha SUGESP":
     render_folha_ponto_sugesp()
+elif destino == "Lista de Presença":
+    render_lista_presenca()
 elif destino == "Controle de Veículos":
     render_veiculos()
 elif destino == "Cadastro de Emissão de GTA":
