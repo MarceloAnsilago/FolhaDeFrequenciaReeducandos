@@ -161,9 +161,9 @@ def _draw_header(
     c.setFont('Helvetica', 9)
     c.drawString(x + 44 * mm, y - h + 2 * mm, 'HORÁRIO INÍCIO')
     c.drawString(x + 111 * mm, y - h + 2 * mm, 'HORÁRIO FIM')
-    c.drawString(rotulo_fim_x + 2 * mm, y - h - 4 * mm, str(data))
-    c.drawString(x + 44 * mm, y - h - 4 * mm, str(horario_inicio))
-    c.drawString(x + 111 * mm, y - h - 4 * mm, str(horario_fim))
+    c.drawRightString(x + 40 * mm, y - h + 2 * mm, str(data))
+    c.drawRightString(x + 107 * mm, y - h + 2 * mm, str(horario_inicio))
+    c.drawRightString(x + largura_tabela - 2 * mm, y - h + 2 * mm, str(horario_fim))
 
     y -= h + gap_entre_blocos
     # LOCAL / MUNICÍPIO
@@ -179,8 +179,8 @@ def _draw_header(
     c.setFont('Helvetica-Bold', 8)
     c.drawString(municipio_x + 0.8 * mm, y - h + 2.2 * mm, 'MUNICÍPIO:')
     c.setFont('Helvetica', 9)
-    c.drawString(rotulo_fim_x + 2 * mm, y - h - 4 * mm, str(local))
-    c.drawString(municipio_label_end_x + 2 * mm, y - h - 4 * mm, str(municipio))
+    c.drawRightString(municipio_x - 2 * mm, y - h + 2 * mm, str(local))
+    c.drawRightString(x + largura_tabela - 2 * mm, y - h + 2 * mm, str(municipio))
 
     y -= h + gap_entre_blocos
     # TIPO DE PÚBLICO
