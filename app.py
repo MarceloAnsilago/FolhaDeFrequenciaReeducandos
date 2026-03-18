@@ -46,6 +46,7 @@ with st.sidebar:
         icons=[
             "file-earmark-text",
             "file-earmark-ruled",
+            "card-checklist",
             "truck",
             "person-vcard",
             "receipt",

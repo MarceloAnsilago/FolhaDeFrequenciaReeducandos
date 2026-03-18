@@ -6,7 +6,7 @@ from services.constants import MESES, ANOS_OPCOES
 
 
 def render_lista_presenca():
-    st.title("📋 Lista de Presença")
+    st.title("🗒️ Lista de Presença")
 
     regional = st.text_input("Regional")
     unidade = st.text_input("Unidade")
