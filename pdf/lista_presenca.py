@@ -183,7 +183,7 @@ def _draw_header(
     altura_publico = h * 3
     c.rect(x, y - altura_publico, logo_box_w, altura_publico, fill=0)
     c.setFont('Helvetica-Bold', 9)
-    c.drawString(x + 2 * mm, y - h - 2 * mm, 'TIPO DE PÚBLICO:')
+    c.drawString(x + 2 * mm, y - (2 * h) + 1 * mm, 'TIPO DE PÚBLICO:')
 
     c.rect(area_campos_x, y - (2 * h), area_campos_w, 2 * h, fill=0)
     publico_col1 = area_campos_x + area_campos_w / 4
