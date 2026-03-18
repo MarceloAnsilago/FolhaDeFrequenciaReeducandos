@@ -91,18 +91,59 @@ def _draw_header(
     c.setFont('Helvetica', 9)
     c.drawString(divisor_campo_x + 2 * mm, y - h + 2 * mm, str(unidade))
 
-    y -= h + 1 * mm
-    # OUTRO-QUAL?
+    y -= h
+    # ATIVIDADE / OUTRO-QUAL?
     h = 8 * mm
-    c.rect(x, y - h, largura_tabela, h, fill=0)
-    c.drawString(x + 2 * mm, y - h + 2 * mm, 'OUTRO-QUAL?')
-    c.drawString(x + 28 * mm, y - h + 2 * mm, str(outro_qual))
+    altura_bloco_atividade = h * 2
+    c.rect(x, y - altura_bloco_atividade, logo_box_w, altura_bloco_atividade, fill=0)
+    c.setFont('Helvetica-Bold', 9)
+    c.drawString(x + 2 * mm, y - h - 2 * mm, 'ATIVIDADE:')
+
+    c.rect(area_campos_x, y - h, area_campos_w, h, fill=0)
+    col1 = area_campos_x + area_campos_w / 4
+    col2 = area_campos_x + area_campos_w / 2
+    col3 = area_campos_x + (area_campos_w * 3 / 4)
+    c.line(col1, y - h, col1, y)
+    c.line(col2, y - h, col2, y)
+    c.line(col3, y - h, col3, y)
+
+    c.setFont('Helvetica', 7)
+    checkbox_size = 2.6 * mm
+    checkbox_y = y - h + 2.5 * mm
+    campos_atividade = [
+        (area_campos_x, col1, 'PALESTRA', atividade_palestra),
+        (col1, col2, 'REUNIÃO', atividade_reuniao),
+        (col2, col3, 'CURSO/ TREINAMENTO', atividade_curso),
+        (col3, area_campos_x + area_campos_w, 'ENCONTRO', atividade_encontro),
+    ]
+    for x0, x1, label, marcado in campos_atividade:
+        checkbox_x = x0 + 2 * mm
+        c.rect(checkbox_x, checkbox_y, checkbox_size, checkbox_size, fill=0)
+        if str(marcado).strip():
+            c.setFont('Helvetica-Bold', 7)
+            c.drawCentredString(
+                checkbox_x + checkbox_size / 2,
+                checkbox_y + 0.15 * mm,
+                'X',
+            )
+            c.setFont('Helvetica', 7)
+        c.drawRightString(x1 - 1.5 * mm, y - h + 2.5 * mm, label)
+
+    y -= h
+    c.rect(area_campos_x, y - h, area_campos_w, h, fill=0)
+    c.line(col1, y - h, col1, y)
+    c.setFont('Helvetica-Bold', 9)
+    c.drawRightString(col1 - 2 * mm, y - h + 2 * mm, 'OUTRO-QUAL?')
+    c.setFont('Helvetica', 9)
+    c.drawString(col1 + 2 * mm, y - h + 2 * mm, str(outro_qual))
 
     y -= h + 1 * mm
     # TEMA
     h = 8 * mm
     c.rect(x, y - h, largura_tabela, h, fill=0)
+    c.setFont('Helvetica-Bold', 9)
     c.drawString(x + 2 * mm, y - h + 2 * mm, 'TEMA:')
+    c.setFont('Helvetica', 9)
     c.drawString(x + 20 * mm, y - h + 2 * mm, str(tema))
 
     y -= h + 1 * mm
@@ -111,7 +152,9 @@ def _draw_header(
     c.rect(x, y - h, largura_tabela, h, fill=0)
     c.line(x + 42 * mm, y - h, x + 42 * mm, y)
     c.line(x + 109 * mm, y - h, x + 109 * mm, y)
+    c.setFont('Helvetica-Bold', 9)
     c.drawString(x + 2 * mm, y - h + 2 * mm, 'DATA:')
+    c.setFont('Helvetica', 9)
     c.drawString(x + 44 * mm, y - h + 2 * mm, 'HORÁRIO INÍCIO')
     c.drawString(x + 111 * mm, y - h + 2 * mm, 'HORÁRIO FIM')
     c.drawString(x + 2 * mm, y - h - 4 * mm, str(data))
@@ -122,11 +165,17 @@ def _draw_header(
     # LOCAL / MUNICÍPIO
     h = 8 * mm
     c.rect(x, y - h, largura_tabela, h, fill=0)
-    c.line(x + 115 * mm, y - h, x + 115 * mm, y)
+    municipio_x = x + 92 * mm
+    municipio_label_end_x = x + 109 * mm
+    c.line(municipio_x, y - h, municipio_x, y)
+    c.line(municipio_label_end_x, y - h, municipio_label_end_x, y)
+    c.setFont('Helvetica-Bold', 9)
     c.drawString(x + 2 * mm, y - h + 2 * mm, 'LOCAL:')
-    c.drawString(x + 117 * mm, y - h + 2 * mm, 'MUNICÍPIO:')
+    c.setFont('Helvetica-Bold', 8)
+    c.drawString(municipio_x + 0.8 * mm, y - h + 2.2 * mm, 'MUNICÍPIO:')
+    c.setFont('Helvetica', 9)
     c.drawString(x + 2 * mm, y - h - 4 * mm, str(local))
-    c.drawString(x + 117 * mm, y - h - 4 * mm, str(municipio))
+    c.drawString(municipio_label_end_x + 2 * mm, y - h - 4 * mm, str(municipio))
 
     y -= h + 1 * mm
     # TIPO DE PÚBLICO
