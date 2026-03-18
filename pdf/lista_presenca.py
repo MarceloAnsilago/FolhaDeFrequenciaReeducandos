@@ -179,38 +179,40 @@ def _draw_header(
 
     y -= h + 1 * mm
     # TIPO DE PÚBLICO
-    h = 12 * mm
-    c.rect(x, y - h, largura_tabela, h, fill=0)
-    row1_y = y - 4 * mm
-    row2_y = y - 8 * mm
+    h = 8 * mm
+    altura_publico = h * 3
+    c.rect(x, y - altura_publico, logo_box_w, altura_publico, fill=0)
+    c.setFont('Helvetica-Bold', 9)
+    c.drawString(x + 2 * mm, y - h - 2 * mm, 'TIPO DE PÚBLICO:')
+
+    c.rect(area_campos_x, y - (2 * h), area_campos_w, 2 * h, fill=0)
+    publico_col1 = area_campos_x + area_campos_w / 4
+    publico_col2 = area_campos_x + area_campos_w / 2
+    publico_col3 = area_campos_x + (area_campos_w * 3 / 4)
+    c.line(publico_col1, y - (2 * h), publico_col1, y)
+    c.line(publico_col2, y - (2 * h), publico_col2, y)
+    c.line(publico_col3, y - (2 * h), publico_col3, y)
+    c.line(area_campos_x, y - h, area_campos_x + area_campos_w, y - h)
+
     c.setFont('Helvetica', 8)
-    c.drawString(x + 2 * mm, y - h + 2 * mm, 'TIPO DE PÚBLICO:')
+    c.drawCentredString((area_campos_x + publico_col1) / 2, y - h + 2 * mm, 'PRODUTOR')
+    c.drawCentredString((publico_col1 + publico_col2) / 2, y - h + 2 * mm, 'LIDERANÇAS')
+    c.drawCentredString((publico_col2 + publico_col3) / 2, y - h + 2 * mm, 'ESCOLARES')
+    c.drawCentredString((publico_col3 + area_campos_x + area_campos_w) / 2, y - h + 2 * mm, 'COMERCIANTES')
+    c.drawCentredString((area_campos_x + publico_col1) / 2, y - (2 * h) + 2 * mm, 'PROFESSORES')
+    c.drawCentredString((publico_col1 + publico_col2) / 2, y - (2 * h) + 2 * mm, 'AUTORIDADES')
+    c.drawCentredString((publico_col2 + publico_col3) / 2, y - (2 * h) + 2 * mm, 'SERVIDORES IDARON')
+    c.drawCentredString((publico_col3 + area_campos_x + area_campos_w) / 2, y - (2 * h) + 2 * mm, 'OUTRO')
 
-    # colunas para público
-    col0 = x + 34 * mm
-    col1 = x + 70 * mm
-    col2 = x + 112 * mm
-    col3 = x + 149 * mm
-    c.line(col0, y - h, col0, y)
-    c.line(col1, y - h, col1, y)
-    c.line(col2, y - h, col2, y)
-    c.line(col3, y - h, col3, y)
-
-    c.drawString(col0 + 2 * mm, row1_y, 'PRODUTOR')
-    c.drawString(col1 + 2 * mm, row1_y, 'LIDERANÇAS')
-    c.drawString(col2 + 2 * mm, row1_y, 'ESCOLARES')
-    c.drawString(col3 + 2 * mm, row1_y, 'COMERCIANTES')
-    c.drawString(col0 + 2 * mm, row2_y, 'PROFESSORES')
-    c.drawString(col1 + 2 * mm, row2_y, 'AUTORIDADES')
-    c.drawString(col2 + 2 * mm, row2_y, 'SERVIDORES IDARON')
-    c.drawString(col3 + 2 * mm, row2_y, 'OUTRO')
-
-    y -= h + 1 * mm
+    y -= 2 * h
     # QUAL
     h = 8 * mm
-    c.rect(x, y - h, largura_tabela, h, fill=0)
-    c.drawString(x + 2 * mm, y - h + 2 * mm, 'QUAL?')
-    c.drawString(x + 14 * mm, y - h + 2 * mm, str(qual))
+    c.rect(area_campos_x, y - h, area_campos_w, h, fill=0)
+    c.line(publico_col1, y - h, publico_col1, y)
+    c.setFont('Helvetica-Bold', 9)
+    c.drawCentredString((area_campos_x + publico_col1) / 2, y - h + 2 * mm, 'QUAL?')
+    c.setFont('Helvetica', 9)
+    c.drawString(publico_col1 + 2 * mm, y - h + 2 * mm, str(qual))
 
     return y - h - 4 * mm
 
