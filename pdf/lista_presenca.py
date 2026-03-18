@@ -140,16 +140,19 @@ def _draw_header(
     y -= h + 1 * mm
     # TEMA
     h = 8 * mm
+    rotulo_fim_x = x + 18 * mm
     c.rect(x, y - h, largura_tabela, h, fill=0)
+    c.line(rotulo_fim_x, y - h, rotulo_fim_x, y)
     c.setFont('Helvetica-Bold', 9)
     c.drawString(x + 2 * mm, y - h + 2 * mm, 'TEMA:')
     c.setFont('Helvetica', 9)
-    c.drawString(x + 20 * mm, y - h + 2 * mm, str(tema))
+    c.drawString(rotulo_fim_x + 2 * mm, y - h + 2 * mm, str(tema))
 
     y -= h + 1 * mm
     # DATA/HORÁRIO INÍCIO/HORÁRIO FIM
     h = 8 * mm
     c.rect(x, y - h, largura_tabela, h, fill=0)
+    c.line(rotulo_fim_x, y - h, rotulo_fim_x, y)
     c.line(x + 42 * mm, y - h, x + 42 * mm, y)
     c.line(x + 109 * mm, y - h, x + 109 * mm, y)
     c.setFont('Helvetica-Bold', 9)
@@ -157,7 +160,7 @@ def _draw_header(
     c.setFont('Helvetica', 9)
     c.drawString(x + 44 * mm, y - h + 2 * mm, 'HORÁRIO INÍCIO')
     c.drawString(x + 111 * mm, y - h + 2 * mm, 'HORÁRIO FIM')
-    c.drawString(x + 2 * mm, y - h - 4 * mm, str(data))
+    c.drawString(rotulo_fim_x + 2 * mm, y - h - 4 * mm, str(data))
     c.drawString(x + 44 * mm, y - h - 4 * mm, str(horario_inicio))
     c.drawString(x + 111 * mm, y - h - 4 * mm, str(horario_fim))
 
@@ -165,6 +168,7 @@ def _draw_header(
     # LOCAL / MUNICÍPIO
     h = 8 * mm
     c.rect(x, y - h, largura_tabela, h, fill=0)
+    c.line(rotulo_fim_x, y - h, rotulo_fim_x, y)
     municipio_x = x + 92 * mm
     municipio_label_end_x = x + 109 * mm
     c.line(municipio_x, y - h, municipio_x, y)
@@ -174,7 +178,7 @@ def _draw_header(
     c.setFont('Helvetica-Bold', 8)
     c.drawString(municipio_x + 0.8 * mm, y - h + 2.2 * mm, 'MUNICÍPIO:')
     c.setFont('Helvetica', 9)
-    c.drawString(x + 2 * mm, y - h - 4 * mm, str(local))
+    c.drawString(rotulo_fim_x + 2 * mm, y - h - 4 * mm, str(local))
     c.drawString(municipio_label_end_x + 2 * mm, y - h - 4 * mm, str(municipio))
 
     y -= h + 1 * mm
@@ -194,15 +198,28 @@ def _draw_header(
     c.line(publico_col3, y - (2 * h), publico_col3, y)
     c.line(area_campos_x, y - h, area_campos_x + area_campos_w, y - h)
 
-    c.setFont('Helvetica', 8)
-    c.drawCentredString((area_campos_x + publico_col1) / 2, y - h + 2 * mm, 'PRODUTOR')
-    c.drawCentredString((publico_col1 + publico_col2) / 2, y - h + 2 * mm, 'LIDERANÇAS')
-    c.drawCentredString((publico_col2 + publico_col3) / 2, y - h + 2 * mm, 'ESCOLARES')
-    c.drawCentredString((publico_col3 + area_campos_x + area_campos_w) / 2, y - h + 2 * mm, 'COMERCIANTES')
-    c.drawCentredString((area_campos_x + publico_col1) / 2, y - (2 * h) + 2 * mm, 'PROFESSORES')
-    c.drawCentredString((publico_col1 + publico_col2) / 2, y - (2 * h) + 2 * mm, 'AUTORIDADES')
-    c.drawCentredString((publico_col2 + publico_col3) / 2, y - (2 * h) + 2 * mm, 'SERVIDORES IDARON')
-    c.drawCentredString((publico_col3 + area_campos_x + area_campos_w) / 2, y - (2 * h) + 2 * mm, 'OUTRO')
+    publico_selecionado = {item.strip().lower() for item in str(tipo_publico).split(',') if item.strip()}
+    checkbox_size = 2.6 * mm
+    c.setFont('Helvetica', 7)
+    opcoes_publico = [
+        (area_campos_x, publico_col1, y - h, 'PRODUTOR', 'produtor'),
+        (publico_col1, publico_col2, y - h, 'LIDERANÇAS', 'lideranças'),
+        (publico_col2, publico_col3, y - h, 'ESCOLARES', 'escolares'),
+        (publico_col3, area_campos_x + area_campos_w, y - h, 'COMERCIANTES', 'comerciantes'),
+        (area_campos_x, publico_col1, y - (2 * h), 'PROFESSORES', 'professores'),
+        (publico_col1, publico_col2, y - (2 * h), 'AUTORIDADES', 'autoridades'),
+        (publico_col2, publico_col3, y - (2 * h), 'SERVIDORES IDARON', 'servidores idaron'),
+        (publico_col3, area_campos_x + area_campos_w, y - (2 * h), 'OUTRO', 'outro'),
+    ]
+    for x0, x1, y_base, label, chave in opcoes_publico:
+        checkbox_x = x0 + 1.8 * mm
+        checkbox_y = y_base + 2.4 * mm
+        c.rect(checkbox_x, checkbox_y, checkbox_size, checkbox_size, fill=0)
+        if chave in publico_selecionado:
+            c.setFont('Helvetica-Bold', 7)
+            c.drawCentredString(checkbox_x + checkbox_size / 2, checkbox_y + 0.15 * mm, 'X')
+            c.setFont('Helvetica', 7)
+        c.drawRightString(x1 - 1.5 * mm, y_base + 2.5 * mm, label)
 
     y -= 2 * h
     # QUAL
