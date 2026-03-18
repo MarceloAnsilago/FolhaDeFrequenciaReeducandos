@@ -33,7 +33,7 @@ def _draw_header(
     largura_tabela = largura_pagina - 2 * x
 
     # logo e título em topo
-    y_top = altura_pagina - 14 * mm
+    y_top = altura_pagina - 5 * mm
     h_topo = 8 * mm
     h_titulo = h_topo
     h_regional = h_topo
@@ -41,7 +41,7 @@ def _draw_header(
     logo_h = h_titulo + h_regional + h_atividade
     area_campos_x = x + 42 * mm
     area_campos_w = largura_tabela - 42 * mm
-    bloco_top_y = y_top - 18 * mm
+    bloco_top_y = y_top - 5 * mm
     logo_box_x = x
     logo_box_y = bloco_top_y - logo_h
     logo_box_w = area_campos_x - logo_box_x
@@ -137,7 +137,8 @@ def _draw_header(
     c.setFont('Helvetica', 9)
     c.drawString(col1 + 2 * mm, y - h + 2 * mm, str(outro_qual))
 
-    y -= h + 1 * mm
+    gap_entre_blocos = 0.2 * mm
+    y -= h + gap_entre_blocos
     # TEMA
     h = 8 * mm
     rotulo_fim_x = x + 18 * mm
@@ -148,7 +149,7 @@ def _draw_header(
     c.setFont('Helvetica', 9)
     c.drawString(rotulo_fim_x + 2 * mm, y - h + 2 * mm, str(tema))
 
-    y -= h + 1 * mm
+    y -= h + gap_entre_blocos
     # DATA/HORÁRIO INÍCIO/HORÁRIO FIM
     h = 8 * mm
     c.rect(x, y - h, largura_tabela, h, fill=0)
@@ -164,7 +165,7 @@ def _draw_header(
     c.drawString(x + 44 * mm, y - h - 4 * mm, str(horario_inicio))
     c.drawString(x + 111 * mm, y - h - 4 * mm, str(horario_fim))
 
-    y -= h + 1 * mm
+    y -= h + gap_entre_blocos
     # LOCAL / MUNICÍPIO
     h = 8 * mm
     c.rect(x, y - h, largura_tabela, h, fill=0)
@@ -181,7 +182,7 @@ def _draw_header(
     c.drawString(rotulo_fim_x + 2 * mm, y - h - 4 * mm, str(local))
     c.drawString(municipio_label_end_x + 2 * mm, y - h - 4 * mm, str(municipio))
 
-    y -= h + 1 * mm
+    y -= h + gap_entre_blocos
     # TIPO DE PÚBLICO
     h = 8 * mm
     altura_publico = h * 3
@@ -231,7 +232,7 @@ def _draw_header(
     c.setFont('Helvetica', 9)
     c.drawString(publico_col1 + 2 * mm, y - h + 2 * mm, str(qual))
 
-    return y - h - 4 * mm
+    return y - h - 1 * mm
 
 
 def desenhar_lista_presenca(
@@ -255,7 +256,7 @@ def desenhar_lista_presenca(
     tipo_publico="",
     tipo_publico_outra="",
     qual="",
-    total_linhas=31,
+    total_linhas=30,
 ):
     largura_pagina, altura_pagina = A4
 
@@ -285,12 +286,11 @@ def desenhar_lista_presenca(
     x = (largura_pagina - largura_tabela) / 2
     y_inicio = y
 
-    # colunas: Nº, NOME, MATRÍCULA, CARGO, DIA, ASSINATURA
-    num_cols = 6
-    largura_igual = largura_tabela / num_cols
+    # colunas: PARTICIPANTES, NOME, CARGO/FUNÇÃO, ASSINATURA
+    larguras_colunas = [22 * mm, 73 * mm, 42 * mm, 43 * mm]
     col_x = [x]
-    for _ in range(num_cols):
-        col_x.append(col_x[-1] + largura_igual)
+    for largura_coluna in larguras_colunas:
+        col_x.append(col_x[-1] + largura_coluna)
 
     altura_header = 7 * mm
     altura_linha = 6 * mm
@@ -301,7 +301,7 @@ def desenhar_lista_presenca(
     for x_line in col_x[1:]:
         c.line(x_line, y_inicio - altura_header, x_line, y_inicio)
 
-    labels = ["Nº", "Nome", "Matrícula", "Cargo", "Dia", "Assinatura"]
+    labels = ["Particip.", "NOME", "CARGO/FUNÇÃO", "ASSINATURA"]
     for i, label in enumerate(labels):
         x_centro = (col_x[i] + col_x[i + 1]) / 2
         c.drawCentredString(x_centro, y_inicio - altura_header / 2 - 2, label)
@@ -313,7 +313,7 @@ def desenhar_lista_presenca(
         c.rect(x, y_linha, largura_tabela, altura_linha, fill=0)
         for x_line in col_x[1:]:
             c.line(x_line, y_linha, x_line, y_linha + altura_linha)
-        c.drawCentredString((col_x[0] + col_x[1]) / 2, y_linha + 1.8 * mm, str(i))
+        c.drawString(col_x[0] + 2 * mm, y_linha + 1.8 * mm, f"{i}-")
 
     # assinaturas de fechamento
     y_final = y_linha - 15 * mm
