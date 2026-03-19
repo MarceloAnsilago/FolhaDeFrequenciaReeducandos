@@ -24,15 +24,15 @@ PERMISSAO_COLUNAS = [
 ]
 
 PERMISSAO_ITENS = [
-    (1, "CADASTRO PESSOA FISICA"),
+    (1, "CADASTRO PESSOA FÍSICA"),
     (2, "CADASTRO PROPRIEDADE RURAL"),
-    (3, "CADASTRO FICHA DE BOVIDEOS"),
+    (3, "CADASTRO FICHA DE BOVÍDEOS"),
     (4, "CADASTRO DE LOGRADOURO"),
-    (5, "SETOR MUNICIPIO/EPIDEMIOLOGICO"),
-    (6, "CAD. FRIGORIFICO/MATADOURO..."),
+    (5, "SETOR MUNICÍPIO/EPIDEMIOLÓGICO"),
+    (6, "CAD. FRIGORÍFICO/MATADOURO..."),
     (7, "CAD. REVENDEDOR DE VACINAS"),
-    (8, "DECLARACAO DE VACINAS"),
-    (9, "GTA / TTRB / D. CONS./ ETC e outras\nformas de entrada e saida de bovideos"),
+    (8, "DECLARAÇÃO DE VACINAS"),
+    (9, "GTA / TTRB / D. CONS./ ETC e outras\nformas de entrada e saída de bovídeos"),
 ]
 
 PERMISSAO_DEFAULTS = {
@@ -157,7 +157,7 @@ def _add_docx_header(section, logo_path: Path):
         run = p_logo.add_run()
         run.add_picture(str(logo_path), width=Mm(24))
 
-    p = header.add_paragraph("GOVERNO DO ESTADO DE RONDONIA")
+    p = header.add_paragraph("GOVERNO DO ESTADO DE RONDÔNIA")
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.space_before = Pt(0)
     p.paragraph_format.space_after = Pt(0)
@@ -165,7 +165,7 @@ def _add_docx_header(section, logo_path: Path):
     run.bold = True
     run.font.size = Pt(8.5)
 
-    p = header.add_paragraph("Agencia de Defesa Sanitaria Agrosilvopastoril do Estado de Rondonia - IDARON")
+    p = header.add_paragraph("Agência de Defesa Sanitária Agrosilvopastoril do Estado de Rondônia - IDARON")
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.space_before = Pt(0)
     p.paragraph_format.space_after = Pt(0)
@@ -187,7 +187,7 @@ def build_docx_cadastro_gta(data: dict, logo_path: Path) -> bytes:
 
     content_w = 170  # 210 - 20 - 20 mm
 
-    p = doc.add_paragraph("CADASTRO DE SERVIDOR PARA EMISSAO DE GTA")
+    p = doc.add_paragraph("CADASTRO DE SERVIDOR PARA EMISSÃO DE GTA")
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.runs[0].bold = True
     p.runs[0].font.size = Pt(12)
@@ -220,17 +220,17 @@ def build_docx_cadastro_gta(data: dict, logo_path: Path) -> bytes:
 
     _set_docx_labeled_cell(table.cell(0, 1).merge(table.cell(0, 2)), "NOME", data.get("nome", ""))
     _set_docx_labeled_cell(table.cell(1, 1).merge(table.cell(1, 2)), "CARGO", data.get("cargo", ""))
-    _set_docx_labeled_cell(table.cell(2, 1).merge(table.cell(2, 2)), "FORMACAO", data.get("formacao", ""))
-    _set_docx_labeled_cell(table.cell(3, 1).merge(table.cell(3, 2)), "MATRICULA", data.get("matricula", ""))
+    _set_docx_labeled_cell(table.cell(2, 1).merge(table.cell(2, 2)), "FORMAÇÃO", data.get("formacao", ""))
+    _set_docx_labeled_cell(table.cell(3, 1).merge(table.cell(3, 2)), "MATRÍCULA", data.get("matricula", ""))
     _set_docx_labeled_cell(table.cell(4, 1), "RG", data.get("rg", ""))
     _set_docx_labeled_cell(table.cell(4, 2), "CPF", data.get("cpf", ""))
 
     _set_docx_labeled_cell(
         table.cell(5, 0).merge(table.cell(5, 1)),
-        "ORGAO DE ORIGEM",
+        "ÓRGÃO DE ORIGEM",
         data.get("orgao_origem", ""),
     )
-    _set_docx_labeled_cell(table.cell(5, 2), "DATA DA EMISSAO", data.get("data_emissao", ""))
+    _set_docx_labeled_cell(table.cell(5, 2), "DATA DA EMISSÃO", data.get("data_emissao", ""))
 
     _set_docx_labeled_cell(
         table.cell(6, 0).merge(table.cell(6, 1)).merge(table.cell(6, 2)),
@@ -240,14 +240,14 @@ def build_docx_cadastro_gta(data: dict, logo_path: Path) -> bytes:
 
     _set_docx_labeled_cell(
         table.cell(7, 0).merge(table.cell(7, 1)),
-        "UNIDADE DE LOTACAO",
+        "UNIDADE DE LOTAÇÃO",
         data.get("unidade_lotacao", ""),
     )
-    _set_docx_labeled_cell(table.cell(7, 2), "DATA DE LOTACAO", data.get("data_lotacao", ""))
+    _set_docx_labeled_cell(table.cell(7, 2), "DATA DE LOTAÇÃO", data.get("data_lotacao", ""))
 
     _set_docx_labeled_cell(
         table.cell(8, 0).merge(table.cell(8, 1)).merge(table.cell(8, 2)),
-        "AUTORIZADO PARA TRANSITO",
+        "AUTORIZADO PARA TRÂNSITO",
         data.get("autorizado_transito", ""),
     )
     _set_docx_labeled_cell(
@@ -257,7 +257,7 @@ def build_docx_cadastro_gta(data: dict, logo_path: Path) -> bytes:
     )
     _set_docx_labeled_cell(
         table.cell(10, 0).merge(table.cell(10, 1)).merge(table.cell(10, 2)),
-        "ESPECIES AUTORIZADAS",
+        "ESPÉCIES AUTORIZADAS",
         data.get("especies", ""),
     )
     _set_docx_labeled_cell(
@@ -367,34 +367,34 @@ def build_pdf_cadastro_gta(data: dict, logo_path: Path) -> bytes:
         )
 
     c.setFont("Helvetica-Bold", 9)
-    c.drawCentredString(x + w / 2, y_top - 16 * mm, "GOVERNO DO ESTADO DE RONDONIA")
+    c.drawCentredString(x + w / 2, y_top - 16 * mm, "GOVERNO DO ESTADO DE RONDÔNIA")
     c.setFont("Helvetica", 6.4)
     c.drawCentredString(
         x + w / 2,
         y_top - 19.8 * mm,
-        "Agencia de Defesa Sanitaria Agrosilvopastoril do Estado de Rondonia - IDARON",
+        "Agência de Defesa Sanitária Agrosilvopastoril do Estado de Rondônia - IDARON",
     )
 
     title_h = 9 * mm
     title_y = y_top - 30 * mm
     c.rect(x, title_y, w, title_h)
     c.setFont("Helvetica-Bold", 14)
-    c.drawCentredString(x + w / 2, title_y + 2.9 * mm, "CADASTRO DE SERVIDOR PARA EMISSAO DE GTA")
+    c.drawCentredString(x + w / 2, title_y + 2.9 * mm, "CADASTRO DE SERVIDOR PARA EMISSÃO DE GTA")
 
     table_y = title_y - 5 * mm
 
     row_specs = [
         ("NOME", "nome", 9 * mm, None),
         ("CARGO", "cargo", 7 * mm, None),
-        ("FORMACAO", "formacao", 7 * mm, None),
-        ("MATRICULA", "matricula", 8 * mm, None),
+        ("FORMAÇÃO", "formacao", 7 * mm, None),
+        ("MATRÍCULA", "matricula", 8 * mm, None),
         (("RG", "rg"), ("CPF", "cpf"), 8 * mm, 0.6),
-        (("ORGAO DE ORIGEM", "orgao_origem"), ("DATA DA EMISSAO", "data_emissao"), 8 * mm, 0.76),
+        (("ÓRGÃO DE ORIGEM", "orgao_origem"), ("DATA DA EMISSÃO", "data_emissao"), 8 * mm, 0.76),
         ("REGIONAL", "regional", 8 * mm, None),
-        (("UNIDADE DE LOTACAO", "unidade_lotacao"), ("DATA DE LOTACAO", "data_lotacao"), 8 * mm, 0.76),
-        ("AUTORIZADO PARA TRANSITO", "autorizado_transito", 8 * mm, None),
+        (("UNIDADE DE LOTAÇÃO", "unidade_lotacao"), ("DATA DE LOTAÇÃO", "data_lotacao"), 8 * mm, 0.76),
+        ("AUTORIZADO PARA TRÂNSITO", "autorizado_transito", 8 * mm, None),
         ("MUNIC/EST. AUTORIZADO", "municipio_estado", 8 * mm, None),
-        ("ESPECIES AUTORIZADAS", "especies", 8 * mm, None),
+        ("ESPÉCIES AUTORIZADAS", "especies", 8 * mm, None),
         ("OUTROS DOCUMENTOS", "outros_documentos", 12 * mm, None),
     ]
 
@@ -508,25 +508,25 @@ def build_pdf_permissoes_gta(data: dict, logo_path: Path, permissoes: dict) -> b
         )
 
     c.setFont("Helvetica-Bold", 8.5)
-    c.drawCentredString(x + w / 2, y_top - 13 * mm, "GOVERNO DO ESTADO DE RONDONIA")
+    c.drawCentredString(x + w / 2, y_top - 13 * mm, "GOVERNO DO ESTADO DE RONDÔNIA")
     c.setFont("Helvetica", 6.2)
     c.drawCentredString(
         x + w / 2,
         y_top - 16.5 * mm,
-        "Agencia de Defesa Sanitaria Agrosilvopastoril do Estado de Rondonia - IDARON",
+        "Agência de Defesa Sanitária Agrosilvopastoril do Estado de Rondônia - IDARON",
     )
     c.setFont("Helvetica-Bold", 11)
-    c.drawCentredString(x + w / 2, y_top - 24.5 * mm, "NIVEIS DE PERMISSOES PARA USUARIOS DO SISTEMA SISIDARON")
+    c.drawCentredString(x + w / 2, y_top - 24.5 * mm, "NÍVEIS DE PERMISSÕES PARA USUÁRIOS DO SISTEMA SISIDARON")
 
     info_y = y_top - 33 * mm
     unidade_lotacao = (data.get("unidade_lotacao", "") or "").strip()
     c.setFont("Helvetica-Bold", 9)
     c.drawString(x + 2 * mm, info_y, f"Nome do Servidor:  {data.get('nome', '')}")
-    c.drawString(x + 112 * mm, info_y, f"Unidade de Lotacao: {unidade_lotacao}")
+    c.drawString(x + 112 * mm, info_y, f"Unidade de Lotação: {unidade_lotacao}")
 
-    c.drawString(x + 2 * mm, info_y - 8 * mm, f"Funcao:  {data.get('cargo', '')}")
+    c.drawString(x + 2 * mm, info_y - 8 * mm, f"Função:  {data.get('cargo', '')}")
     c.drawString(x + 94 * mm, info_y - 8 * mm, f"CPF: {data.get('cpf', '')}")
-    c.drawString(x + 150 * mm, info_y - 8 * mm, f"Matricula: {data.get('matricula', '')}")
+    c.drawString(x + 150 * mm, info_y - 8 * mm, f"Matrícula: {data.get('matricula', '')}")
 
     table_w = 200 * mm
     table_x = x + (w - table_w) / 2
@@ -566,7 +566,7 @@ def build_pdf_permissoes_gta(data: dict, logo_path: Path, permissoes: dict) -> b
     c.setFont("Helvetica-Bold", 10)
     c.drawCentredString(table_x + col_ws[0] / 2, table_top - 5.1 * mm, "ITEM")
     c.drawCentredString(table_x + col_ws[0] + col_ws[1] / 2, table_top - 5.1 * mm, "DOCUMENTO")
-    c.drawCentredString(x_perm_start + sum(col_ws[2:]) / 2, table_top - 3.5 * mm, "PERMISSOES")
+    c.drawCentredString(x_perm_start + sum(col_ws[2:]) / 2, table_top - 3.5 * mm, "PERMISSÕES")
 
     y_head2 = table_top - row_hs[0] - 4.6 * mm
     for idx, (_, label) in enumerate(PERMISSAO_COLUNAS):
@@ -636,7 +636,7 @@ def build_pdf_permissoes_gta(data: dict, logo_path: Path, permissoes: dict) -> b
         y_cursor -= data_h + blank_h
 
     c.setFont("Helvetica", 10)
-    c.drawString(table_x + 1 * mm, table_top - total_h - 8 * mm, "Marcar com X a permissao que o servidor tera acesso no SISIDARON")
+    c.drawString(table_x + 1 * mm, table_top - total_h - 8 * mm, "Marcar com X a permissão que o servidor terá acesso no SISIDARON")
 
     sig_y = table_top - total_h - 43 * mm
     sig_w = 70 * mm
@@ -644,7 +644,7 @@ def build_pdf_permissoes_gta(data: dict, logo_path: Path, permissoes: dict) -> b
     right_sig_x = table_x + table_w - 20 * mm - sig_w
 
     c.line(left_sig_x, sig_y, left_sig_x + sig_w, sig_y)
-    c.drawCentredString(left_sig_x + sig_w / 2, sig_y - 4.2 * mm, "Assinatura do Funcionario")
+    c.drawCentredString(left_sig_x + sig_w / 2, sig_y - 4.2 * mm, "Assinatura do Funcionário")
     c.line(right_sig_x, sig_y, right_sig_x + sig_w, sig_y)
     c.drawCentredString(right_sig_x + sig_w / 2, sig_y - 4.2 * mm, "Assinatura do Chefe de ULSAV")
 
@@ -675,13 +675,13 @@ def render_cadastro_emissao_gta():
 
     col_left, col_mid, col_right = st.columns([1, 2, 1])
     with col_mid:
-        st.title("Cadastro de Emissao de GTA")
+        st.title("Cadastro de Emissão de GTA")
 
         with st.form("form_cadastro_emissao_gta"):
             st.text_input("Nome", key="gta_nome")
             st.text_input("Cargo", key="gta_cargo")
-            st.text_input("Formacao", key="gta_formacao")
-            st.text_input("Matricula", key="gta_matricula")
+            st.text_input("Formação", key="gta_formacao")
+            st.text_input("Matrícula", key="gta_matricula")
 
             col_doc = st.columns(2)
             with col_doc[0]:
@@ -691,21 +691,21 @@ def render_cadastro_emissao_gta():
 
             col_orgao = st.columns(2)
             with col_orgao[0]:
-                st.text_input("Orgao de origem", key="gta_orgao_origem")
+                st.text_input("Órgão de origem", key="gta_orgao_origem")
             with col_orgao[1]:
-                st.date_input("Data da emissao", key="gta_data_emissao", value=date.today())
+                st.date_input("Data da emissão", key="gta_data_emissao", value=date.today())
 
             st.text_input("Regional", key="gta_regional")
 
             col_lot = st.columns(2)
             with col_lot[0]:
-                st.text_input("Unidade de lotacao", key="gta_unidade_lotacao")
+                st.text_input("Unidade de lotação", key="gta_unidade_lotacao")
             with col_lot[1]:
-                st.date_input("Data de lotacao", key="gta_data_lotacao", value=date.today())
+                st.date_input("Data de lotação", key="gta_data_lotacao", value=date.today())
 
-            st.text_input("Autorizado para transito", key="gta_autorizado_transito")
+            st.text_input("Autorizado para trânsito", key="gta_autorizado_transito")
             st.text_input("Munic./Est. autorizado", key="gta_municipio_estado")
-            st.text_input("Especies autorizadas", key="gta_especies")
+            st.text_input("Espécies autorizadas", key="gta_especies")
             st.text_area("Outros documentos", key="gta_outros_documentos", height=70)
 
             submit = st.form_submit_button("Gerar Arquivos")
@@ -746,13 +746,13 @@ def render_cadastro_emissao_gta():
             st.success("Arquivos PDF e DOCX gerados e salvos.")
 
         if "cadastro_gta_pdf" in st.session_state:
-            st.markdown("### Pagina de impressao")
+            st.markdown("### Página de impressão")
             pdf_bytes = st.session_state["cadastro_gta_pdf"]
             try:
                 st.pdf(pdf_bytes)
             except StreamlitAPIException:
                 st.info(
-                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
+                    "Pré-visualização de PDF indisponível neste ambiente. "
                     "Para habilitar, instale: pip install streamlit[pdf]"
                 )
 
@@ -775,8 +775,8 @@ def render_cadastro_emissao_gta():
                 st.caption(f"DOCX salvo em: {st.session_state['cadastro_gta_docx_path']}")
 
         st.divider()
-        st.subheader("Formulario de Permissoes SISIDARON (PDF Paisagem)")
-        st.caption("Este PDF usa os mesmos dados do cadastro acima (nome, funcao, CPF, matricula e lotacao).")
+        st.subheader("Formulário de Permissões SISIDARON (PDF Paisagem)")
+        st.caption("Este PDF usa os mesmos dados do cadastro acima (nome, função, CPF, matrícula e lotação).")
 
         with st.form("form_permissoes_sisidaron"):
             for item_num, item_nome in PERMISSAO_ITENS:
@@ -786,7 +786,7 @@ def render_cadastro_emissao_gta():
                     with cols[col_idx]:
                         st.checkbox(perm_label, key=f"gta_perm_{item_num}_{perm_key}")
 
-            submit_permissoes = st.form_submit_button("Gerar PDF de Permissoes")
+            submit_permissoes = st.form_submit_button("Gerar PDF de Permissões")
 
         if submit_permissoes:
             logo_path = Path(__file__).resolve().parents[1] / "assets" / "logo_ro_horizontal.JPG"
@@ -811,21 +811,21 @@ def render_cadastro_emissao_gta():
             output_path = output_dir / "cadastro_emissao_gta_permissoes.pdf"
             output_path.write_bytes(pdf_permissoes)
             st.session_state["cadastro_gta_permissoes_pdf_path"] = output_path
-            st.success("PDF de permissoes gerado e salvo.")
+            st.success("PDF de permissões gerado e salvo.")
 
         if "cadastro_gta_permissoes_pdf" in st.session_state:
-            st.markdown("### Pagina de impressao - Permissoes")
+            st.markdown("### Página de impressão - Permissões")
             pdf_bytes = st.session_state["cadastro_gta_permissoes_pdf"]
             try:
                 st.pdf(pdf_bytes)
             except StreamlitAPIException:
                 st.info(
-                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
+                    "Pré-visualização de PDF indisponível neste ambiente. "
                     "Para habilitar, instale: pip install streamlit[pdf]"
                 )
 
             st.download_button(
-                "Baixar PDF de Permissoes",
+                "Baixar PDF de Permissões",
                 data=pdf_bytes,
                 file_name="cadastro_emissao_gta_permissoes.pdf",
                 mime="application/pdf",
