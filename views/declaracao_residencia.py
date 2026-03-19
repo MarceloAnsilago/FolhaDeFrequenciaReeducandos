@@ -64,7 +64,7 @@ def build_pdf_declaracao_residencia(data: dict, logo_path: Path) -> bytes:
     margin = 20 * mm
     y = title_y - 12 * mm
     c.setFont("Helvetica-Bold", 12)
-    c.drawCentredString(page_width / 2, y, "DECLARACAO DE RESIDENCIA")
+    c.drawCentredString(page_width / 2, y, "DECLARAÇÃO DE RESIDÊNCIA")
     y -= 14 * mm
 
     nome = data.get("nome_declarante", "").strip() or "____________________________"
@@ -73,16 +73,16 @@ def build_pdf_declaracao_residencia(data: dict, logo_path: Path) -> bytes:
     complemento = data.get("complemento", "").strip()
     observacoes = data.get("observacoes", "").strip()
 
-    endereco = f"{logradouro}, municipio de {municipio}"
+    endereco = f"{logradouro}, município de {municipio}"
     if complemento:
         endereco = f"{endereco}, complemento: {complemento}"
 
     texto = (
-        f"Eu, {nome}, declaro para os devidos fins que resido no endereco {endereco}. "
-        "Firmo a presente declaracao para os efeitos legais cabiveis."
+        f"Eu, {nome}, declaro para os devidos fins que resido no endereço {endereco}. "
+        "Firmo a presente declaração para os efeitos legais cabíveis."
     )
     if observacoes:
-        texto = f"{texto} Observacoes: {observacoes}."
+        texto = f"{texto} Observações: {observacoes}."
 
     c.setFont("Helvetica", 11)
     for linha in _wrap_text(texto, "Helvetica", 11, page_width - 2 * margin):
@@ -109,13 +109,13 @@ def build_pdf_declaracao_residencia(data: dict, logo_path: Path) -> bytes:
 def render_declaracao_residencia():
     col_esq, col_meio, col_dir = st.columns([1, 2, 1])
     with col_meio:
-        st.markdown("## Declaracao de residencia")
+        st.markdown("## Declaração de residência")
         with st.form("form_declaracao_residencia"):
             st.text_input("Nome do declarante", key="dr_nome_declarante")
             st.text_input("Logradouro", key="dr_logradouro")
-            st.text_input("Municipio", key="dr_municipio")
+            st.text_input("Município", key="dr_municipio")
             st.text_input("Complemento", key="dr_complemento")
-            st.text_area("Observacoes (opcional)", key="dr_observacoes", height=80)
+            st.text_area("Observações (opcional)", key="dr_observacoes", height=80)
             submitted = st.form_submit_button("Gerar")
 
         if submitted:
@@ -139,13 +139,13 @@ def render_declaracao_residencia():
             st.success("PDF gerado e salvo.")
 
         if "declaracao_residencia_pdf" in st.session_state:
-            st.markdown("### Pagina de impressao")
+            st.markdown("### Página de impressão")
             pdf_bytes = st.session_state["declaracao_residencia_pdf"]
             try:
                 st.pdf(pdf_bytes)
             except StreamlitAPIException:
                 st.info(
-                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
+                    "Pré-visualização de PDF indisponível neste ambiente. "
                     "Para habilitar, instale: pip install streamlit[pdf]"
                 )
             st.download_button(
