@@ -95,7 +95,7 @@ def build_pdf_declaracao_nada_consta(data: dict, logo_path: Path) -> bytes:
         y -= 5 * mm
     if servidor_matricula:
         c.setFont("Helvetica", 10)
-        c.drawCentredString(page_width / 2, y, f"Matricula: {servidor_matricula}")
+        c.drawCentredString(page_width / 2, y, f"Matrícula: {servidor_matricula}")
         y -= 5 * mm
 
     if incluir_assinatura_requerente and (requerente_nome or requerente_cpf or requerente_rg):
@@ -124,7 +124,7 @@ def build_pdf_declaracao_nada_consta(data: dict, logo_path: Path) -> bytes:
 def render_declaracao_nada_consta():
     col_esq, col_meio, col_dir = st.columns([1, 2, 1])
     with col_meio:
-        st.markdown("## Declaracao de nada consta")
+        st.markdown("## Declaração de nada consta")
         st.session_state.setdefault("dnc_show_page", False)
         st.session_state.setdefault("dnc_page_data", {})
         with st.form("form_declaracao_nada_consta"):
@@ -136,14 +136,14 @@ def render_declaracao_nada_consta():
             st.text_input("Nome", key="dnc_nome")
             st.text_input("CPF", key="dnc_cpf")
             st.text_input("RG", key="dnc_rg")
-            st.text_input("Endereco", key="dnc_endereco")
-            st.text_input("Municipio", key="dnc_municipio")
+            st.text_input("Endereço", key="dnc_endereco")
+            st.text_input("Município", key="dnc_municipio")
             st.markdown("---")
             st.text_input("Nome do servidor", key="dnc_servidor_nome")
             st.text_input("Cargo", key="dnc_servidor_cargo")
-            st.text_input("Matricula", key="dnc_servidor_matricula")
+            st.text_input("Matrícula", key="dnc_servidor_matricula")
             st.checkbox(
-                "acrescentar assinatura do requerente",
+                "Acrescentar assinatura do requerente",
                 key="dnc_incluir_assinatura_requerente",
                 value=True,
             )
@@ -151,8 +151,8 @@ def render_declaracao_nada_consta():
 
         if submitted:
             sexo = st.session_state.get("dnc_sexo")
-            destinatario = "Ao Ilustrissimo Sr." if sexo == "Masculino" else "A Ilustrissima Sra."
-            vocativo = "Ilmo Sr." if sexo == "Masculino" else "Ilma Sra."
+            destinatario = "Ao Ilustríssimo Sr." if sexo == "Masculino" else "À Ilustríssima Sra."
+            vocativo = "Ilmo. Sr." if sexo == "Masculino" else "Ilma. Sra."
             nome = st.session_state.get("dnc_nome", "").strip()
             nome_caps = nome.upper()
             cpf = st.session_state.get("dnc_cpf", "").strip()
@@ -177,9 +177,9 @@ def render_declaracao_nada_consta():
 
             corpo = (
                 "Ao tempo que aproveitamos para cumprimentar Vossa Senhoria, "
-                f"e em resposta a solicitacao de {data_solicitacao} e seus anexos, declaramos que, "
-                f"{nome_caps}, {doc_segmento}residente e domiciliado {endereco}, no municipio de {municipio}, "
-                "NAO POSSUI FICHA DE CADASTRO DE BENS SEMOVENTE ATIVA, na Agencia IDARON na presente data."
+                f"e em resposta à solicitação de {data_solicitacao} e seus anexos, declaramos que, "
+                f"{nome_caps}, {doc_segmento}residente e domiciliado {endereco}, no município de {municipio}, "
+                "NÃO POSSUI FICHA DE CADASTRO DE BENS SEMOVENTE ATIVA, na Agência IDARON na presente data."
             )
 
             st.session_state["dnc_page_data"] = {
@@ -206,7 +206,7 @@ def render_declaracao_nada_consta():
             servidor_matricula = data.get("servidor_matricula", "")
             incluir_assinatura_requerente = data.get("incluir_assinatura_requerente", True)
             logo_path = Path(__file__).resolve().parents[1] / "assets" / "logo_inferior_dir.jpg"
-            st.markdown("### Pagina de impressao")
+            st.markdown("### Página de impressão")
             pdf_bytes = build_pdf_declaracao_nada_consta(
                 {
                     "destinatario": data.get("destinatario", ""),
@@ -226,7 +226,7 @@ def render_declaracao_nada_consta():
                 st.pdf(pdf_bytes)
             except StreamlitAPIException:
                 st.info(
-                    "Pre-visualizacao de PDF indisponivel neste ambiente. "
+                    "Pré-visualização de PDF indisponível neste ambiente. "
                     "Para habilitar, instale: pip install streamlit[pdf]"
                 )
             st.download_button(
