@@ -3,6 +3,7 @@ from streamlit_option_menu import option_menu
 
 from services.constants import DEFAULTS
 from views.cadastro_emissao_gta import render_cadastro_emissao_gta
+from views.declaracao_cadastral_suinos import render_declaracao_cadastral_suinos
 from views.declaracao_residencia import render_declaracao_residencia
 from views.declaracao_nada_consta import render_declaracao_nada_consta
 from views.lista_presenca import render_lista_presenca
@@ -38,6 +39,7 @@ with st.sidebar:
             "Lista de Presença",
             "Controle de Veículos",
             "Cadastro de Emissão de GTA",
+            "Declaração cadastral - suínos",
             "Parcelar Auto de Infração",
             "Requerimento de restituição de valor recolhido indevidamente",
             "Declaração de nada consta",
@@ -49,6 +51,7 @@ with st.sidebar:
             "card-checklist",
             "truck",
             "person-vcard",
+            "file-earmark-richtext",
             "receipt",
             "cash-coin",
             "file-text",
@@ -68,11 +71,13 @@ elif destino == "Controle de Veículos":
     render_veiculos()
 elif destino == "Cadastro de Emissão de GTA":
     render_cadastro_emissao_gta()
+elif destino == "Declaração cadastral - suínos":
+    render_declaracao_cadastral_suinos()
 elif destino == "Parcelar Auto de Infração":
     render_parcelamento()
+elif destino == "Requerimento de restituição de valor recolhido indevidamente":
+    render_restituicao()
 elif destino == "Declaração de nada consta":
     render_declaracao_nada_consta()
-elif destino == "Declaração de residência":
-    render_declaracao_residencia()
 else:
-    render_restituicao()
+    render_declaracao_residencia()
