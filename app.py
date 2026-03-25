@@ -21,6 +21,22 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+st.markdown(
+    """
+    <style>
+    [data-testid="stSidebar"] {
+        min-width: 430px;
+        max-width: 430px;
+    }
+    [data-testid="stSidebar"] .nav-link {
+        white-space: normal;
+        line-height: 1.2;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 for chave, valor in DEFAULTS.items():
     st.session_state.setdefault(chave, valor)
 # flags de controle do upload (para nao sobrescrever apos a primeira aplicacao)
@@ -59,6 +75,13 @@ with st.sidebar:
         ],
         menu_icon="cast",
         default_index=0,
+        styles={
+            "nav-link": {
+                "font-size": "14px",
+                "white-space": "normal",
+                "line-height": "1.2",
+            },
+        },
     )
 
 if destino == "Folha Reeducandos":

@@ -346,72 +346,73 @@ def render_declaracao_cadastral_suinos():
     with col_meio:
         st.markdown("## Declaração cadastral - suínos")
 
-        st.text_input("ULSAV", key="dcs_ulsav")
-        st.text_input("Número da declaração (ex.: 0165/2026)", key="dcs_numero_declaracao")
-        st.text_input("Nome do produtor", key="dcs_nome")
+        with st.expander("Dados do produtor", expanded=True):
+            st.text_input("ULSAV", key="dcs_ulsav")
+            st.text_input("Número da declaração (ex.: 0165/2026)", key="dcs_numero_declaracao")
+            st.text_input("Nome do produtor", key="dcs_nome")
 
-        col_dados = st.columns(2)
-        with col_dados[0]:
-            st.text_input("Nacionalidade", key="dcs_nacionalidade", value="brasileiro(a)")
-        with col_dados[1]:
-            st.text_input("Profissão", key="dcs_profissao", value="suinocultor(a)")
+            col_dados = st.columns(2)
+            with col_dados[0]:
+                st.text_input("Nacionalidade", key="dcs_nacionalidade", value="brasileiro(a)")
+            with col_dados[1]:
+                st.text_input("Profissão", key="dcs_profissao", value="suinocultor(a)")
 
-        col_docs = st.columns(2)
-        with col_docs[0]:
-            st.text_input("RG", key="dcs_rg")
-        with col_docs[1]:
-            st.text_input("Órgão expedidor", key="dcs_orgao_emissor", value="SSP/RO")
+            col_docs = st.columns(2)
+            with col_docs[0]:
+                st.text_input("RG", key="dcs_rg")
+            with col_docs[1]:
+                st.text_input("Órgão expedidor", key="dcs_orgao_emissor", value="SSP/RO")
 
-        st.text_input("CPF/CNPJ", key="dcs_cpf_cnpj")
-        st.text_input("Endereço da propriedade", key="dcs_endereco")
+            st.text_input("CPF/CNPJ", key="dcs_cpf_cnpj")
+            st.text_input("Endereço da propriedade", key="dcs_endereco")
 
-        _sync_field_from_source("dcs_ulsav", "dcs_municipio")
-        col_local = st.columns(2)
-        with col_local[0]:
-            st.text_input("Município", key="dcs_municipio")
-        with col_local[1]:
-            st.text_input("UF", key="dcs_uf", value="RO")
+            _sync_field_from_source("dcs_ulsav", "dcs_municipio")
+            col_local = st.columns(2)
+            with col_local[0]:
+                st.text_input("Município", key="dcs_municipio")
+            with col_local[1]:
+                st.text_input("UF", key="dcs_uf", value="RO")
 
-        st.markdown("### Estratificação - suínos")
-        col_animais = st.columns(3)
-        with col_animais[0]:
-            st.number_input("Reprodutor", key="dcs_reprodutor", min_value=0, step=1)
-            st.number_input("Leitão M", key="dcs_leitao_m", min_value=0, step=1)
-        with col_animais[1]:
-            st.number_input("Matriz", key="dcs_matriz", min_value=0, step=1)
-            st.number_input("Leitão F", key="dcs_leitao_f", min_value=0, step=1)
-        with col_animais[2]:
-            st.number_input("Idade e sexo não relevante", key="dcs_idade_sexo_nao_relevante", min_value=0, step=1)
-            st.text_input("Total de animais", value=str(total_animais), disabled=True)
+        with st.expander("Estratificação - suínos", expanded=True):
+            col_animais = st.columns(3)
+            with col_animais[0]:
+                st.number_input("Reprodutor", key="dcs_reprodutor", min_value=0, step=1)
+                st.number_input("Leitão M", key="dcs_leitao_m", min_value=0, step=1)
+            with col_animais[1]:
+                st.number_input("Matriz", key="dcs_matriz", min_value=0, step=1)
+                st.number_input("Leitão F", key="dcs_leitao_f", min_value=0, step=1)
+            with col_animais[2]:
+                st.number_input("Idade e sexo não relevante", key="dcs_idade_sexo_nao_relevante", min_value=0, step=1)
+                st.text_input("Total de animais", value=str(total_animais), disabled=True)
 
-        st.markdown("### Dados do imóvel rural")
-        st.caption("Nome e CPF/CNPJ do proprietário são preenchidos automaticamente com os dados do produtor, mas podem ser alterados se necessário.")
-        _sync_field_from_source("dcs_nome", "dcs_nome_prop_imovel")
-        _sync_field_from_source("dcs_cpf_cnpj", "dcs_cpf_cnpj_prop")
-        col_prop = st.columns(2)
-        with col_prop[0]:
-            st.text_input("CPF/CNPJ do proprietário do imóvel", key="dcs_cpf_cnpj_prop")
-            st.text_input("Tipo de vínculo do pecuarista com a terra", key="dcs_tipo_vinculo", value="PROPRIETÁRIO")
-        with col_prop[1]:
-            st.text_input("Nome do proprietário do imóvel", key="dcs_nome_prop_imovel")
-            st.text_input("Cód. propriedade PGA", key="dcs_cod_propriedade_pga")
-            st.text_input("Cód. exploração PGA", key="dcs_cod_exploracao_pga")
+        with st.expander("Dados do imóvel rural", expanded=True):
+            st.caption("Nome e CPF/CNPJ do proprietário são preenchidos automaticamente com os dados do produtor, mas podem ser alterados se necessário.")
+            _sync_field_from_source("dcs_nome", "dcs_nome_prop_imovel")
+            _sync_field_from_source("dcs_cpf_cnpj", "dcs_cpf_cnpj_prop")
+            col_prop = st.columns(2)
+            with col_prop[0]:
+                st.text_input("CPF/CNPJ do proprietário do imóvel", key="dcs_cpf_cnpj_prop")
+                st.text_input("Tipo de vínculo do pecuarista com a terra", key="dcs_tipo_vinculo", value="PROPRIETÁRIO")
+            with col_prop[1]:
+                st.text_input("Nome do proprietário do imóvel", key="dcs_nome_prop_imovel")
+                st.text_input("Cód. propriedade PGA", key="dcs_cod_propriedade_pga")
+                st.text_input("Cód. exploração PGA", key="dcs_cod_exploracao_pga")
 
-        col_ficha = st.columns(2)
-        with col_ficha[0]:
-            st.date_input("Data de abertura da ficha", key="dcs_data_abertura_ficha", value=date.today())
-        with col_ficha[1]:
-            st.date_input("Data do documento", key="dcs_data_documento", value=date.today())
+            col_ficha = st.columns(2)
+            with col_ficha[0]:
+                st.date_input("Data de abertura da ficha", key="dcs_data_abertura_ficha", value=date.today())
+            with col_ficha[1]:
+                st.date_input("Data do documento", key="dcs_data_documento", value=date.today())
 
-        st.text_area("Observações", key="dcs_observacoes", height=70)
+            st.text_area("Observações", key="dcs_observacoes", height=70)
 
-        st.markdown("### Identificação do emitente")
-        st.text_input("Nome do emitente", key="dcs_emitente_nome")
-        col_emit = st.columns(2)
-        with col_emit[0]:
-            st.text_input("Cargo", key="dcs_emitente_cargo")
-        with col_emit[1]:
-            st.text_input("Matrícula", key="dcs_emitente_matricula")
+        with st.expander("Identificação do emitente", expanded=True):
+            st.text_input("Nome do emitente", key="dcs_emitente_nome")
+            col_emit = st.columns(2)
+            with col_emit[0]:
+                st.text_input("Cargo", key="dcs_emitente_cargo")
+            with col_emit[1]:
+                st.text_input("Matrícula", key="dcs_emitente_matricula")
 
         gerar = st.button("Gerar PDF")
 
