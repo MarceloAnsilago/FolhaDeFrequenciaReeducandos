@@ -39,11 +39,11 @@ with st.sidebar:
             "Lista de Presença",
             "Controle de Veículos",
             "Cadastro de Emissão de GTA",
-            "Declaração cadastral - suínos",
             "Parcelar Auto de Infração",
             "Requerimento de restituição de valor recolhido indevidamente",
             "Declaração de nada consta",
             "Declaração de residência",
+            "Declaração cadastral - suínos",
         ],
         icons=[
             "file-earmark-text",
@@ -51,11 +51,11 @@ with st.sidebar:
             "card-checklist",
             "truck",
             "person-vcard",
-            "file-earmark-richtext",
             "receipt",
             "cash-coin",
             "file-text",
             "house",
+            "file-earmark-richtext",
         ],
         menu_icon="cast",
         default_index=0,
@@ -71,13 +71,13 @@ elif destino == "Controle de Veículos":
     render_veiculos()
 elif destino == "Cadastro de Emissão de GTA":
     render_cadastro_emissao_gta()
-elif destino == "Declaração cadastral - suínos":
-    render_declaracao_cadastral_suinos()
 elif destino == "Parcelar Auto de Infração":
     render_parcelamento()
 elif destino == "Requerimento de restituição de valor recolhido indevidamente":
     render_restituicao()
 elif destino == "Declaração de nada consta":
     render_declaracao_nada_consta()
-else:
+elif destino == "Declaração de residência":
     render_declaracao_residencia()
+else:
+    render_declaracao_cadastral_suinos()
