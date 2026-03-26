@@ -226,12 +226,10 @@ def _draw_imovel_section(c: canvas.Canvas, x: float, y_top: float, width: float,
     _draw_labeled_box(c, x + cpf_w + nome_w, y_top, cod_prop_w, row1_h, "CÓD. PROPRIEDADE PGA", data.get("cod_propriedade_pga", ""))
     y_top -= row1_h
 
-    vinculo_w = 78 * mm
-    abertura_w = 52 * mm
-    exploracao_w = width - vinculo_w - abertura_w
+    vinculo_w = 92 * mm
+    exploracao_w = width - vinculo_w
     _draw_labeled_box(c, x, y_top, vinculo_w, row2_h, "Tipo de Vínculo do Pecuarista com a Terra", data.get("tipo_vinculo", ""))
-    _draw_labeled_box(c, x + vinculo_w, y_top, abertura_w, row2_h, "Data de abertura da ficha", data.get("data_abertura_ficha", ""))
-    _draw_labeled_box(c, x + vinculo_w + abertura_w, y_top, exploracao_w, row2_h, "CÓD. EXPLORAÇÃO PGA", data.get("cod_exploracao_pga", ""))
+    _draw_labeled_box(c, x + vinculo_w, y_top, exploracao_w, row2_h, "CÓD. EXPLORAÇÃO PGA", data.get("cod_exploracao_pga", ""))
     y_top -= row2_h
 
     local_data = data.get("local_data_extenso", "").strip()
@@ -327,7 +325,6 @@ def render_declaracao_cadastral_suinos():
     st.session_state.setdefault("dcs_leitao_m", 0)
     st.session_state.setdefault("dcs_leitao_f", 0)
     st.session_state.setdefault("dcs_idade_sexo_nao_relevante", 0)
-    st.session_state.setdefault("dcs_data_abertura_ficha", date.today())
     st.session_state.setdefault("dcs_data_documento", date.today())
     st.session_state.setdefault(
         "dcs_observacoes",
@@ -389,20 +386,17 @@ def render_declaracao_cadastral_suinos():
             st.caption("Nome e CPF/CNPJ do proprietário são preenchidos automaticamente com os dados do produtor, mas podem ser alterados se necessário.")
             _sync_field_from_source("dcs_nome", "dcs_nome_prop_imovel")
             _sync_field_from_source("dcs_cpf_cnpj", "dcs_cpf_cnpj_prop")
-            col_prop = st.columns(2)
+            col_prop = st.columns(3)
             with col_prop[0]:
                 st.text_input("CPF/CNPJ do proprietário do imóvel", key="dcs_cpf_cnpj_prop")
-                st.text_input("Tipo de vínculo do pecuarista com a terra", key="dcs_tipo_vinculo", value="PROPRIETÁRIO")
             with col_prop[1]:
                 st.text_input("Nome do proprietário do imóvel", key="dcs_nome_prop_imovel")
                 st.text_input("Cód. propriedade PGA", key="dcs_cod_propriedade_pga")
+            with col_prop[2]:
+                st.text_input("Tipo de vínculo do pecuarista com a terra", key="dcs_tipo_vinculo", value="PROPRIETÁRIO")
                 st.text_input("Cód. exploração PGA", key="dcs_cod_exploracao_pga")
 
-            col_ficha = st.columns(2)
-            with col_ficha[0]:
-                st.date_input("Data de abertura da ficha", key="dcs_data_abertura_ficha", value=date.today())
-            with col_ficha[1]:
-                st.date_input("Data do documento", key="dcs_data_documento", value=date.today())
+            st.date_input("Data do documento", key="dcs_data_documento", value=date.today())
 
             st.text_area("Observações", key="dcs_observacoes", height=70)
 
@@ -445,7 +439,6 @@ def render_declaracao_cadastral_suinos():
                 "cod_propriedade_pga": st.session_state.get("dcs_cod_propriedade_pga", ""),
                 "observacoes": st.session_state.get("dcs_observacoes", ""),
                 "tipo_vinculo": st.session_state.get("dcs_tipo_vinculo", ""),
-                "data_abertura_ficha": _fmt_date(st.session_state.get("dcs_data_abertura_ficha")),
                 "cod_exploracao_pga": st.session_state.get("dcs_cod_exploracao_pga", ""),
                 "local_data_extenso": local_data_extenso,
                 "emitente_nome": st.session_state.get("dcs_emitente_nome", ""),
