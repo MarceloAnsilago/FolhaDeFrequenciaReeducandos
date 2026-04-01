@@ -2,10 +2,11 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 
 from services.constants import DEFAULTS
+from views.autorizacao_viagem_manual import render_autorizacao_viagem_manual
 from views.cadastro_emissao_gta import render_cadastro_emissao_gta
 from views.declaracao_cadastral_suinos import render_declaracao_cadastral_suinos
-from views.declaracao_residencia import render_declaracao_residencia
 from views.declaracao_nada_consta import render_declaracao_nada_consta
+from views.declaracao_residencia import render_declaracao_residencia
 from views.lista_presenca import render_lista_presenca
 from views.parcelamento import render_parcelamento
 from views.reeducandos import render_folha_ponto
@@ -39,7 +40,7 @@ st.markdown(
 
 for chave, valor in DEFAULTS.items():
     st.session_state.setdefault(chave, valor)
-# flags de controle do upload (para nao sobrescrever apos a primeira aplicacao)
+
 st.session_state.setdefault("_upload_aplicado", False)
 st.session_state.setdefault("_ultimo_upload", "")
 st.session_state.setdefault("_sugesp_upload_aplicado", False)
@@ -60,6 +61,7 @@ with st.sidebar:
             "Declaração de nada consta",
             "Declaração de residência",
             "Declaração cadastral - suínos",
+            "Autorização de viagem manual",
         ],
         icons=[
             "file-earmark-text",
@@ -72,6 +74,7 @@ with st.sidebar:
             "file-text",
             "house",
             "file-earmark-richtext",
+            "car-front",
         ],
         menu_icon="cast",
         default_index=0,
@@ -102,5 +105,7 @@ elif destino == "Declaração de nada consta":
     render_declaracao_nada_consta()
 elif destino == "Declaração de residência":
     render_declaracao_residencia()
-else:
+elif destino == "Declaração cadastral - suínos":
     render_declaracao_cadastral_suinos()
+else:
+    render_autorizacao_viagem_manual()
