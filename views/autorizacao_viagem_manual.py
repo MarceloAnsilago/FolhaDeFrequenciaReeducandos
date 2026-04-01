@@ -5,9 +5,31 @@ import streamlit as st
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from streamlit.errors import StreamlitAPIException
+
+FONT_REGULAR = "Helvetica"
+FONT_BOLD = "Helvetica-Bold"
+
+
+def _ensure_fonts() -> None:
+    global FONT_REGULAR, FONT_BOLD
+
+    if getattr(_ensure_fonts, "_loaded", False):
+        return
+
+    regular_path = Path(r"C:\Windows\Fonts\arial.ttf")
+    bold_path = Path(r"C:\Windows\Fonts\arialbd.ttf")
+    if regular_path.exists() and bold_path.exists():
+        pdfmetrics.registerFont(TTFont("AVMArial", str(regular_path)))
+        pdfmetrics.registerFont(TTFont("AVMArial-Bold", str(bold_path)))
+        FONT_REGULAR = "AVMArial"
+        FONT_BOLD = "AVMArial-Bold"
+
+    _ensure_fonts._loaded = True
 
 
 def _wrap_text(text: str, font_name: str, font_size: int, max_width: float) -> list[str]:
@@ -47,15 +69,15 @@ def _draw_labeled_box(
 ) -> None:
     _draw_box(c, x, y_top, w, h)
     pad_x = 1.5 * mm
-    c.setFont("Helvetica", value_size)
-    linhas = _wrap_text(value, "Helvetica", value_size, w - 3 * mm)
+    c.setFont(FONT_REGULAR, value_size)
+    linhas = _wrap_text(value, FONT_REGULAR, value_size, w - 3 * mm)
     if label:
-        c.setFont("Helvetica-Bold", 6.5)
+        c.setFont(FONT_BOLD, 6.5)
         c.drawString(x + pad_x, y_top - 3.3 * mm, label)
         y = y_top - 7 * mm
     else:
         y = y_top - 4.7 * mm
-    c.setFont("Helvetica", value_size)
+    c.setFont(FONT_REGULAR, value_size)
     for linha in linhas[:max_lines]:
         c.drawString(x + pad_x, y, linha)
         y -= 3.8 * mm
@@ -94,11 +116,11 @@ def _draw_header(c: canvas.Canvas, x: float, y_top: float, w: float, h: float, l
         gov_w,
         h,
         [
-            "GOVERNO DO ESTADO DE RONDONIA",
-            "AGENCIA DE DEFESA AGROSILVOPASTORIL",
-            "DO ESTADO DE RONDONIA - IDARON",
+            "GOVERNO DO ESTADO DE RONDÔNIA",
+            "AGÊNCIA DE DEFESA AGROSILVOPASTORIL",
+            "DO ESTADO DE RONDÔNIA - IDARON",
         ],
-        "Helvetica-Bold",
+        FONT_BOLD,
         7.1,
         3.8 * mm,
     )
@@ -109,11 +131,11 @@ def _draw_header(c: canvas.Canvas, x: float, y_top: float, w: float, h: float, l
         title_w,
         h,
         [
-            "AUTORIZACAO PROVISORIA DE",
-            "VIAGEM OU TRANSITO FORA DO",
-            "HORARIO DE EXPEDIENTE",
+            "AUTORIZAÇÃO PROVISÓRIA DE",
+            "VIAGEM OU TRÂNSITO FORA DO",
+            "HORÁRIO DE EXPEDIENTE",
         ],
-        "Helvetica-Bold",
+        FONT_BOLD,
         7.8,
         4.2 * mm,
     )
@@ -142,7 +164,7 @@ def _draw_label_row(c: canvas.Canvas, x: float, y_top: float, w: float, h: float
     _draw_box(c, x, y_top, left_w, h)
     _draw_box(c, x + left_w, y_top, right_w, h)
 
-    c.setFont("Helvetica-Bold", 7.6)
+    c.setFont(FONT_BOLD, 7.6)
     baseline_y = y_top - h + (h * 0.42)
     c.drawCentredString(x + (left_w / 2), baseline_y, "OBJETIVO")
     c.drawCentredString(x + left_w + (right_w / 2), baseline_y, "DESTINO")
@@ -154,7 +176,7 @@ def _draw_route_row(
     left_w = w * 0.46
     km_w = w * 0.12
 
-    prefixo = "SAIDA" if is_saida else "CHEGADA"
+    prefixo = "SAÍDA" if is_saida else "CHEGADA"
     valor_data = data.get("saida_texto" if is_saida else "chegada_texto", "")
     valor_km = data.get("km_saida" if is_saida else "km_chegada", "")
 
@@ -178,7 +200,7 @@ def _draw_formulario(c: canvas.Canvas, x: float, y_top: float, w: float, data: d
     y -= header_h
 
     veiculo = f"PLACA {data.get('placa', '').strip()}    TIPO/MODELO: {data.get('tipo_modelo', '').strip()}"
-    _draw_labeled_box(c, x, y, w, vehicle_h, "VEICULO", veiculo, value_size=8.8, max_lines=2)
+    _draw_labeled_box(c, x, y, w, vehicle_h, "VEÍCULO", veiculo, value_size=8.8, max_lines=2)
     y -= vehicle_h
 
     _draw_label_row(c, x, y, w, section_label_h, 0.6)
@@ -192,10 +214,10 @@ def _draw_formulario(c: canvas.Canvas, x: float, y_top: float, w: float, data: d
 
     servidor_linhas = [
         f"SERVIDOR: {data.get('servidor', '').strip()}",
-        f"CARGO/FUNCAO: {data.get('cargo_funcao', '').strip()}",
-        f"MATRICULA: {data.get('matricula', '').strip()}",
+        f"CARGO/FUNÇÃO: {data.get('cargo_funcao', '').strip()}",
+        f"MATRÍCULA: {data.get('matricula', '').strip()}",
         (
-            "HABILITACAO: "
+            "HABILITAÇÃO: "
             f"{data.get('habilitacao', '').strip()}    - CATEGORIA: {data.get('categoria', '').strip()}    "
             f"- VALIDADE: {data.get('validade', '').strip()}"
         ),
@@ -213,7 +235,7 @@ def _draw_formulario(c: canvas.Canvas, x: float, y_top: float, w: float, data: d
         y + route_h,
         resp_w,
         route_h * 2,
-        "Responsavel Transporte:",
+        "Responsável Transporte:",
         data.get("responsavel_transporte", ""),
         value_size=8.3,
         max_lines=4,
@@ -225,6 +247,7 @@ def _draw_formulario(c: canvas.Canvas, x: float, y_top: float, w: float, data: d
 
 
 def build_pdf_autorizacao_viagem_manual(data: dict, logo_path: Path) -> bytes:
+    _ensure_fonts()
     buffer = BytesIO()
     page_width, page_height = A4
     c = canvas.Canvas(buffer, pagesize=A4)
@@ -240,8 +263,8 @@ def build_pdf_autorizacao_viagem_manual(data: dict, logo_path: Path) -> bytes:
 
     _draw_formulario(c, x, top1, w, data, logo_path)
 
-    c.setFont("Helvetica-Bold", 8)
-    c.drawCentredString(page_width / 2, top2 + 5 * mm, "2a VIA PARA O SETOR")
+    c.setFont(FONT_BOLD, 8)
+    c.drawCentredString(page_width / 2, top2 + 5 * mm, "2ª VIA PARA O SETOR")
 
     _draw_formulario(c, x, top2, w, data, logo_path)
 
@@ -252,7 +275,7 @@ def build_pdf_autorizacao_viagem_manual(data: dict, logo_path: Path) -> bytes:
 
 
 def render_autorizacao_viagem_manual():
-    st.session_state.setdefault("avm_observacao", "VEICULO ENTREGUE EM PERFEITO ESTADO DE CONSERVACAO")
+    st.session_state.setdefault("avm_observacao", "VEÍCULO ENTREGUE EM PERFEITO ESTADO DE CONSERVAÇÃO")
 
     col_esq, col_meio, col_dir = st.columns([1, 2, 1])
     with col_meio:
