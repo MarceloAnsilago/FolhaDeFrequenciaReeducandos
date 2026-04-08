@@ -23,6 +23,18 @@ VEICULO_MESES = [
     "Dezembro",
 ]
 VEICULO_ANOS = list(range(2026, 2037))
+VEICULO_TABLE_HEADERS = [
+    "DATA",
+    "HR SAIDA",
+    "KM SAIDA",
+    "HR CHEG",
+    "KM CHEGADA",
+    "DESTINO",
+    "ABASTECIMENTO",
+    "SERVIÇO REALIZADO DETALHADAMENTE",
+    "NOME DO CONDUTOR POR EXTENSO",
+]
+VEICULO_TABLE_WIDTHS = [18, 18, 18, 18, 16, 50, 24, 50, 50]
 
 def build_pdf_veiculo(data: dict, logo_path: Path) -> bytes:
     buffer = BytesIO()
@@ -83,9 +95,8 @@ def build_pdf_veiculo(data: dict, logo_path: Path) -> bytes:
     rows = 14
     row_h = table_height / rows
 
-    col_widths = [18, 18, 18, 18, 16, 48, 82, 44]
-    scale = rect_w / sum(col_widths)
-    col_widths = [w * scale for w in col_widths]
+    scale = rect_w / sum(VEICULO_TABLE_WIDTHS)
+    col_widths = [w * scale for w in VEICULO_TABLE_WIDTHS]
 
     x = rect_x
     c.setLineWidth(0.5)
@@ -98,20 +109,10 @@ def build_pdf_veiculo(data: dict, logo_path: Path) -> bytes:
         y = table_top - i * row_h
         c.line(rect_x, y, rect_x + rect_w, y)
 
-    headers = [
-        "DATA",
-        "HR SAIDA",
-        "KM SAIDA",
-        "HR CHEG",
-        "KM CHEGADA",
-        "DESTINO",
-        "SERVICO REALIZADO DETALHADAMENTE",
-        "NOME DO CONDUTOR POR EXTENSO",
-    ]
     c.setFont("Helvetica-Bold", 6)
     x = rect_x
     y = table_top - row_h + 2 * mm
-    for w, h in zip(col_widths, headers):
+    for w, h in zip(col_widths, VEICULO_TABLE_HEADERS):
         c.drawCentredString(x + w / 2, y, h)
         x += w
 
@@ -266,6 +267,7 @@ def render_veiculos():
                 width: 100%;
                 border-collapse: collapse;
                 font-size: 10px;
+                table-layout: fixed;
             }}
             .tabela th, .tabela td {{
                 border: 1px solid #222;
@@ -325,20 +327,16 @@ def render_veiculos():
                     <div><strong>PLACA DO VEICULO:</strong> {data["placa"]} ({data["modelo"]})</div>
                 </div>
                 <table class="tabela">
+                    <colgroup>
+                        {"".join([f"<col style='width: {width / sum(VEICULO_TABLE_WIDTHS) * 100:.4f}%;'>" for width in VEICULO_TABLE_WIDTHS])}
+                    </colgroup>
                     <thead>
                         <tr>
-                            <th>DATA</th>
-                            <th>HR SAIDA</th>
-                            <th>KM SAIDA</th>
-                            <th>HR CHEG</th>
-                            <th>KM CHEGADA</th>
-                            <th>DESTINO</th>
-                            <th>SERVICO REALIZADO DETALHADAMENTE</th>
-                            <th>NOME DO CONDUTOR POR EXTENSO</th>
+                            {"".join([f"<th>{header}</th>" for header in VEICULO_TABLE_HEADERS])}
                         </tr>
                     </thead>
                     <tbody>
-                        {"".join(["<tr>" + "".join(["<td>" + ("/    /" if i == 0 else "&nbsp;") + "</td>" for i in range(8)]) + "</tr>" for _ in range(14)])}
+                        {"".join(["<tr>" + "".join(["<td>" + ("/    /" if i == 0 else "&nbsp;") + "</td>" for i in range(len(VEICULO_TABLE_HEADERS))]) + "</tr>" for _ in range(14)])}
                     </tbody>
                 </table>
                 <div class="bottom-area">
