@@ -219,11 +219,7 @@ def render_restituicao():
             )
             st.text_area(
                 "Justificativa",
-                value=(
-                    "O requerente enviou o DARE para um dos filhos pagar, "
-                    "que estava fora de área, em seguida enviou para a filha que pagou, "
-                    "quando o filho entrou em área pagou novamente em duplicidade."
-                ),
+                value="",
                 height=140,
                 key="rest_justificativa",
             )
