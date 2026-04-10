@@ -111,7 +111,7 @@ def render_declaracao_residencia():
     with col_meio:
         st.markdown("## Declaração de residência")
         with st.form("form_declaracao_residencia"):
-            st.text_input("Nome do declarante", key="dr_nome_declarante")
+            st.text_input("Nome e CPF do declarante", key="dr_nome_declarante")
             st.text_input("Logradouro", key="dr_logradouro")
             st.text_input("Município", key="dr_municipio")
             st.text_input("Complemento", key="dr_complemento")
