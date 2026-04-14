@@ -1,13 +1,33 @@
 import calendar
 from pathlib import Path
-from textwrap import wrap
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 
 LOGO_SUGESP = Path("assets/logo_sugesp.png")
+FONT_REGULAR = "Helvetica"
+FONT_BOLD = "Helvetica-Bold"
+
+
+def _ensure_fonts() -> None:
+    global FONT_REGULAR, FONT_BOLD
+
+    if getattr(_ensure_fonts, "_loaded", False):
+        return
+
+    regular_path = Path(r"C:\Windows\Fonts\BOOKOS.TTF")
+    bold_path = Path(r"C:\Windows\Fonts\BOOKOSB.TTF")
+    if regular_path.exists() and bold_path.exists():
+        pdfmetrics.registerFont(TTFont("SugespBookman", str(regular_path)))
+        pdfmetrics.registerFont(TTFont("SugespBookman-Bold", str(bold_path)))
+        FONT_REGULAR = "SugespBookman"
+        FONT_BOLD = "SugespBookman-Bold"
+
+    _ensure_fonts._loaded = True
 
 
 def _wrap_text(c, texto, max_width, font_name, font_size):
@@ -57,9 +77,9 @@ def desenhar_cabecalho_sugesp(
     y_texto = y_logo - 3 * mm
     x_centro = largura_pagina / 2
 
-    c.setFont("Helvetica-Bold", 10)
+    c.setFont(FONT_BOLD, 10)
     c.drawCentredString(x_centro, y_texto, "GOVERNO DO ESTADO DE RONDONIA")
-    c.setFont("Helvetica-Bold", 9)
+    c.setFont(FONT_BOLD, 9)
     c.drawCentredString(
         x_centro,
         y_texto - 4 * mm,
@@ -114,7 +134,7 @@ def desenhar_tabela_sugesp(
     altura_linha = 5 * mm
 
     c.setLineWidth(0.7)
-    c.setFont("Helvetica-Bold", 10)
+    c.setFont(FONT_BOLD, 10)
 
     y = y_top
 
@@ -123,19 +143,19 @@ def desenhar_tabela_sugesp(
     c.rect(x0, y1, x5 - x0, altura_titulo, fill=0)
     c.rect(x5, y1, x7 - x5, altura_titulo, fill=0)
     c.drawCentredString(x0 + (x5 - x0) / 2, y1 + 2 * mm, "REGISTRO INDIVIDUAL DE PONTO")
-    c.setFont("Helvetica-Bold", 9)
+    c.setFont(FONT_BOLD, 9)
     c.drawString(x5 + 2 * mm, y1 + 1.5 * mm, "ANO:")
     y = y1
 
     # linha 2: unidade e ano (altura dinamica para 2 linhas)
     unidade_texto = f"UNIDADE: {unidade}"
-    linhas_unidade = _wrap_text(c, unidade_texto, (x5 - x0) - 4 * mm, "Helvetica-Bold", 9)
+    linhas_unidade = _wrap_text(c, unidade_texto, (x5 - x0) - 4 * mm, FONT_BOLD, 9)
     altura_unidade = max(altura_linha, (len(linhas_unidade[:2]) * 3.2 * mm) + 1.6 * mm)
     y2 = y - altura_unidade
     c.rect(x0, y2, x5 - x0, altura_unidade, fill=0)
     c.rect(x5, y2, x7 - x5, altura_unidade, fill=0)
     y_unidade = y2 + altura_unidade - 3.4 * mm
-    c.setFont("Helvetica-Bold", 9)
+    c.setFont(FONT_BOLD, 9)
     for linha in linhas_unidade[:2]:
         c.drawString(x0 + 2 * mm, y_unidade, linha)
         y_unidade -= 3.4 * mm
@@ -149,7 +169,7 @@ def desenhar_tabela_sugesp(
 
     # coluna direita (mes) mesclada por 3 linhas
     c.rect(x5, y3 - 2 * altura_linha, x7 - x5, 3 * altura_linha, fill=0)
-    c.setFont("Helvetica-Bold", 9)
+    c.setFont(FONT_BOLD, 9)
     c.drawCentredString(x5 + (x7 - x5) / 2, y3 - altura_linha + 1.5 * mm, f"MES: {mes_label}")
 
     y4 = y3 - altura_linha
@@ -183,7 +203,7 @@ def desenhar_tabela_sugesp(
     c.rect(x0, y_header, x6 - x0, altura_header_dias, fill=0)
     for xv in (x1, x2, x3, x4):
         c.line(xv, y_header, xv, y_header + altura_header_dias)
-    c.setFont("Helvetica-Bold", 8)
+    c.setFont(FONT_BOLD, 8)
     c.drawCentredString((x0 + x1) / 2, y_header + 1.5 * mm, "DIA")
     c.drawCentredString((x1 + x2) / 2, y_header + 1.5 * mm, "Hr")
     c.drawCentredString((x2 + x3) / 2, y_header + 1.5 * mm, "ENTRADA")
@@ -204,10 +224,10 @@ def desenhar_tabela_sugesp(
     c.translate((x6 + x7) / 2, (y_header + altura_header_dias + y_dias_bottom) / 2)
     c.rotate(90)
     max_width = (y_header + altura_header_dias - y_dias_bottom) - 4 * mm
-    linhas = _wrap_text(c, decreto, max_width, "Helvetica-Bold", 7)
+    linhas = _wrap_text(c, decreto, max_width, FONT_BOLD, 7)
     total_h = len(linhas) * 8
     y_text = total_h / 2 - 7
-    c.setFont("Helvetica-Bold", 7)
+    c.setFont(FONT_BOLD, 7)
     for linha in linhas:
         c.drawCentredString(0, y_text, linha)
         y_text -= 8
@@ -234,7 +254,7 @@ def desenhar_tabela_sugesp(
         for xv in (x1, x2, x3, x4):
             c.line(xv, y_row, xv, y_row + altura_linha_dia)
 
-        c.setFont("Helvetica-Bold", 8)
+        c.setFont(FONT_BOLD, 8)
         dia_str = f"{dia:02d}" if is_valido else "---"
         c.drawCentredString((x0 + x1) / 2, y_row + 1.5 * mm, dia_str)
 
@@ -268,7 +288,7 @@ def desenhar_tabela_sugesp(
             texto_entrada = "---"
             texto_saida = "---"
 
-        c.setFont("Helvetica-Bold", 8)
+        c.setFont(FONT_BOLD, 8)
         if texto_hr1:
             c.drawCentredString((x1 + x2) / 2, y_row + 1.5 * mm, texto_hr1)
         if texto_hr2:
@@ -278,7 +298,7 @@ def desenhar_tabela_sugesp(
             if not is_valido:
                 c.drawCentredString((x2 + x3) / 2, y_row + 1.5 * mm, texto_entrada)
             else:
-                linhas = _wrap_text(c, texto_entrada, (x3 - x2) - 2 * mm, "Helvetica-Bold", 7)
+                linhas = _wrap_text(c, texto_entrada, (x3 - x2) - 2 * mm, FONT_BOLD, 7)
                 y_text = y_row + 2.5 * mm + (len(linhas) - 1) * 3
                 for linha in linhas:
                     c.drawCentredString((x2 + x3) / 2, y_text, linha)
@@ -287,7 +307,7 @@ def desenhar_tabela_sugesp(
             if not is_valido:
                 c.drawCentredString((x4 + x6) / 2, y_row + 1.5 * mm, texto_saida)
             else:
-                linhas = _wrap_text(c, texto_saida, (x6 - x4) - 2 * mm, "Helvetica-Bold", 7)
+                linhas = _wrap_text(c, texto_saida, (x6 - x4) - 2 * mm, FONT_BOLD, 7)
                 y_text = y_row + 2.5 * mm + (len(linhas) - 1) * 3
                 for linha in linhas:
                     c.drawCentredString((x4 + x6) / 2, y_text, linha)
@@ -312,7 +332,7 @@ def desenhar_tabela_sugesp(
 
     y_r1 = y_footer_top - row1_h
     c.rect(x0, y_r1, tabela_largura, row1_h, fill=0)
-    c.setFont("Helvetica", 8)
+    c.setFont(FONT_REGULAR, 8)
     c.drawString(x0 + 2 * mm, y_r1 + 1.5 * mm, f"ENDERECO: {endereco} CEP: {cep}")
 
     y_r2 = y_r1 - row2_h
@@ -331,11 +351,11 @@ def desenhar_tabela_sugesp(
     # DATA | devolucao
     c.line(f1, y_r3, f1, y_r3 + row3_h)
     c.drawString(x0 + 2 * mm, y_r3 + 1.5 * mm, f"DATA: {data_preenchimento}")
-    c.setFont("Helvetica", 7)
+    c.setFont(FONT_REGULAR, 7)
     c.drawString(f1 + 2 * mm, y_r3 + 1.5 * mm, "Devolver esta folha ate o 1o dia util do mes seguinte na SUGESP-CGP")
 
     y_r4 = y_r3 - row4_h
-    c.setFont("Helvetica", 8)
+    c.setFont(FONT_REGULAR, 8)
     c.rect(x0, y_r4, tabela_largura, row4_h, fill=0)
     split_sig = f0 + fw[0] + fw[1] + fw[2]
     c.line(split_sig, y_r4, split_sig, y_r4 + row4_h)
@@ -357,8 +377,8 @@ def desenhar_tabela_sugesp(
         "IMEDIATO, ATRAVES DE ASSINATURA E RESPECTIVO CARIMBO DE IDENTIFICACAO (DEC.5442/91)"
     )
     max_width = tabela_largura - 4 * mm
-    c.setFont("Helvetica-Bold", 6.5)
-    linhas = _wrap_text(c, legal, max_width, "Helvetica-Bold", 6.5)
+    c.setFont(FONT_BOLD, 6.5)
+    linhas = _wrap_text(c, legal, max_width, FONT_BOLD, 6.5)
     line_h = 2.6 * mm
     legal_h = max(10 * mm, (len(linhas) * line_h) + 3 * mm)
     y_legal = y_r5 - legal_h
@@ -377,6 +397,7 @@ def gerar_pdf_sugesp(data):
     from reportlab.pdfgen import canvas
     from io import BytesIO
 
+    _ensure_fonts()
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     c.setTitle("Folha de ponto SUGESP")
