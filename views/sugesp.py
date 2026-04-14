@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit.errors import StreamlitAPIException
 
 from services.constants import ANOS_OPCOES, MESES
-from services.parsers import _ler_upload, _parse_campos_sugesp, _safe_index, parse_feriados_text
+from services.parsers import _ler_upload, _parse_campos_sugesp, parse_feriados_text
 from pdf.sugesp import gerar_pdf_sugesp
 
 def render_folha_ponto_sugesp():
@@ -65,29 +65,6 @@ def render_folha_ponto_sugesp():
             with col_ano:
                 ano = st.selectbox("Ano", anos_opcoes, key="sugesp_ano")
 
-            opcoes_he = [
-                f"{h:02d}:{m:02d}"
-                for h in range(5, 10)
-                for m in (0, 30)
-                if (h < 9 or (h == 9 and m == 0))
-            ]
-            opcoes_hs = [
-                f"{h:02d}:{m:02d}"
-                for h in range(10, 18)
-                for m in (0, 30)
-                if not (h == 10 and m == 0)
-            ]
-
-            col_he, col_hs = st.columns(2)
-            with col_he:
-                he_default = st.session_state.get("sugesp_he", "")
-                he_index = _safe_index(opcoes_he, he_default, 0)
-                he = st.selectbox("Horario de entrada", opcoes_he, index=he_index, key="sugesp_he")
-            with col_hs:
-                hs_default = st.session_state.get("sugesp_hs", "")
-                hs_index = _safe_index(opcoes_hs, hs_default, 0)
-                hs = st.selectbox("Horario de saida", opcoes_hs, index=hs_index, key="sugesp_hs")
-
             feriados_texto = st.text_area(
                 "Feriados (formato: dia-descricao, separados por virgulas)",
                 value=st.session_state.get("sugesp_feriados_texto", ""),
@@ -111,8 +88,6 @@ def render_folha_ponto_sugesp():
                         "matricula": matricula,
                         "sigla": sigla,
                         "cargo": cargo,
-                        "he": he,
-                        "hs": hs,
                         "feriados": feriados_dict,
                         "endereco": endereco,
                         "cep": cep,

@@ -1,7 +1,8 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 import calendar
-from textwrap import wrap
+
+from pdf import bookman_font
 
 def desenhar_tabela(
     c,
@@ -26,6 +27,7 @@ def desenhar_tabela(
     conta=None,
     tipo_conta=None,
 ):
+    bookman_font.ensure_bookman_fonts()
     largura_pagina, altura_pagina = A4
     feriados = feriados or {}
 
@@ -80,7 +82,7 @@ def desenhar_tabela(
     y1 = y_top - altura_titulo
     c.rect(x, y1, largura_tabela, altura_titulo, fill=0)
 
-    c.setFont("Helvetica-Bold", 12)   # Arial Black 12 ~
+    c.setFont(bookman_font.FONT_BOLD, 12)   # Arial Black 12 ~
     c.drawCentredString(
         x + largura_tabela / 2,
         y1 + (altura_titulo / 2) - 4,
@@ -94,9 +96,9 @@ def desenhar_tabela(
     y2 = y_atual - altura_linha
     c.rect(x, y2, largura_tabela, altura_linha, fill=0)
 
-    c.setFont("Helvetica-Bold", 11)
+    c.setFont(bookman_font.FONT_BOLD, 11)
     texto_ano = f"ANO: {ano}"
-    largura_texto_ano = c.stringWidth(texto_ano, "Helvetica-Bold", 11)
+    largura_texto_ano = c.stringWidth(texto_ano, bookman_font.FONT_BOLD, 11)
 
     x_ano = x + largura_tabela - pad - largura_texto_ano
     x_div1 = x_ano - pad
@@ -154,9 +156,9 @@ def desenhar_tabela(
     y5 = y_atual - altura_linha
     c.rect(x, y5, largura_tabela, altura_linha, fill=0)
 
-    c.setFont("Helvetica-Bold", 11)
+    c.setFont(bookman_font.FONT_BOLD, 11)
     texto_data = f"DATA DA INCLUSÃO: {data_inclusao}"
-    largura_texto_data = c.stringWidth(texto_data, "Helvetica-Bold", 11)
+    largura_texto_data = c.stringWidth(texto_data, bookman_font.FONT_BOLD, 11)
 
     x_fim_data = x + pad + largura_texto_data + 2
     c.line(x_fim_data, y5, x_fim_data, y5 + altura_linha)
@@ -262,7 +264,7 @@ def desenhar_tabela(
     for xv in (x1, x2, x3, x4, x5):
         c.line(xv, y_header, xv, y_header + altura_cabecalho_dias)
 
-    c.setFont("Helvetica-Bold", 9)
+    c.setFont(bookman_font.FONT_BOLD, 9)
 
     def wrap_text(texto, max_width, font_name, font_size):
         """Quebra o texto para caber na largura disponível."""
@@ -318,7 +320,7 @@ def desenhar_tabela(
     total_linhas = 31
     altura_linha_dia = 5 * mm
 
-    c.setFont("Helvetica-Bold", 9)
+    c.setFont(bookman_font.FONT_BOLD, 9)
 
     # topo da tabela de dias fica logo abaixo do cabeçalho
     y_top_tabela = y_header
@@ -326,7 +328,7 @@ def desenhar_tabela(
 
     for dia in range(1, total_linhas + 1):
         # reset fonte padrÇœo da linha para evitar heranÓas do feriado anterior
-        c.setFont("Helvetica-Bold", 9)
+        c.setFont(bookman_font.FONT_BOLD, 9)
         y_row = y_ultima_linha - altura_linha_dia
 
         # retângulo DA LINHA até SAÍDA TARDE (não entra na última coluna)
@@ -373,7 +375,7 @@ def desenhar_tabela(
             saida_texto = "---"
             placeholder_invalido = True
 
-        c.setFont("Helvetica-Bold", 9)
+        c.setFont(bookman_font.FONT_BOLD, 9)
         c.drawCentredString(
             (x0 + x1) / 2,
             y_row + (altura_linha_dia / 2) - 3,
@@ -381,7 +383,7 @@ def desenhar_tabela(
         )
 
         if he_text:
-            c.setFont("Helvetica-Bold", 9)
+            c.setFont(bookman_font.FONT_BOLD, 9)
             c.drawCentredString(
                 (x1 + x2) / 2,
                 y_row + (altura_linha_dia / 2) - 3,
@@ -389,7 +391,7 @@ def desenhar_tabela(
             )
         if entrada_texto:
             if placeholder_invalido:
-                c.setFont("Helvetica-Bold", 9)
+                c.setFont(bookman_font.FONT_BOLD, 9)
                 c.drawCentredString(
                     (x2 + x3) / 2,
                     y_row + (altura_linha_dia / 2) - 3,
@@ -397,7 +399,7 @@ def desenhar_tabela(
                 )
             else:
                 is_feriado = bool(feriados.get(dia))
-                fonte = "Helvetica" if is_feriado else "Helvetica-Bold"
+                fonte = bookman_font.FONT_REGULAR if is_feriado else bookman_font.FONT_BOLD
                 tamanho = 5 if is_feriado else 9
                 draw_wrapped_centered(
                     entrada_texto,
@@ -408,7 +410,7 @@ def desenhar_tabela(
                     tamanho,
                 )
         if hs_text:
-            c.setFont("Helvetica-Bold", 9)
+            c.setFont(bookman_font.FONT_BOLD, 9)
             c.drawCentredString(
                 (x3 + x4) / 2,
                 y_row + (altura_linha_dia / 2) - 3,
@@ -416,7 +418,7 @@ def desenhar_tabela(
             )
         if saida_texto:
             if placeholder_invalido:
-                c.setFont("Helvetica-Bold", 9)
+                c.setFont(bookman_font.FONT_BOLD, 9)
                 c.drawCentredString(
                     (x4 + x5) / 2,
                     y_row + (altura_linha_dia / 2) - 3,
@@ -424,7 +426,7 @@ def desenhar_tabela(
                 )
             else:
                 is_feriado = bool(feriados.get(dia))
-                fonte = "Helvetica" if is_feriado else "Helvetica-Bold"
+                fonte = bookman_font.FONT_REGULAR if is_feriado else bookman_font.FONT_BOLD
                 tamanho = 5 if is_feriado else 9
                 draw_wrapped_centered(
                     saida_texto,
@@ -459,7 +461,7 @@ def desenhar_tabela(
         "13:30 HS",
     ]
 
-    c.setFont("Helvetica-Bold", 7)
+    c.setFont(bookman_font.FONT_BOLD, 7)
 
     line_h = 9  # altura aproximada da linha em pontos
     linhas_por_bloco = len(bloco_texto) + 1  # +1 linha em branco

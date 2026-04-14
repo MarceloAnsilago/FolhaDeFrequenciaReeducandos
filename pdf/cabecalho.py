@@ -4,6 +4,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 
+from pdf import bookman_font
+
 
 LOGO_PATH = Path("assets/logo_ro_horizontal.jpg")
 LOGO_PATH_ALT = Path("assets/logo_ro_horizontal.JPG")
@@ -19,6 +21,7 @@ def desenhar_cabecalho(
     Desenha o cabeçalho oficial com o brasão e devolve a coordenada Y logo abaixo dele.
     Mantém o início do conteúdo mais alto, para afastar rodapé e ganhar espaço na página.
     """
+    bookman_font.ensure_bookman_fonts()
     largura_pagina, altura_pagina = A4
 
     # ---------- LOGO ----------
@@ -53,7 +56,7 @@ def desenhar_cabecalho(
     linha3 = "FUNDO PENITENCIÁRIO"
 
     espacamento = 10
-    c.setFont("Helvetica-Bold", 10)
+    c.setFont(bookman_font.FONT_BOLD, 10)
     c.drawCentredString(x_centro, y_texto, linha1)
     c.drawCentredString(x_centro, y_texto - espacamento, linha2)
     c.drawCentredString(x_centro, y_texto - 2 * espacamento, linha3)

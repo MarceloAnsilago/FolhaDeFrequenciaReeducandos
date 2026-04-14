@@ -102,8 +102,6 @@ def desenhar_tabela_sugesp(
     matricula,
     sigla,
     cargo,
-    he,
-    hs,
     feriados,
     endereco,
     cep,
@@ -265,23 +263,14 @@ def desenhar_tabela_sugesp(
 
         if is_valido:
             if is_sabado:
-                texto_hr1 = "---"
-                texto_hr2 = "---"
                 texto_entrada = "SABADO"
                 texto_saida = "SABADO"
             elif is_domingo:
-                texto_hr1 = "---"
-                texto_hr2 = "---"
                 texto_entrada = "DOMINGO"
                 texto_saida = "DOMINGO"
             elif is_feriado:
-                texto_hr1 = "---"
-                texto_hr2 = "---"
                 texto_entrada = feriados[dia].upper()
                 texto_saida = feriados[dia].upper()
-            else:
-                texto_hr1 = he or ""
-                texto_hr2 = hs or ""
         else:
             texto_hr1 = "---"
             texto_hr2 = "---"
