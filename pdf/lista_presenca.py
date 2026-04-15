@@ -8,6 +8,94 @@ from reportlab.lib.utils import ImageReader
 LOGO_IDARON = Path("assets/logo_idaron1548x1787px-1.png")
 
 
+def _wrap_text(c, text, max_width, font_name, font_size):
+    """Quebra texto respeitando a largura em pontos do ReportLab."""
+    words = str(text or "").split()
+    lines = []
+    current = ""
+
+    def split_long_word(word):
+        parts = []
+        part = ""
+        for char in word:
+            candidate = f"{part}{char}"
+            if c.stringWidth(candidate, font_name, font_size) <= max_width:
+                part = candidate
+            else:
+                if part:
+                    parts.append(part)
+                part = char
+        if part:
+            parts.append(part)
+        return parts
+
+    for word in words:
+        candidate = word if not current else f"{current} {word}"
+        if c.stringWidth(candidate, font_name, font_size) <= max_width:
+            current = candidate
+            continue
+
+        if current:
+            lines.append(current)
+            current = ""
+
+        if c.stringWidth(word, font_name, font_size) <= max_width:
+            current = word
+        else:
+            parts = split_long_word(word)
+            lines.extend(parts[:-1])
+            current = parts[-1] if parts else ""
+
+    if current:
+        lines.append(current)
+
+    return lines or [""]
+
+
+def _truncate_to_width(c, text, max_width, font_name, font_size, add_ellipsis=False):
+    ellipsis = "..."
+    text = str(text or "")
+    suffix = ellipsis if add_ellipsis else ""
+
+    if not add_ellipsis and c.stringWidth(text, font_name, font_size) <= max_width:
+        return text
+
+    while text and c.stringWidth(f"{text}{suffix}", font_name, font_size) > max_width:
+        text = text[:-1]
+
+    return f"{text}{suffix}" if text else ellipsis
+
+
+def _draw_wrapped_text(
+    c,
+    text,
+    x,
+    y_top,
+    max_width,
+    max_height,
+    font_name="Helvetica",
+    font_size=8,
+    line_height=8.8,
+):
+    lines = _wrap_text(c, text, max_width, font_name, font_size)
+    max_lines = max(1, int(max_height // line_height))
+    if len(lines) > max_lines:
+        lines = lines[:max_lines]
+        lines[-1] = _truncate_to_width(
+            c,
+            lines[-1],
+            max_width,
+            font_name,
+            font_size,
+            add_ellipsis=True,
+        )
+
+    c.setFont(font_name, font_size)
+    start_y = y_top - font_size
+    for index, line in enumerate(lines):
+        c.drawString(x, start_y - index * line_height, line)
+
+
 def _draw_header(
     c,
     regional,
@@ -97,7 +185,18 @@ def _draw_header(
     altura_bloco_atividade = h * 2
     c.rect(x, y - altura_bloco_atividade, logo_box_w, altura_bloco_atividade, fill=0)
     c.setFont('Helvetica-Bold', 9)
-    c.drawString(x + 2 * mm, y - h - 2 * mm, 'ATIVIDADE:')
+    c.drawString(x + 2 * mm, y - 4 * mm, 'ATIVIDADE:')
+    _draw_wrapped_text(
+        c,
+        atividade,
+        x + 2 * mm,
+        y - 6.2 * mm,
+        logo_box_w - 4 * mm,
+        altura_bloco_atividade - 7.5 * mm,
+        font_name='Helvetica',
+        font_size=7,
+        line_height=7.5,
+    )
 
     c.rect(area_campos_x, y - h, area_campos_w, h, fill=0)
     col1 = area_campos_x + area_campos_w / 4
@@ -140,14 +239,23 @@ def _draw_header(
     gap_entre_blocos = 0.2 * mm
     y -= h + gap_entre_blocos
     # TEMA
-    h = 8 * mm
+    h = 12 * mm
     rotulo_fim_x = x + 18 * mm
     c.rect(x, y - h, largura_tabela, h, fill=0)
     c.line(rotulo_fim_x, y - h, rotulo_fim_x, y)
     c.setFont('Helvetica-Bold', 9)
-    c.drawString(x + 2 * mm, y - h + 2 * mm, 'TEMA:')
-    c.setFont('Helvetica', 9)
-    c.drawString(rotulo_fim_x + 2 * mm, y - h + 2 * mm, str(tema))
+    c.drawString(x + 2 * mm, y - (h / 2) - 1.2 * mm, 'TEMA:')
+    _draw_wrapped_text(
+        c,
+        tema,
+        rotulo_fim_x + 2 * mm,
+        y - 2.5 * mm,
+        largura_tabela - (rotulo_fim_x - x) - 4 * mm,
+        h - 4 * mm,
+        font_name='Helvetica',
+        font_size=7.5,
+        line_height=8,
+    )
 
     y -= h + gap_entre_blocos
     # DATA/HORÁRIO INÍCIO/HORÁRIO FIM
