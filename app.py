@@ -7,6 +7,7 @@ from views.cadastro_emissao_gta import render_cadastro_emissao_gta
 from views.declaracao_cadastral_suinos import render_declaracao_cadastral_suinos
 from views.declaracao_nada_consta import render_declaracao_nada_consta
 from views.declaracao_residencia import render_declaracao_residencia
+from views.etiqueta_arquivo import render_etiqueta_arquivo
 from views.lista_presenca import render_lista_presenca
 from views.parcelamento import render_parcelamento
 from views.reeducandos import render_folha_ponto
@@ -61,6 +62,7 @@ with st.sidebar:
             "Declaração de nada consta",
             "Declaração de residência",
             "Declaração cadastral - suínos",
+            "Etiqueta de arquivo",
             "Autorização de viagem manual",
         ],
         icons=[
@@ -74,6 +76,7 @@ with st.sidebar:
             "file-text",
             "house",
             "file-earmark-richtext",
+            "tag",
             "car-front",
         ],
         menu_icon="cast",
@@ -107,5 +110,7 @@ elif destino == "Declaração de residência":
     render_declaracao_residencia()
 elif destino == "Declaração cadastral - suínos":
     render_declaracao_cadastral_suinos()
+elif destino == "Etiqueta de arquivo":
+    render_etiqueta_arquivo()
 else:
     render_autorizacao_viagem_manual()
