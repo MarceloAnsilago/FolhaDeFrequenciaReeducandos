@@ -258,7 +258,7 @@ def render_etiqueta_arquivo():
                 key="etiqueta_itens",
                 height=140,
                 help="Digite um item por linha. Cada linha será gerada com ponto na frente.",
-                placeholder="DOCUMENTO 1\nDOCUMENTO 2\nDOCUMENTO 3\nDOCUMENTO 4",
+                placeholder="documento 1\ndocumento 2\ndocumento 3\ndocumento 4",
             )
             st.text_input("ULSAV - parte inferior", key="etiqueta_ulsav_base")
             st.text_input("Ano", key="etiqueta_ano")
