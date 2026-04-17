@@ -14,6 +14,106 @@ LABEL_HEIGHT_MM = 145
 ROW_HEIGHTS_MM = [15, 35, 52, 20, 23]
 
 
+def _render_instruction_diagram():
+    st.markdown(
+        """
+        <style>
+        .etq-wrap {
+            display: flex;
+            justify-content: center;
+            margin: 0.5rem 0 1.25rem 0;
+        }
+        .etq-card {
+            width: 430px;
+            border: 1.5px solid #111;
+            background: #fff;
+            color: #111;
+            font-family: Arial, sans-serif;
+        }
+        .etq-row {
+            border-bottom: 1.5px solid #111;
+            padding: 8px 12px;
+            box-sizing: border-box;
+        }
+        .etq-row:last-child {
+            border-bottom: none;
+        }
+        .etq-top {
+            text-align: center;
+            min-height: 72px;
+        }
+        .etq-top strong {
+            font-size: 24px;
+        }
+        .etq-top span {
+            font-size: 13px;
+        }
+        .etq-num {
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .etq-num-left {
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .etq-num-right {
+            font-size: 18px;
+            line-height: 1.35;
+        }
+        .etq-middle {
+            min-height: 145px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 18px;
+            line-height: 1.2;
+        }
+        .etq-unit,
+        .etq-month {
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.2;
+        }
+        .etq-unit strong,
+        .etq-month strong {
+            font-size: 17px;
+        }
+        .etq-obs {
+            font-weight: 700;
+        }
+        </style>
+        <div class="etq-wrap">
+            <div class="etq-card">
+                <div class="etq-row etq-top">
+                    <div><strong>SETOR ORIGEM</strong> - <span>(setor responsavel pelo acondicionamento das GTA's, pode ser a Regional ou a propria unidade)</span></div>
+                </div>
+                <div class="etq-row etq-num">
+                    <div class="etq-num-left">Nº</div>
+                    <div class="etq-num-right">(Campo destinado ao uso do arquivo.<br>Nao preenche-lo nem encobrir com fita adesiva)</div>
+                </div>
+                <div class="etq-row etq-middle">
+                    <div>
+                        Nome do documento, sucinto e objetivo. Este campo pode ser alongado para baixo, ate que a etiqueta atinja o limite da desse espaco. Utilizar a maior fonte possivel, de acordo com o tamanho da informacao aqui contida.
+                    </div>
+                </div>
+                <div class="etq-row etq-unit">
+                    <strong>UNIDADE:</strong> Unidade a que se referem os documentos. Unidade pela qual se procurara quando se demandar pesquisa.<br>
+                    <span class="etq-obs">Obs:</span> pode-se colocar GTA's mais de uma unidade. Nesse caso, todas as Unidades devem ser descritas nesse espaco e <span class="etq-obs">no campo abaixo so se podera colocar um unico mes.</span>
+                </div>
+                <div class="etq-row etq-month">
+                    <strong>MES/ANO:</strong> pode-se colocar GTA's de mais de um mes. Nesse caso, todos os meses devem ser descritos nesse espaco e <span class="etq-obs">no campo acima so se podera colocar uma unidade.</span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def _normalize_items(raw_text: str) -> list[str]:
     items = []
     for line in (raw_text or "").splitlines():
@@ -148,6 +248,7 @@ def render_etiqueta_arquivo():
     with col_mid:
         st.title("Etiqueta de Arquivo")
         st.caption("Etiqueta em PDF com medida aproximada de 11,5 x 14,5 cm.")
+        _render_instruction_diagram()
 
         with st.form("form_etiqueta_arquivo"):
             st.text_input("ULSAV - parte superior", key="etiqueta_ulsav_topo")
@@ -157,7 +258,7 @@ def render_etiqueta_arquivo():
                 key="etiqueta_itens",
                 height=140,
                 help="Digite um item por linha. Cada linha será gerada com ponto na frente.",
-                placeholder="Ex.:\nProdutor: Fulano\nCPF: 000.000.000-00\nAssunto: Cadastro",
+                placeholder="DOCUMENTO 1\nDOCUMENTO 2\nDOCUMENTO 3\nDOCUMENTO 4",
             )
             st.text_input("ULSAV - parte inferior", key="etiqueta_ulsav_base")
             st.text_input("Ano", key="etiqueta_ano")
