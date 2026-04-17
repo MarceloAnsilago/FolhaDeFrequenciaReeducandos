@@ -97,12 +97,12 @@ def _render_instruction_diagram():
                 </div>
                 <div class="etq-row etq-middle">
                     <div>
-                        Nome do documento, sucinto e objetivo. Este campo pode ser alongado para baixo, ate que a etiqueta atinja o limite da desse espaco. Utilizar a maior fonte possivel, de acordo com o tamanho da informacao aqui contida.
+                        Nome do documento, sucinto e objetivo. Este campo pode ser alongado para baixo, ate que a etiqueta atinja o limite desse espaco. Utilizar a maior fonte possivel, de acordo com o tamanho da informacao aqui contida.
                     </div>
                 </div>
                 <div class="etq-row etq-unit">
                     <strong>UNIDADE:</strong> Unidade a que se referem os documentos. Unidade pela qual se procurara quando se demandar pesquisa.<br>
-                    <span class="etq-obs">Obs:</span> pode-se colocar GTA's mais de uma unidade. Nesse caso, todas as Unidades devem ser descritas nesse espaco e <span class="etq-obs">no campo abaixo so se podera colocar um unico mes.</span>
+                    <span class="etq-obs">Obs:</span> pode-se colocar GTA's de mais de uma unidade. Nesse caso, todas as unidades devem ser descritas nesse espaco e <span class="etq-obs">no campo abaixo so se podera colocar um unico mes.</span>
                 </div>
                 <div class="etq-row etq-month">
                     <strong>MES/ANO:</strong> pode-se colocar GTA's de mais de um mes. Nesse caso, todos os meses devem ser descritos nesse espaco e <span class="etq-obs">no campo acima so se podera colocar uma unidade.</span>
@@ -123,31 +123,117 @@ def _normalize_items(raw_text: str) -> list[str]:
     return items
 
 
-def _fit_font_size(text: str, max_width: float, font_name: str, base_size: int, min_size: int) -> int:
-    text = (text or "").strip()
-    if not text:
-        return base_size
+def _wrap_text(text: str, max_width: float, font_name: str, font_size: int) -> list[str]:
+    normalized = " ".join((text or "").strip().split())
+    if not normalized:
+        return [""]
 
-    font_size = base_size
-    while font_size > min_size and stringWidth(text, font_name, font_size) > max_width:
-        font_size -= 1
-    return font_size
+    words = normalized.split()
+    lines = []
+    current = words[0]
+    for word in words[1:]:
+        candidate = f"{current} {word}"
+        if stringWidth(candidate, font_name, font_size) <= max_width:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+    lines.append(current)
+    return lines
 
 
-def _draw_centered_text(
-    c: canvas.Canvas,
+def _fit_multiline_font_size(
     text: str,
-    x_center: float,
-    y_center: float,
     max_width: float,
+    max_height: float,
+    font_name: str,
     base_size: int,
     min_size: int,
+    line_height_factor: float = 1.15,
+):
+    font_size = base_size
+    while font_size >= min_size:
+        lines = _wrap_text(text, max_width, font_name, font_size)
+        total_height = len(lines) * font_size * line_height_factor
+        if total_height <= max_height:
+            return font_size, lines
+        font_size -= 1
+    return min_size, _wrap_text(text, max_width, font_name, min_size)
+
+
+def _draw_centered_text_box(
+    c: canvas.Canvas,
+    text: str,
+    x_left: float,
+    y_bottom: float,
+    box_width: float,
+    box_height: float,
+    base_size: int,
+    min_size: int,
+    line_height_factor: float = 1.15,
 ):
     text = (text or "").strip()
     font_name = "Helvetica-Bold"
-    font_size = _fit_font_size(text, max_width, font_name, base_size, min_size)
+    font_size, lines = _fit_multiline_font_size(
+        text=text,
+        max_width=box_width,
+        max_height=box_height,
+        font_name=font_name,
+        base_size=base_size,
+        min_size=min_size,
+        line_height_factor=line_height_factor,
+    )
+    line_height = font_size * line_height_factor
+    total_height = len(lines) * line_height
+    start_y = y_bottom + ((box_height + total_height) / 2) - font_size
     c.setFont(font_name, font_size)
-    c.drawCentredString(x_center, y_center - (font_size * 0.35), text)
+    x_center = x_left + (box_width / 2)
+    for idx, line in enumerate(lines):
+        c.drawCentredString(x_center, start_y - (idx * line_height), line)
+
+
+def _draw_left_text_box(
+    c: canvas.Canvas,
+    lines: list[str],
+    x_left: float,
+    y_top: float,
+    box_width: float,
+    box_height: float,
+    base_size: int,
+    min_size: int,
+    bullet: bool = False,
+    line_height_factor: float = 1.15,
+):
+    font_name = "Helvetica-Bold"
+    prepared_lines = lines or [""]
+    font_size = base_size
+
+    while font_size >= min_size:
+        wrapped_lines = []
+        available_width = box_width - (2 * mm)
+        bullet_prefix = "• " if bullet else ""
+        bullet_width = stringWidth(bullet_prefix, font_name, font_size) if bullet else 0
+        first_width = available_width - bullet_width
+
+        for item in prepared_lines:
+            wrapped = _wrap_text(item, first_width if bullet else available_width, font_name, font_size)
+            if bullet and wrapped:
+                wrapped_lines.append(f"• {wrapped[0]}")
+                for extra in wrapped[1:]:
+                    wrapped_lines.append(f"  {extra}")
+            else:
+                wrapped_lines.extend(wrapped)
+
+        total_height = len(wrapped_lines) * font_size * line_height_factor
+        if total_height <= box_height:
+            c.setFont(font_name, font_size)
+            line_height = font_size * line_height_factor
+            cursor_y = y_top - font_size
+            for line in wrapped_lines:
+                c.drawString(x_left, cursor_y, line)
+                cursor_y -= line_height
+            return
+        font_size -= 1
 
 
 def build_pdf_etiqueta_arquivo(
@@ -173,60 +259,72 @@ def build_pdf_etiqueta_arquivo(
     c.rect(x, y, label_width, label_height)
 
     current_top = y + label_height
-    row_centers = []
+    row_bounds = []
     for idx, row_height in enumerate(row_heights):
         row_top = current_top
         row_bottom = row_top - row_height
-        row_centers.append((row_top + row_bottom) / 2)
+        row_bounds.append((row_top, row_bottom))
         if idx < len(row_heights) - 1:
             c.line(x, row_bottom, x + label_width, row_bottom)
         current_top = row_bottom
 
-    _draw_centered_text(
+    _draw_centered_text_box(
         c,
         (ulsav_topo or "").upper(),
-        x + (label_width / 2),
-        row_centers[0],
+        x + (4 * mm),
+        row_bounds[0][1] + (1.5 * mm),
         label_width - (8 * mm),
+        row_heights[0] - (3 * mm),
         base_size=16,
         min_size=10,
     )
 
-    numero_top = y + label_height - row_heights[0]
+    numero_top = row_bounds[1][0]
     c.setFont("Helvetica-Bold", 34)
     c.drawString(x + 3 * mm, numero_top - 12 * mm, "Nº")
     if numero:
-        c.setFont("Helvetica-Bold", 18)
-        c.drawString(x + 24 * mm, numero_top - 11 * mm, numero.strip())
+        _draw_left_text_box(
+            c,
+            [numero.strip()],
+            x + 24 * mm,
+            numero_top - 3 * mm,
+            label_width - (28 * mm),
+            row_heights[1] - (6 * mm),
+            base_size=18,
+            min_size=10,
+        )
 
     itens = _normalize_items(itens_texto)
-    middle_top = y + label_height - row_heights[0] - row_heights[1]
-    middle_height = row_heights[2]
-    start_y = middle_top - 8 * mm
-    line_step = 7.5 * mm
-    c.setFont("Helvetica-Bold", 12.5)
-    for idx, item in enumerate(itens[:6]):
-        y_line = start_y - (idx * line_step)
-        if y_line < (middle_top - middle_height + 5 * mm):
-            break
-        c.drawString(x + 8 * mm, y_line, f"• {item}")
+    _draw_left_text_box(
+        c,
+        itens,
+        x + 6 * mm,
+        row_bounds[2][0] - 5 * mm,
+        label_width - (12 * mm),
+        row_heights[2] - (10 * mm),
+        base_size=12,
+        min_size=7,
+        bullet=True,
+    )
 
-    _draw_centered_text(
+    _draw_centered_text_box(
         c,
         (ulsav_base or "").upper(),
-        x + (label_width / 2),
-        row_centers[3],
+        x + (4 * mm),
+        row_bounds[3][1] + (1.5 * mm),
         label_width - (8 * mm),
+        row_heights[3] - (3 * mm),
         base_size=18,
         min_size=11,
     )
 
-    _draw_centered_text(
+    _draw_centered_text_box(
         c,
         ano,
-        x + (label_width / 2),
-        row_centers[4],
+        x + (4 * mm),
+        row_bounds[4][1] + (1.5 * mm),
         label_width - (8 * mm),
+        row_heights[4] - (3 * mm),
         base_size=22,
         min_size=14,
     )
