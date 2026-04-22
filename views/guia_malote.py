@@ -196,7 +196,7 @@ def build_pdf_guia_malote(data: dict, logo_path: Path) -> bytes:
     c.drawCentredString(
         page_width / 2,
         title_y,
-        "GUIA DE REMESSA DE CORRESPONDENCIA PARA MALOTE",
+        "GUIA DE REMESSA DE CORRESPONDÊNCIA PARA MALOTE",
     )
 
     c.showPage()
@@ -284,7 +284,7 @@ def build_pdf_guia_malote_v2(data: dict, logo_path: Path) -> bytes:
 
     title_y = resumo_y - 8 * mm
     c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(page_width / 2, title_y, "GUIA DE REMESSA DE CORRESPONDENCIA PARA MALOTE")
+    c.drawCentredString(page_width / 2, title_y, "GUIA DE REMESSA DE CORRESPONDÊNCIA PARA MALOTE")
 
     tabela_x = margin
     tabela_w = page_width - (2 * margin)
@@ -374,7 +374,7 @@ def build_pdf_guia_malote_v2(data: dict, logo_path: Path) -> bytes:
     c.drawCentredString(
         (left_x1 + left_x2) / 2,
         assinatura_y - 14 * mm,
-        f"MATRICULA: {data.get('assinatura_matricula', '')}",
+        f"MATRÍCULA: {data.get('assinatura_matricula', '')}",
     )
 
     c.showPage()
@@ -385,7 +385,7 @@ def build_pdf_guia_malote_v2(data: dict, logo_path: Path) -> bytes:
 
 def render_guia_malote():
     st.title("Guia de Malote")
-    st.caption("Gera a guia em PDF no mesmo padrao dos outros modulos.")
+    st.caption("Gera a guia em PDF no mesmo padrão dos outros módulos.")
 
     defaults = {
         "guia_malote_numero": "",
@@ -406,28 +406,28 @@ def render_guia_malote():
         st.markdown("### Dados da guia")
         guia_col1, guia_col2 = st.columns(2)
         with guia_col1:
-            st.text_input("Numero da guia", key="guia_malote_numero")
+            st.text_input("Número da guia", key="guia_malote_numero")
             st.text_input("Ano", key="guia_malote_ano")
             st.text_input("Data de envio", key="guia_malote_data_envio", placeholder="17/04/2026")
         with guia_col2:
-            st.text_input("Supervisao regional", key="guia_malote_supervisao")
-            st.text_input("Origem resumo", key="guia_malote_origem_resumo")
-            st.text_input("Destino resumo", key="guia_malote_destino_resumo")
+            st.text_input("Supervisão regional", key="guia_malote_supervisao")
+            st.text_input("Origem", key="guia_malote_origem_resumo")
+            st.text_input("Destino", key="guia_malote_destino_resumo")
 
-        st.markdown("### Dados do responsavel")
+        st.markdown("### Dados do responsável")
         resp_col1, resp_col2 = st.columns(2)
         with resp_col1:
             st.text_input("Nome da assinatura", key="guia_malote_assinatura_nome")
             st.text_input("Cargo da assinatura", key="guia_malote_assinatura_cargo")
         with resp_col2:
-            st.text_input("Matricula da assinatura", key="guia_malote_assinatura_matricula")
+            st.text_input("Matrícula da assinatura", key="guia_malote_assinatura_matricula")
 
         st.text_area(
-            "Descricoes da tabela",
+            "Descrições da tabela",
             key="guia_malote_itens",
             height=140,
-            placeholder="Processo administrativo\nNota fiscal avulsa de servicos",
-            help="Use uma linha por item. Cada linha sera usada como descricao.",
+            placeholder="Processo administrativo\nNota fiscal avulsa de serviços",
+            help="Use uma linha por item. Cada linha será usada como descrição.",
         )
 
         submit = st.form_submit_button("Gerar PDF")
@@ -465,7 +465,7 @@ def render_guia_malote():
         try:
             st.pdf(st.session_state["guia_malote_pdf"])
         except StreamlitAPIException:
-            st.info("Pre-visualizacao indisponivel. Instale streamlit[pdf].")
+            st.info("Pré-visualização indisponível. Instale streamlit[pdf].")
 
         numero = (st.session_state.get("guia_malote_numero", "") or "").strip()
         ano = (st.session_state.get("guia_malote_ano", "") or "").strip()
