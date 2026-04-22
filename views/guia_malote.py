@@ -11,6 +11,28 @@ from reportlab.pdfgen import canvas
 from streamlit.errors import StreamlitAPIException
 
 
+def _safe_filename_part(value: str) -> str:
+    cleaned = (value or "").strip()
+    invalid_chars = '<>:"/\\|?*'
+    translation = str.maketrans({char: "-" for char in invalid_chars})
+    cleaned = cleaned.translate(translation)
+    cleaned = " ".join(cleaned.split())
+    return cleaned.strip(". ")
+
+
+def _build_output_filename(numero: str, ano: str) -> str:
+    numero_safe = _safe_filename_part(numero)
+    ano_safe = _safe_filename_part(ano)
+
+    if numero_safe and ano_safe:
+        return f"GUIA DE MALOTE {numero_safe} {ano_safe}.pdf"
+    if numero_safe:
+        return f"GUIA DE MALOTE {numero_safe}.pdf"
+    if ano_safe:
+        return f"GUIA DE MALOTE {ano_safe}.pdf"
+    return "GUIA DE MALOTE.pdf"
+
+
 def _wrap_text(text: str, font_name: str, font_size: int, max_width: float) -> list[str]:
     lines = []
     for paragraph in (text or "").splitlines():
@@ -433,14 +455,7 @@ def render_guia_malote():
 
         output_dir = Path(__file__).resolve().parents[1] / "pdf"
         output_dir.mkdir(parents=True, exist_ok=True)
-        if numero and ano:
-            file_name = f"GUIA DE MALOTE {numero} {ano}.pdf"
-        elif numero:
-            file_name = f"GUIA DE MALOTE {numero}.pdf"
-        elif ano:
-            file_name = f"GUIA DE MALOTE {ano}.pdf"
-        else:
-            file_name = "GUIA DE MALOTE.pdf"
+        file_name = _build_output_filename(numero, ano)
         output_path = output_dir / file_name
         output_path.write_bytes(pdf_bytes)
         st.session_state["guia_malote_pdf_path"] = output_path
@@ -454,14 +469,7 @@ def render_guia_malote():
 
         numero = (st.session_state.get("guia_malote_numero", "") or "").strip()
         ano = (st.session_state.get("guia_malote_ano", "") or "").strip()
-        if numero and ano:
-            file_name = f"GUIA DE MALOTE {numero} {ano}.pdf"
-        elif numero:
-            file_name = f"GUIA DE MALOTE {numero}.pdf"
-        elif ano:
-            file_name = f"GUIA DE MALOTE {ano}.pdf"
-        else:
-            file_name = "GUIA DE MALOTE.pdf"
+        file_name = _build_output_filename(numero, ano)
 
         st.download_button(
             "Baixar PDF",
