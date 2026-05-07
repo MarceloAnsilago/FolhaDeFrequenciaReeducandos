@@ -13,7 +13,6 @@ from views.lista_presenca import render_lista_presenca
 from views.parcelamento import render_parcelamento
 from views.reeducandos import render_folha_ponto
 from views.restituicao import render_restituicao
-from views.sugesp import render_folha_ponto_sugesp
 from views.veiculos import render_veiculos
 
 
@@ -45,8 +44,6 @@ for chave, valor in DEFAULTS.items():
 
 st.session_state.setdefault("_upload_aplicado", False)
 st.session_state.setdefault("_ultimo_upload", "")
-st.session_state.setdefault("_sugesp_upload_aplicado", False)
-st.session_state.setdefault("_sugesp_ultimo_upload", "")
 
 
 with st.sidebar:
@@ -54,7 +51,6 @@ with st.sidebar:
         "Navegação",
         [
             "Folha Reeducandos",
-            "Folha SUGESP",
             "Lista de Presença",
             "Controle de Veículos",
             "Cadastro de Emissão de GTA",
@@ -69,7 +65,6 @@ with st.sidebar:
         ],
         icons=[
             "file-earmark-text",
-            "file-earmark-ruled",
             "card-checklist",
             "truck",
             "person-vcard",
@@ -95,8 +90,6 @@ with st.sidebar:
 
 if destino == "Folha Reeducandos":
     render_folha_ponto()
-elif destino == "Folha SUGESP":
-    render_folha_ponto_sugesp()
 elif destino == "Lista de Presença":
     render_lista_presenca()
 elif destino == "Controle de Veículos":
