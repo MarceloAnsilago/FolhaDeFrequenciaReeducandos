@@ -379,8 +379,6 @@ def render_etiqueta_arquivo():
     col_left, col_mid, col_right = st.columns([1, 2, 1])
     with col_mid:
         st.title("Etiqueta de Arquivo")
-        st.caption("Modelo inicial com três linhas e divisórias duplas.")
-        _render_instruction_diagram()
 
         st.text_input("Supervisão regional", key="etiqueta_supervisao_regional")
         st.text_input("Unidade", key="etiqueta_unidade")
