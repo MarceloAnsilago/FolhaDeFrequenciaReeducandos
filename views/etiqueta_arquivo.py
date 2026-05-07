@@ -1,4 +1,5 @@
 from io import BytesIO
+from datetime import date
 from pathlib import Path
 
 import streamlit as st
@@ -10,8 +11,182 @@ from streamlit.errors import StreamlitAPIException
 
 
 LABEL_WIDTH_MM = 115
-LABEL_HEIGHT_MM = 145
-ROW_HEIGHTS_MM = [15, 35, 52, 20, 23]
+MONTH_HEADER_HEIGHT_MM = 14
+ROW_HEIGHTS_MM = [MONTH_HEADER_HEIGHT_MM, MONTH_HEADER_HEIGHT_MM, MONTH_HEADER_HEIGHT_MM]
+MONTH_SEPARATOR_HEIGHT_MM = MONTH_HEADER_HEIGHT_MM
+MONTH_BODY_MIN_HEIGHT_MM = 0
+MONTH_BODY_TOP_PADDING_MM = 5
+MONTH_BODY_BOTTOM_PADDING_MM = 2
+PAGE_MARGIN_MM = 15
+OUTPUT_FILENAME = "modelo etiqueta para caixa arquivo.pdf"
+TEXT_FONT = "Helvetica-Bold"
+TEXT_SIZE = 12
+MIN_TEXT_SIZE = 6
+MONTHS = [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
+]
+CURRENT_YEAR = date.today().year
+YEARS = list(range(2012, CURRENT_YEAR + 1))
+
+
+def _normalize_text(text: str) -> str:
+    normalized = " ".join((text or "").strip().split())
+    return normalized
+
+
+def _fit_single_line_text(text: str, max_width: float, font_name: str, base_size: int, min_size: int):
+    normalized = _normalize_text(text)
+    font_size = base_size
+    while font_size >= min_size:
+        if stringWidth(normalized, font_name, font_size) <= max_width:
+            return font_size, normalized
+        font_size -= 1
+    return min_size, normalized
+
+
+def _draw_double_line(c: canvas.Canvas, x1: float, y1: float, x2: float, y2: float):
+    c.line(x1, y1, x2, y2)
+    if y1 == y2:
+        c.line(x1, y1 - 1.2 * mm, x2, y2 - 1.2 * mm)
+    elif x1 == x2:
+        c.line(x1 + 1.2 * mm, y1, x2 + 1.2 * mm, y2)
+
+
+def _draw_inner_horizontal_line(c: canvas.Canvas, x: float, y: float, width: float):
+    inset = 1.2 * mm
+    _draw_double_line(c, x + inset, y, x + width - inset, y)
+
+
+def _draw_vertical_borders(c: canvas.Canvas, x: float, y_top: float, y_bottom: float, width: float):
+    _draw_double_line(c, x, y_top, x, y_bottom)
+    _draw_double_line(c, x + width - 1.2 * mm, y_top, x + width - 1.2 * mm, y_bottom)
+
+
+def _draw_row(c: canvas.Canvas, label: str, value: str, x: float, y_top: float, width: float, height: float):
+    padding_x = 5 * mm
+
+    full_text = f"{label} {(value or '').upper()}".strip()
+    text_width = width - (2 * padding_x)
+    font_size, line = _fit_single_line_text(full_text, text_width, TEXT_FONT, TEXT_SIZE, MIN_TEXT_SIZE)
+    text_y = y_top - (height / 2) - (font_size / 3)
+
+    c.setFont(TEXT_FONT, font_size)
+    c.drawString(x + padding_x, text_y, line)
+
+
+def _draw_centered_row(c: canvas.Canvas, text: str, x: float, y_top: float, width: float, height: float):
+    padding_x = 5 * mm
+    text = (text or "").upper()
+    text_width = width - (2 * padding_x)
+    font_size, line = _fit_single_line_text(text, text_width, TEXT_FONT, TEXT_SIZE, MIN_TEXT_SIZE)
+    text_y = y_top - (height / 2) - (font_size / 3)
+
+    c.setFont(TEXT_FONT, font_size)
+    c.drawCentredString(x + width / 2, text_y, line)
+
+
+def _split_text_lines(text: str) -> list[str]:
+    lines = []
+    for raw_line in (text or "").splitlines():
+        line = raw_line.strip()
+        if line:
+            lines.append(line)
+    return lines
+
+
+def _month_body_height(line_count: int):
+    return (
+        (MONTH_BODY_TOP_PADDING_MM * mm)
+        + (max(1, line_count) * TEXT_SIZE * 1.45)
+        + (MONTH_BODY_BOTTOM_PADDING_MM * mm)
+    )
+
+
+def _max_month_lines_for_height(body_height: float):
+    usable_height = body_height - (MONTH_BODY_TOP_PADDING_MM * mm) - (MONTH_BODY_BOTTOM_PADDING_MM * mm)
+    return max(1, int(usable_height // (TEXT_SIZE * 1.45)))
+
+
+def _draw_month_section(
+    c: canvas.Canvas,
+    *,
+    month: str,
+    year: int,
+    lines: list[str],
+    x: float,
+    y_top: float,
+    width: float,
+    header_height: float,
+    body_height: float,
+    separator_height: float,
+):
+    padding_x = 5 * mm
+    header_y = y_top - (header_height / 2) - (TEXT_SIZE / 3)
+    body_top = y_top - header_height
+    body_bottom = body_top - body_height
+    separator_bottom = body_bottom - separator_height
+
+    c.setFont(TEXT_FONT, TEXT_SIZE)
+    c.drawString(x + padding_x, header_y, f"MÊS/ANO: {month.upper()}/{year}")
+    _draw_inner_horizontal_line(c, x, body_top, width)
+
+    line_height = TEXT_SIZE * 1.45
+    cursor_y = body_top - (MONTH_BODY_TOP_PADDING_MM * mm)
+    for line in lines:
+        if cursor_y < body_bottom + (MONTH_BODY_BOTTOM_PADDING_MM * mm):
+            break
+        c.drawString(x + padding_x, cursor_y, line)
+        cursor_y -= line_height
+
+    c.rect(x, separator_bottom, width, separator_height, stroke=1, fill=0)
+    c.setFillColorRGB(127 / 255, 127 / 255, 127 / 255)
+    c.rect(x + 0.4, separator_bottom + 0.4, width - 0.8, separator_height - 0.8, stroke=0, fill=1)
+    c.setFillColorRGB(0, 0, 0)
+    return separator_bottom
+
+
+def _draw_fixed_header(
+    c: canvas.Canvas,
+    *,
+    supervisao_regional: str,
+    unidade: str,
+    caixa: str,
+    x: float,
+    y_top: float,
+    width: float,
+    row_heights: list[float],
+):
+    c.setLineWidth(0.8)
+    c.setFillColorRGB(0, 0, 0)
+    _draw_double_line(c, x, y_top, x + width, y_top)
+
+    rows = [
+        ("SUPERVISÃO REGIONAL:", supervisao_regional),
+        ("UNIDADE:", unidade),
+    ]
+
+    cursor_top = y_top
+    for index, (label, value) in enumerate(rows):
+        row_height = row_heights[index]
+        _draw_row(c, label, value, x, cursor_top, width, row_height)
+        cursor_top -= row_height
+        _draw_inner_horizontal_line(c, x, cursor_top, width)
+
+    _draw_centered_row(c, f"CAIXA Nº: {caixa}", x, cursor_top, width, row_heights[2])
+    cursor_top -= row_heights[2]
+    _draw_inner_horizontal_line(c, x, cursor_top, width)
+    return cursor_top
 
 
 def _render_instruction_diagram():
@@ -25,87 +200,52 @@ def _render_instruction_diagram():
         }
         .etq-card {
             width: 430px;
-            border: 1.5px solid #111;
+            border: 4px double #111;
             background: #fff;
             color: #111;
-            font-family: Arial, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
         }
         .etq-row {
-            border-bottom: 1.5px solid #111;
-            padding: 8px 12px;
+            min-height: 48px;
+            border-bottom: 4px double #111;
+            padding: 6px 18px;
             box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
         .etq-row:last-child {
             border-bottom: none;
         }
-        .etq-top {
-            text-align: center;
-            min-height: 72px;
-        }
-        .etq-top strong {
-            font-size: 24px;
-        }
-        .etq-top span {
-            font-size: 13px;
-        }
-        .etq-num {
-            min-height: 140px;
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
-        .etq-num-left {
-            font-size: 64px;
-            font-weight: 700;
-            line-height: 1;
-        }
-        .etq-num-right {
-            font-size: 18px;
-            line-height: 1.35;
-        }
-        .etq-middle {
-            min-height: 145px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: 18px;
-            line-height: 1.2;
-        }
-        .etq-unit,
-        .etq-month {
-            text-align: center;
+        .etq-label {
             font-size: 14px;
-            line-height: 1.2;
-        }
-        .etq-unit strong,
-        .etq-month strong {
-            font-size: 17px;
-        }
-        .etq-obs {
             font-weight: 700;
+            flex: 0 0 auto;
+        }
+        .etq-value {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.15;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .etq-row-center {
+            justify-content: center;
         }
         </style>
         <div class="etq-wrap">
             <div class="etq-card">
-                <div class="etq-row etq-top">
-                    <div><strong>SETOR ORIGEM</strong> - <span>(setor responsavel pelo acondicionamento das GTA's, pode ser a Regional ou a propria unidade)</span></div>
+                <div class="etq-row">
+                    <div class="etq-label">SUPERVISÃO REGIONAL:</div>
+                    <div class="etq-value">&nbsp;</div>
                 </div>
-                <div class="etq-row etq-num">
-                    <div class="etq-num-left">Nº</div>
-                    <div class="etq-num-right">(Campo destinado ao uso do arquivo.<br>Nao preenche-lo nem encobrir com fita adesiva)</div>
+                <div class="etq-row">
+                    <div class="etq-label">UNIDADE:</div>
+                    <div class="etq-value">&nbsp;</div>
                 </div>
-                <div class="etq-row etq-middle">
-                    <div>
-                        Nome do documento, sucinto e objetivo. Este campo pode ser alongado para baixo, ate que a etiqueta atinja o limite desse espaco. Utilizar a maior fonte possivel, de acordo com o tamanho da informacao aqui contida.
-                    </div>
-                </div>
-                <div class="etq-row etq-unit">
-                    <strong>UNIDADE:</strong> Unidade a que se referem os documentos. Unidade pela qual se procurara quando se demandar pesquisa.<br>
-                    <span class="etq-obs">Obs:</span> pode-se colocar GTA's de mais de uma unidade. Nesse caso, todas as unidades devem ser descritas nesse espaco e <span class="etq-obs">no campo abaixo so se podera colocar um unico mes.</span>
-                </div>
-                <div class="etq-row etq-month">
-                    <strong>MES/ANO:</strong> pode-se colocar GTA's de mais de um mes. Nesse caso, todos os meses devem ser descritos nesse espaco e <span class="etq-obs">no campo acima so se podera colocar uma unidade.</span>
+                <div class="etq-row etq-row-center">
+                    <div class="etq-label">CAIXA Nº: *</div>
                 </div>
             </div>
         </div>
@@ -114,221 +254,114 @@ def _render_instruction_diagram():
     )
 
 
-def _normalize_items(raw_text: str) -> list[str]:
-    items = []
-    for line in (raw_text or "").splitlines():
-        cleaned = line.strip().lstrip("•").lstrip(".").strip()
-        if cleaned:
-            items.append(cleaned)
-    return items
-
-
-def _wrap_text(text: str, max_width: float, font_name: str, font_size: int) -> list[str]:
-    normalized = " ".join((text or "").strip().split())
-    if not normalized:
-        return [""]
-
-    words = normalized.split()
-    lines = []
-    current = words[0]
-    for word in words[1:]:
-        candidate = f"{current} {word}"
-        if stringWidth(candidate, font_name, font_size) <= max_width:
-            current = candidate
-        else:
-            lines.append(current)
-            current = word
-    lines.append(current)
-    return lines
-
-
-def _fit_multiline_font_size(
-    text: str,
-    max_width: float,
-    max_height: float,
-    font_name: str,
-    base_size: int,
-    min_size: int,
-    line_height_factor: float = 1.15,
-):
-    font_size = base_size
-    while font_size >= min_size:
-        lines = _wrap_text(text, max_width, font_name, font_size)
-        total_height = len(lines) * font_size * line_height_factor
-        if total_height <= max_height:
-            return font_size, lines
-        font_size -= 1
-    return min_size, _wrap_text(text, max_width, font_name, min_size)
-
-
-def _draw_centered_text_box(
-    c: canvas.Canvas,
-    text: str,
-    x_left: float,
-    y_bottom: float,
-    box_width: float,
-    box_height: float,
-    base_size: int,
-    min_size: int,
-    line_height_factor: float = 1.15,
-):
-    text = (text or "").strip()
-    font_name = "Helvetica-Bold"
-    font_size, lines = _fit_multiline_font_size(
-        text=text,
-        max_width=box_width,
-        max_height=box_height,
-        font_name=font_name,
-        base_size=base_size,
-        min_size=min_size,
-        line_height_factor=line_height_factor,
-    )
-    line_height = font_size * line_height_factor
-    total_height = len(lines) * line_height
-    start_y = y_bottom + ((box_height + total_height) / 2) - font_size
-    c.setFont(font_name, font_size)
-    x_center = x_left + (box_width / 2)
-    for idx, line in enumerate(lines):
-        c.drawCentredString(x_center, start_y - (idx * line_height), line)
-
-
-def _draw_left_text_box(
-    c: canvas.Canvas,
-    lines: list[str],
-    x_left: float,
-    y_top: float,
-    box_width: float,
-    box_height: float,
-    base_size: int,
-    min_size: int,
-    bullet: bool = False,
-    line_height_factor: float = 1.15,
-):
-    font_name = "Helvetica-Bold"
-    prepared_lines = lines or [""]
-    font_size = base_size
-
-    while font_size >= min_size:
-        wrapped_lines = []
-        available_width = box_width - (2 * mm)
-        bullet_prefix = "• " if bullet else ""
-        bullet_width = stringWidth(bullet_prefix, font_name, font_size) if bullet else 0
-        first_width = available_width - bullet_width
-
-        for item in prepared_lines:
-            wrapped = _wrap_text(item, first_width if bullet else available_width, font_name, font_size)
-            if bullet and wrapped:
-                wrapped_lines.append(f"• {wrapped[0]}")
-                for extra in wrapped[1:]:
-                    wrapped_lines.append(f"  {extra}")
-            else:
-                wrapped_lines.extend(wrapped)
-
-        total_height = len(wrapped_lines) * font_size * line_height_factor
-        if total_height <= box_height:
-            c.setFont(font_name, font_size)
-            line_height = font_size * line_height_factor
-            cursor_y = y_top - font_size
-            for line in wrapped_lines:
-                c.drawString(x_left, cursor_y, line)
-                cursor_y -= line_height
-            return
-        font_size -= 1
-
-
 def build_pdf_etiqueta_arquivo(
     *,
-    ulsav_topo: str,
-    numero: str,
-    itens_texto: str,
-    ulsav_base: str,
-    ano: str,
+    supervisao_regional: str,
+    unidade: str,
+    caixa: str,
+    month_sections: list[dict] | None = None,
 ) -> bytes:
     buffer = BytesIO()
     page_width, page_height = A4
     c = canvas.Canvas(buffer, pagesize=A4)
 
     label_width = LABEL_WIDTH_MM * mm
-    label_height = LABEL_HEIGHT_MM * mm
     row_heights = [value * mm for value in ROW_HEIGHTS_MM]
+    month_sections = month_sections or []
+    month_header_height = MONTH_HEADER_HEIGHT_MM * mm
+    month_separator_height = MONTH_SEPARATOR_HEIGHT_MM * mm
+    month_body_min_height = MONTH_BODY_MIN_HEIGHT_MM * mm
+    month_layouts = []
+    for section in month_sections:
+        lines = _split_text_lines(section.get("text", "")) or [""]
+        body_height = max(
+            month_body_min_height,
+            _month_body_height(len(lines)),
+        )
+        month_layouts.append((section, lines, body_height))
 
     x = (page_width - label_width) / 2
-    y = (page_height - label_height) / 2
-
-    c.setLineWidth(0.8)
-    c.rect(x, y, label_width, label_height)
-
-    current_top = y + label_height
-    row_bounds = []
-    for idx, row_height in enumerate(row_heights):
-        row_top = current_top
-        row_bottom = row_top - row_height
-        row_bounds.append((row_top, row_bottom))
-        if idx < len(row_heights) - 1:
-            c.line(x, row_bottom, x + label_width, row_bottom)
-        current_top = row_bottom
-
-    _draw_centered_text_box(
+    page_margin = PAGE_MARGIN_MM * mm
+    page_top = page_height - page_margin
+    page_bottom = page_margin
+    page_start_top = page_top
+    cursor_top = _draw_fixed_header(
         c,
-        (ulsav_topo or "").upper(),
-        x + (4 * mm),
-        row_bounds[0][1] + (1.5 * mm),
-        label_width - (8 * mm),
-        row_heights[0] - (3 * mm),
-        base_size=16,
-        min_size=10,
+        supervisao_regional=supervisao_regional,
+        unidade=unidade,
+        caixa=caixa,
+        x=x,
+        y_top=page_start_top,
+        width=label_width,
+        row_heights=row_heights,
     )
 
-    numero_top = row_bounds[1][0]
-    c.setFont("Helvetica-Bold", 34)
-    c.drawString(x + 3 * mm, numero_top - 12 * mm, "Nº")
-    if numero:
-        _draw_left_text_box(
+    def finish_page(y_bottom: float):
+        _draw_vertical_borders(c, x, page_start_top, y_bottom, label_width)
+        _draw_inner_horizontal_line(c, x, y_bottom, label_width)
+
+    def start_new_page():
+        nonlocal page_start_top, cursor_top
+        finish_page(cursor_top)
+        c.showPage()
+        page_start_top = page_top
+        cursor_top = _draw_fixed_header(
             c,
-            [numero.strip()],
-            x + 24 * mm,
-            numero_top - 3 * mm,
-            label_width - (28 * mm),
-            row_heights[1] - (6 * mm),
-            base_size=18,
-            min_size=10,
+            supervisao_regional=supervisao_regional,
+            unidade=unidade,
+            caixa=caixa,
+            x=x,
+            y_top=page_start_top,
+            width=label_width,
+            row_heights=row_heights,
         )
 
-    itens = _normalize_items(itens_texto)
-    _draw_left_text_box(
-        c,
-        itens,
-        x + 6 * mm,
-        row_bounds[2][0] - 5 * mm,
-        label_width - (12 * mm),
-        row_heights[2] - (10 * mm),
-        base_size=12,
-        min_size=7,
-        bullet=True,
-    )
+    fresh_page_available = page_top - sum(row_heights) - page_bottom
 
-    _draw_centered_text_box(
-        c,
-        (ulsav_base or "").upper(),
-        x + (4 * mm),
-        row_bounds[3][1] + (1.5 * mm),
-        label_width - (8 * mm),
-        row_heights[3] - (3 * mm),
-        base_size=18,
-        min_size=11,
-    )
+    for section, lines, body_height in month_layouts:
+        section_height = month_header_height + body_height + month_separator_height
+        if section_height <= fresh_page_available and cursor_top - section_height < page_bottom:
+            start_new_page()
 
-    _draw_centered_text_box(
-        c,
-        ano,
-        x + (4 * mm),
-        row_bounds[4][1] + (1.5 * mm),
-        label_width - (8 * mm),
-        row_heights[4] - (3 * mm),
-        base_size=22,
-        min_size=14,
-    )
+        line_index = 0
+        while line_index < len(lines):
+            available_height = cursor_top - page_bottom
+            remaining_lines = len(lines) - line_index
+            remaining_body_height = max(month_body_min_height, _month_body_height(remaining_lines))
+            remaining_section_height = month_header_height + remaining_body_height + month_separator_height
 
+            if remaining_section_height <= available_height:
+                lines_to_draw = lines[line_index:]
+                fragment_body_height = remaining_body_height
+            else:
+                fragment_available_body_height = available_height - month_header_height - month_separator_height
+                if fragment_available_body_height <= _month_body_height(1):
+                    start_new_page()
+                    continue
+                max_lines = min(
+                    remaining_lines,
+                    _max_month_lines_for_height(fragment_available_body_height),
+                )
+                lines_to_draw = lines[line_index:line_index + max_lines]
+                fragment_body_height = _month_body_height(len(lines_to_draw))
+
+            cursor_top = _draw_month_section(
+                c,
+                month=section.get("month", ""),
+                year=section.get("year", CURRENT_YEAR),
+                lines=lines_to_draw,
+                x=x,
+                y_top=cursor_top,
+                width=label_width,
+                header_height=month_header_height,
+                body_height=fragment_body_height,
+                separator_height=month_separator_height,
+            )
+            line_index += len(lines_to_draw)
+            if line_index < len(lines):
+                start_new_page()
+
+    finish_page(cursor_top)
     c.showPage()
     c.save()
     buffer.seek(0)
@@ -336,47 +369,73 @@ def build_pdf_etiqueta_arquivo(
 
 
 def render_etiqueta_arquivo():
-    st.session_state.setdefault("etiqueta_ulsav_topo", "ULSAV SÃO MIGUEL DO GUAPORÉ")
-    st.session_state.setdefault("etiqueta_numero", "")
-    st.session_state.setdefault("etiqueta_itens", "")
-    st.session_state.setdefault("etiqueta_ulsav_base", "SÃO MIGUEL DO GUAPORÉ")
-    st.session_state.setdefault("etiqueta_ano", "")
+    st.session_state.setdefault("etiqueta_supervisao_regional", "")
+    st.session_state.setdefault("etiqueta_unidade", "")
+    st.session_state.setdefault("etiqueta_caixa", "*")
+    for month in MONTHS:
+        st.session_state.setdefault(f"etiqueta_mes_{month.lower()}", False)
+        st.session_state.setdefault(f"etiqueta_ano_{month.lower()}", CURRENT_YEAR)
 
     col_left, col_mid, col_right = st.columns([1, 2, 1])
     with col_mid:
         st.title("Etiqueta de Arquivo")
-        st.caption("Etiqueta em PDF com medida aproximada de 11,5 x 14,5 cm.")
+        st.caption("Modelo inicial com três linhas e divisórias duplas.")
         _render_instruction_diagram()
 
-        with st.form("form_etiqueta_arquivo"):
-            st.text_input("ULSAV - parte superior", key="etiqueta_ulsav_topo")
-            st.text_input("Número", key="etiqueta_numero")
-            st.text_area(
-                "Itens da pasta",
-                key="etiqueta_itens",
-                height=140,
-                help="Digite um item por linha. Cada linha será gerada com ponto na frente.",
-                placeholder="documento 1\ndocumento 2\ndocumento 3\ndocumento 4",
-            )
-            st.text_input("ULSAV - parte inferior", key="etiqueta_ulsav_base")
-            st.text_input("Ano", key="etiqueta_ano")
+        st.text_input("Supervisão regional", key="etiqueta_supervisao_regional")
+        st.text_input("Unidade", key="etiqueta_unidade")
+        st.text_input("Caixa", key="etiqueta_caixa")
+        st.markdown("Meses")
+        month_sections = []
+        for month in MONTHS:
+            month_key = month.lower()
+            month_col, year_col = st.columns([2, 1])
+            with month_col:
+                checked = st.checkbox(month, key=f"etiqueta_mes_{month_key}")
+            with year_col:
+                st.selectbox(
+                    f"Ano - {month}",
+                    YEARS,
+                    index=YEARS.index(st.session_state.get(f"etiqueta_ano_{month_key}", CURRENT_YEAR)),
+                    key=f"etiqueta_ano_{month_key}",
+                    disabled=not checked,
+                    label_visibility="collapsed",
+                )
+            if checked:
+                year = st.session_state.get(f"etiqueta_ano_{month_key}", CURRENT_YEAR)
+                text_key = f"etiqueta_texto_{month_key}"
+                default_text = f"{month} / {year}"
+                st.session_state.setdefault(text_key, "")
+                with st.expander(default_text, expanded=True):
+                    st.text_area(
+                        "Texto",
+                        key=text_key,
+                        height=100,
+                        label_visibility="collapsed",
+                    )
+                month_sections.append(
+                    {
+                        "month": month,
+                        "year": year,
+                        "text": st.session_state.get(text_key, ""),
+                    }
+                )
 
-            submit = st.form_submit_button("Gerar PDF")
+        submit = st.button("Gerar PDF")
 
         if submit:
             pdf_bytes = build_pdf_etiqueta_arquivo(
-                ulsav_topo=st.session_state.get("etiqueta_ulsav_topo", ""),
-                numero=st.session_state.get("etiqueta_numero", ""),
-                itens_texto=st.session_state.get("etiqueta_itens", ""),
-                ulsav_base=st.session_state.get("etiqueta_ulsav_base", ""),
-                ano=st.session_state.get("etiqueta_ano", ""),
+                supervisao_regional=st.session_state.get("etiqueta_supervisao_regional", ""),
+                unidade=st.session_state.get("etiqueta_unidade", ""),
+                caixa=st.session_state.get("etiqueta_caixa", ""),
+                month_sections=month_sections,
             )
 
             st.session_state["etiqueta_arquivo_pdf"] = pdf_bytes
 
             output_dir = Path(__file__).resolve().parents[1] / "pdf"
             output_dir.mkdir(parents=True, exist_ok=True)
-            output_path = output_dir / "Etiqueta arquivo.pdf"
+            output_path = output_dir / OUTPUT_FILENAME
             output_path.write_bytes(pdf_bytes)
             st.session_state["etiqueta_arquivo_pdf_path"] = output_path
             st.success("PDF gerado e salvo.")
@@ -390,7 +449,7 @@ def render_etiqueta_arquivo():
             st.download_button(
                 "Baixar PDF",
                 data=st.session_state["etiqueta_arquivo_pdf"],
-                file_name="Etiqueta arquivo.pdf",
+                file_name=OUTPUT_FILENAME,
                 mime="application/pdf",
             )
             if "etiqueta_arquivo_pdf_path" in st.session_state:
