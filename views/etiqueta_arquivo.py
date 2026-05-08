@@ -461,12 +461,13 @@ def _build_current_pdf(month_sections: list[dict]) -> bytes:
 
 
 def _render_pdf_viewer(pdf_bytes: bytes):
-    pdf_base64 = base64.b64encode(pdf_bytes).decode("ascii")
     try:
         st.pdf(pdf_bytes)
     except StreamlitAPIException:
         st.info("Pré-visualização indisponível. Instale streamlit[pdf].")
 
+def _render_open_pdf_button(pdf_bytes: bytes):
+    pdf_base64 = base64.b64encode(pdf_bytes).decode("ascii")
     components.html(
         f"""
         <button id="open-pdf" type="button">Abrir PDF</button>
@@ -607,11 +608,15 @@ def render_etiqueta_arquivo():
             except StreamlitAPIException:
                 st.info("Pré-visualização indisponível. Instale streamlit[pdf].")
 
-            st.download_button(
-                "Baixar PDF",
-                data=st.session_state["etiqueta_arquivo_pdf"],
-                file_name=OUTPUT_FILENAME,
-                mime="application/pdf",
-            )
+            open_col, download_col = st.columns([1, 1])
+            with open_col:
+                _render_open_pdf_button(st.session_state["etiqueta_arquivo_pdf"])
+            with download_col:
+                st.download_button(
+                    "Baixar PDF",
+                    data=st.session_state["etiqueta_arquivo_pdf"],
+                    file_name=OUTPUT_FILENAME,
+                    mime="application/pdf",
+                )
             if "etiqueta_arquivo_pdf_path" in st.session_state:
                 st.caption(f"Salvo em: {st.session_state['etiqueta_arquivo_pdf_path']}")
