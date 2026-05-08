@@ -469,7 +469,6 @@ def _render_pdf_viewer(pdf_bytes: bytes):
 
     components.html(
         f"""
-        <button id="print-pdf" type="button">Imprimir PDF</button>
         <button id="open-pdf" type="button">Abrir PDF</button>
         <script>
         const pdfBase64 = "{pdf_base64}";
@@ -484,21 +483,6 @@ def _render_pdf_viewer(pdf_bytes: bytes):
         }}
         document.getElementById("open-pdf").addEventListener("click", () => {{
             window.open(pdfUrl(), "_blank");
-        }});
-        document.getElementById("print-pdf").addEventListener("click", () => {{
-            const frame = document.createElement("iframe");
-            frame.style.position = "fixed";
-            frame.style.right = "0";
-            frame.style.bottom = "0";
-            frame.style.width = "0";
-            frame.style.height = "0";
-            frame.style.border = "0";
-            frame.src = pdfUrl();
-            frame.onload = () => {{
-                frame.contentWindow.focus();
-                frame.contentWindow.print();
-            }};
-            document.body.appendChild(frame);
         }});
         </script>
         <style>
