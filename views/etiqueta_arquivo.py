@@ -99,12 +99,33 @@ def _draw_centered_row(c: canvas.Canvas, text: str, x: float, y_top: float, widt
     c.drawCentredString(x + width / 2, text_y, line)
 
 
-def _split_text_lines(text: str) -> list[str]:
+def _wrap_text_line(line: str, max_width: float, font_name: str, font_size: int) -> list[str]:
+    words = line.split()
+    if not words:
+        return []
+
+    wrapped_lines = []
+    current_line = words[0]
+    for word in words[1:]:
+        candidate = f"{current_line} {word}"
+        if stringWidth(candidate, font_name, font_size) <= max_width:
+            current_line = candidate
+        else:
+            wrapped_lines.append(current_line)
+            current_line = word
+    wrapped_lines.append(current_line)
+    return wrapped_lines
+
+
+def _split_text_lines(text: str, max_width: float | None = None) -> list[str]:
     lines = []
     for raw_line in (text or "").splitlines():
         line = raw_line.strip()
         if line:
-            lines.append(line)
+            if max_width:
+                lines.extend(_wrap_text_line(line, max_width, TEXT_FONT, TEXT_SIZE))
+            else:
+                lines.append(line)
     return lines
 
 
@@ -294,8 +315,9 @@ def build_pdf_etiqueta_arquivo(
 
     def build_month_layouts(sections: list[dict]):
         layouts = []
+        text_width = label_width - (2 * 5 * mm)
         for section in sections:
-            lines = _split_text_lines(section.get("text", "")) or [""]
+            lines = _split_text_lines(section.get("text", ""), text_width) or [""]
             body_height = max(
                 month_body_min_height,
                 _month_body_height(len(lines)),
