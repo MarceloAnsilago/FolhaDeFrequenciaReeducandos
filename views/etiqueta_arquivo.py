@@ -1,8 +1,10 @@
+import base64
 from io import BytesIO
 from datetime import date
 from pathlib import Path
 
 import streamlit as st
+import streamlit.components.v1 as components
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -18,6 +20,7 @@ MONTH_BODY_MIN_HEIGHT_MM = 0
 MONTH_BODY_TOP_PADDING_MM = 5
 MONTH_BODY_BOTTOM_PADDING_MM = 2
 PAGE_MARGIN_MM = 15
+LABEL_GAP_MM = 8
 OUTPUT_FILENAME = "modelo etiqueta para caixa arquivo.pdf"
 TEXT_FONT = "Helvetica-Bold"
 TEXT_SIZE = 12
@@ -260,6 +263,7 @@ def build_pdf_etiqueta_arquivo(
     unidade: str,
     caixa: str,
     month_sections: list[dict] | None = None,
+    label_cards: list[dict] | None = None,
 ) -> bytes:
     buffer = BytesIO()
     page_width, page_height = A4
@@ -271,107 +275,251 @@ def build_pdf_etiqueta_arquivo(
     month_header_height = MONTH_HEADER_HEIGHT_MM * mm
     month_separator_height = MONTH_SEPARATOR_HEIGHT_MM * mm
     month_body_min_height = MONTH_BODY_MIN_HEIGHT_MM * mm
-    month_layouts = []
-    for section in month_sections:
-        lines = _split_text_lines(section.get("text", "")) or [""]
-        body_height = max(
-            month_body_min_height,
-            _month_body_height(len(lines)),
-        )
-        month_layouts.append((section, lines, body_height))
 
     x = (page_width - label_width) / 2
     page_margin = PAGE_MARGIN_MM * mm
     page_top = page_height - page_margin
     page_bottom = page_margin
-    page_start_top = page_top
-    cursor_top = _draw_fixed_header(
-        c,
-        supervisao_regional=supervisao_regional,
-        unidade=unidade,
-        caixa=caixa,
-        x=x,
-        y_top=page_start_top,
-        width=label_width,
-        row_heights=row_heights,
-    )
+    label_gap = LABEL_GAP_MM * mm
+    cursor_top = page_top
 
-    def finish_page(y_bottom: float):
-        _draw_vertical_borders(c, x, page_start_top, y_bottom, label_width)
+    cards = label_cards or [
+        {
+            "supervisao_regional": supervisao_regional,
+            "unidade": unidade,
+            "caixa": caixa,
+            "month_sections": month_sections or [],
+        }
+    ]
+
+    def build_month_layouts(sections: list[dict]):
+        layouts = []
+        for section in sections:
+            lines = _split_text_lines(section.get("text", "")) or [""]
+            body_height = max(
+                month_body_min_height,
+                _month_body_height(len(lines)),
+            )
+            layouts.append((section, lines, body_height))
+        return layouts
+
+    def finish_card(y_start: float, y_bottom: float):
+        _draw_vertical_borders(c, x, y_start, y_bottom, label_width)
         _draw_inner_horizontal_line(c, x, y_bottom, label_width)
 
-    def start_new_page():
-        nonlocal page_start_top, cursor_top
-        finish_page(cursor_top)
-        c.showPage()
-        page_start_top = page_top
-        cursor_top = _draw_fixed_header(
+    def draw_header(card: dict, y_top: float):
+        return _draw_fixed_header(
             c,
-            supervisao_regional=supervisao_regional,
-            unidade=unidade,
-            caixa=caixa,
+            supervisao_regional=card.get("supervisao_regional", ""),
+            unidade=card.get("unidade", ""),
+            caixa=card.get("caixa", ""),
             x=x,
-            y_top=page_start_top,
+            y_top=y_top,
             width=label_width,
             row_heights=row_heights,
         )
 
+    def start_new_page(card: dict):
+        nonlocal cursor_top
+        c.showPage()
+        cursor_top = page_top
+        card_start_top = cursor_top
+        cursor_top = draw_header(card, card_start_top)
+        return card_start_top
+
     fresh_page_available = page_top - sum(row_heights) - page_bottom
 
-    for section, lines, body_height in month_layouts:
-        section_height = month_header_height + body_height + month_separator_height
-        if section_height <= fresh_page_available and cursor_top - section_height < page_bottom:
-            start_new_page()
+    for card_index, card in enumerate(cards):
+        if card_index > 0:
+            cursor_top -= label_gap
 
-        line_index = 0
-        while line_index < len(lines):
-            available_height = cursor_top - page_bottom
-            remaining_lines = len(lines) - line_index
-            remaining_body_height = max(month_body_min_height, _month_body_height(remaining_lines))
-            remaining_section_height = month_header_height + remaining_body_height + month_separator_height
+        if cursor_top - sum(row_heights) < page_bottom:
+            c.showPage()
+            cursor_top = page_top
 
-            if remaining_section_height <= available_height:
-                lines_to_draw = lines[line_index:]
-                fragment_body_height = remaining_body_height
-            else:
-                fragment_available_body_height = available_height - month_header_height - month_separator_height
-                if fragment_available_body_height <= _month_body_height(1):
-                    start_new_page()
-                    continue
-                max_lines = min(
-                    remaining_lines,
-                    _max_month_lines_for_height(fragment_available_body_height),
+        card_start_top = cursor_top
+        cursor_top = draw_header(card, card_start_top)
+        month_layouts = build_month_layouts(card.get("month_sections", []))
+
+        for section, lines, body_height in month_layouts:
+            section_height = month_header_height + body_height + month_separator_height
+            if section_height <= fresh_page_available and cursor_top - section_height < page_bottom:
+                finish_card(card_start_top, cursor_top)
+                card_start_top = start_new_page(card)
+
+            line_index = 0
+            while line_index < len(lines):
+                available_height = cursor_top - page_bottom
+                remaining_lines = len(lines) - line_index
+                remaining_body_height = max(month_body_min_height, _month_body_height(remaining_lines))
+                remaining_section_height = month_header_height + remaining_body_height + month_separator_height
+
+                if remaining_section_height <= available_height:
+                    lines_to_draw = lines[line_index:]
+                    fragment_body_height = remaining_body_height
+                else:
+                    fragment_available_body_height = available_height - month_header_height - month_separator_height
+                    if fragment_available_body_height <= _month_body_height(1):
+                        finish_card(card_start_top, cursor_top)
+                        card_start_top = start_new_page(card)
+                        continue
+                    max_lines = min(
+                        remaining_lines,
+                        _max_month_lines_for_height(fragment_available_body_height),
+                    )
+                    lines_to_draw = lines[line_index:line_index + max_lines]
+                    fragment_body_height = _month_body_height(len(lines_to_draw))
+
+                cursor_top = _draw_month_section(
+                    c,
+                    month=section.get("month", ""),
+                    year=section.get("year", CURRENT_YEAR),
+                    lines=lines_to_draw,
+                    x=x,
+                    y_top=cursor_top,
+                    width=label_width,
+                    header_height=month_header_height,
+                    body_height=fragment_body_height,
+                    separator_height=month_separator_height,
                 )
-                lines_to_draw = lines[line_index:line_index + max_lines]
-                fragment_body_height = _month_body_height(len(lines_to_draw))
+                line_index += len(lines_to_draw)
+                if line_index < len(lines):
+                    finish_card(card_start_top, cursor_top)
+                    card_start_top = start_new_page(card)
 
-            cursor_top = _draw_month_section(
-                c,
-                month=section.get("month", ""),
-                year=section.get("year", CURRENT_YEAR),
-                lines=lines_to_draw,
-                x=x,
-                y_top=cursor_top,
-                width=label_width,
-                header_height=month_header_height,
-                body_height=fragment_body_height,
-                separator_height=month_separator_height,
-            )
-            line_index += len(lines_to_draw)
-            if line_index < len(lines):
-                start_new_page()
+        finish_card(card_start_top, cursor_top)
 
-    finish_page(cursor_top)
+    if not cards:
+        cursor_top = draw_header(
+            {
+                "supervisao_regional": supervisao_regional,
+                "unidade": unidade,
+                "caixa": caixa,
+            },
+            cursor_top,
+        )
+        finish_card(page_top, cursor_top)
+
     c.showPage()
     c.save()
     buffer.seek(0)
     return buffer.read()
 
 
+def _current_label_card(month_sections: list[dict]) -> dict:
+    return {
+        "supervisao_regional": st.session_state.get("etiqueta_supervisao_regional", ""),
+        "unidade": st.session_state.get("etiqueta_unidade", ""),
+        "caixa": st.session_state.get("etiqueta_caixa", ""),
+        "month_sections": [
+            {
+                "month": section.get("month", ""),
+                "year": section.get("year", CURRENT_YEAR),
+                "text": section.get("text", ""),
+            }
+            for section in month_sections
+        ],
+    }
+
+
+def _label_card_title(card: dict, index: int) -> str:
+    months = card.get("month_sections", [])
+    month_text = ", ".join(f"{item.get('month', '')}/{item.get('year', '')}" for item in months[:2])
+    if len(months) > 2:
+        month_text = f"{month_text}..."
+    return f"Etiqueta {index} - Caixa {card.get('caixa', '') or '*'}" + (f" - {month_text}" if month_text else "")
+
+
+def _store_etiqueta_pdf(pdf_bytes: bytes):
+    st.session_state["etiqueta_arquivo_pdf"] = pdf_bytes
+
+    output_dir = Path(__file__).resolve().parents[1] / "pdf"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / OUTPUT_FILENAME
+    output_path.write_bytes(pdf_bytes)
+    st.session_state["etiqueta_arquivo_pdf_path"] = output_path
+
+
+def _build_current_pdf(month_sections: list[dict]) -> bytes:
+    cards = st.session_state.get("etiqueta_cards", [])
+    return build_pdf_etiqueta_arquivo(
+        supervisao_regional=st.session_state.get("etiqueta_supervisao_regional", ""),
+        unidade=st.session_state.get("etiqueta_unidade", ""),
+        caixa=st.session_state.get("etiqueta_caixa", ""),
+        month_sections=month_sections,
+        label_cards=cards if cards else None,
+    )
+
+
+def _render_pdf_viewer(pdf_bytes: bytes):
+    pdf_base64 = base64.b64encode(pdf_bytes).decode("ascii")
+    try:
+        st.pdf(pdf_bytes)
+    except StreamlitAPIException:
+        st.info("Pré-visualização indisponível. Instale streamlit[pdf].")
+
+    components.html(
+        f"""
+        <button id="print-pdf" type="button">Imprimir PDF</button>
+        <button id="open-pdf" type="button">Abrir PDF</button>
+        <script>
+        const pdfBase64 = "{pdf_base64}";
+        function pdfUrl() {{
+            const binary = atob(pdfBase64);
+            const bytes = new Uint8Array(binary.length);
+            for (let index = 0; index < binary.length; index++) {{
+                bytes[index] = binary.charCodeAt(index);
+            }}
+            const blob = new Blob([bytes], {{ type: "application/pdf" }});
+            return URL.createObjectURL(blob);
+        }}
+        document.getElementById("open-pdf").addEventListener("click", () => {{
+            window.open(pdfUrl(), "_blank");
+        }});
+        document.getElementById("print-pdf").addEventListener("click", () => {{
+            const frame = document.createElement("iframe");
+            frame.style.position = "fixed";
+            frame.style.right = "0";
+            frame.style.bottom = "0";
+            frame.style.width = "0";
+            frame.style.height = "0";
+            frame.style.border = "0";
+            frame.src = pdfUrl();
+            frame.onload = () => {{
+                frame.contentWindow.focus();
+                frame.contentWindow.print();
+            }};
+            document.body.appendChild(frame);
+        }});
+        </script>
+        <style>
+        button {{
+            appearance: none;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: #ffffff;
+            color: #111827;
+            font: 14px/1.2 sans-serif;
+            padding: 9px 14px;
+            margin: 0 8px 0 0;
+            cursor: pointer;
+        }}
+        button:hover {{
+            border-color: #9ca3af;
+            background: #f9fafb;
+        }}
+        </style>
+        """,
+        height=48,
+        scrolling=False,
+    )
+
+
 def render_etiqueta_arquivo():
     st.session_state.setdefault("etiqueta_supervisao_regional", "")
     st.session_state.setdefault("etiqueta_unidade", "")
     st.session_state.setdefault("etiqueta_caixa", "*")
+    st.session_state.setdefault("etiqueta_cards", [])
     for month in MONTHS:
         st.session_state.setdefault(f"etiqueta_mes_{month.lower()}", False)
         st.session_state.setdefault(f"etiqueta_ano_{month.lower()}", CURRENT_YEAR)
@@ -419,28 +567,43 @@ def render_etiqueta_arquivo():
                     }
                 )
 
-        submit = st.button("Gerar PDF")
+        button_col_gerar, button_col_incluir = st.columns([1, 1])
+        with button_col_gerar:
+            submit = st.button("Gerar PDF")
+        with button_col_incluir:
+            include = st.button("Incluir")
+
+        if include:
+            st.session_state["etiqueta_cards"].append(_current_label_card(month_sections))
+            _store_etiqueta_pdf(_build_current_pdf(month_sections))
+            st.success("Etiqueta incluÃ­da.")
+
+        if st.session_state["etiqueta_cards"]:
+            st.markdown("Etiquetas incluÃ­das")
+            remove_index = None
+            for index, card in enumerate(st.session_state["etiqueta_cards"], start=1):
+                card_col, remove_col = st.columns([4, 1])
+                with card_col:
+                    st.info(_label_card_title(card, index))
+                with remove_col:
+                    if st.button("Remover", key=f"etiqueta_remover_{index}"):
+                        remove_index = index - 1
+            if remove_index is not None:
+                del st.session_state["etiqueta_cards"][remove_index]
+                if st.session_state["etiqueta_cards"]:
+                    _store_etiqueta_pdf(_build_current_pdf(month_sections))
+                else:
+                    st.session_state.pop("etiqueta_arquivo_pdf", None)
+                    st.session_state.pop("etiqueta_arquivo_pdf_path", None)
+                st.rerun()
 
         if submit:
-            pdf_bytes = build_pdf_etiqueta_arquivo(
-                supervisao_regional=st.session_state.get("etiqueta_supervisao_regional", ""),
-                unidade=st.session_state.get("etiqueta_unidade", ""),
-                caixa=st.session_state.get("etiqueta_caixa", ""),
-                month_sections=month_sections,
-            )
-
-            st.session_state["etiqueta_arquivo_pdf"] = pdf_bytes
-
-            output_dir = Path(__file__).resolve().parents[1] / "pdf"
-            output_dir.mkdir(parents=True, exist_ok=True)
-            output_path = output_dir / OUTPUT_FILENAME
-            output_path.write_bytes(pdf_bytes)
-            st.session_state["etiqueta_arquivo_pdf_path"] = output_path
+            _store_etiqueta_pdf(_build_current_pdf(month_sections))
             st.success("PDF gerado e salvo.")
 
         if "etiqueta_arquivo_pdf" in st.session_state:
             try:
-                st.pdf(st.session_state["etiqueta_arquivo_pdf"])
+                _render_pdf_viewer(st.session_state["etiqueta_arquivo_pdf"])
             except StreamlitAPIException:
                 st.info("Pré-visualização indisponível. Instale streamlit[pdf].")
 
