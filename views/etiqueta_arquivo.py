@@ -333,13 +333,22 @@ def build_pdf_etiqueta_arquivo(
         if card_index > 0:
             cursor_top -= label_gap
 
-        if cursor_top - sum(row_heights) < page_bottom:
+        month_layouts = build_month_layouts(card.get("month_sections", []))
+        required_height = sum(row_heights)
+        if month_layouts:
+            _section, _lines, first_body_height = month_layouts[0]
+            first_section_height = month_header_height + first_body_height + month_separator_height
+            if first_section_height <= fresh_page_available:
+                required_height += first_section_height
+            else:
+                required_height += month_header_height + _month_body_height(1) + month_separator_height
+
+        if cursor_top - required_height < page_bottom:
             c.showPage()
             cursor_top = page_top
 
         card_start_top = cursor_top
         cursor_top = draw_header(card, card_start_top)
-        month_layouts = build_month_layouts(card.get("month_sections", []))
 
         for section, lines, body_height in month_layouts:
             section_height = month_header_height + body_height + month_separator_height
