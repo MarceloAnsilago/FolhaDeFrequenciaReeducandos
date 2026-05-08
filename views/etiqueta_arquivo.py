@@ -567,11 +567,16 @@ def render_etiqueta_arquivo():
                     }
                 )
 
-        button_col_gerar, button_col_incluir = st.columns([1, 1])
-        with button_col_gerar:
+        include = False
+        show_include = "etiqueta_arquivo_pdf" in st.session_state or bool(st.session_state["etiqueta_cards"])
+        if show_include:
+            button_col_gerar, button_col_incluir = st.columns([1, 1])
+            with button_col_gerar:
+                submit = st.button("Gerar PDF")
+            with button_col_incluir:
+                include = st.button("Incluir")
+        else:
             submit = st.button("Gerar PDF")
-        with button_col_incluir:
-            include = st.button("Incluir")
 
         if include:
             st.session_state["etiqueta_cards"].append(_current_label_card(month_sections))
@@ -598,6 +603,8 @@ def render_etiqueta_arquivo():
                 st.rerun()
 
         if submit:
+            if not st.session_state["etiqueta_cards"]:
+                st.session_state["etiqueta_cards"].append(_current_label_card(month_sections))
             _store_etiqueta_pdf(_build_current_pdf(month_sections))
             st.success("PDF gerado e salvo.")
 
