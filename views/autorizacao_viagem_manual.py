@@ -11,6 +11,8 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from streamlit.errors import StreamlitAPIException
 
+from services.parsers import _ler_upload, _parse_autorizacao_viagem_manual_campos
+
 FONT_REGULAR = "Helvetica"
 FONT_BOLD = "Helvetica-Bold"
 
@@ -281,6 +283,31 @@ def render_autorizacao_viagem_manual():
     with col_meio:
         st.markdown("## Autorização de viagem manual")
         st.caption("O PDF replica o primeiro quadro do modelo duas vezes na mesma folha.")
+
+        with st.expander("Importar dados da ultima autorizacao (PDF ou DOCX)", expanded=False):
+            arquivo = st.file_uploader(
+                "Selecione o PDF ou DOCX da ultima autorizacao",
+                type=["pdf", "docx"],
+                key="avm_upload_ultima",
+            )
+            if arquivo:
+                if st.session_state.get("_avm_ultimo_upload") != arquivo.name:
+                    st.session_state["_avm_upload_aplicado"] = False
+                    st.session_state["_avm_ultimo_upload"] = arquivo.name
+
+                if not st.session_state.get("_avm_upload_aplicado", False):
+                    texto = _ler_upload(arquivo)
+                    if not texto:
+                        st.warning("Nao consegui ler o arquivo enviado.")
+                    else:
+                        campos = _parse_autorizacao_viagem_manual_campos(texto)
+                        preenchidos = {k: v for k, v in campos.items() if v}
+                        if preenchidos:
+                            st.session_state.update(preenchidos)
+                            st.session_state["_avm_upload_aplicado"] = True
+                            st.success("Dados do servidor preenchidos a partir do arquivo.")
+                        else:
+                            st.warning("Nao encontrei os dados do servidor nesse arquivo.")
 
         with st.form("form_autorizacao_viagem_manual"):
             col_veiculo = st.columns(2)

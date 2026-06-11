@@ -1,5 +1,6 @@
 import re
 from io import BytesIO
+from unicodedata import normalize
 
 import streamlit as st
 
@@ -143,6 +144,35 @@ def _parse_campos(texto: str) -> dict:
             if nome.startswith(mes_upper[:3]):
                 campos["mes_label"] = nome
                 break
+
+    return campos
+
+
+def _strip_accents(texto: str) -> str:
+    return "".join(
+        char for char in normalize("NFD", texto or "") if not re.match(r"[\u0300-\u036f]", char)
+    )
+
+
+def _parse_autorizacao_viagem_manual_campos(texto: str) -> dict:
+    """Extrai dados do servidor de uma autorizacao de viagem manual ja emitida."""
+    norm = _clean_text(texto)
+    norm_upper = _strip_accents(norm).upper()
+    campos = {}
+
+    def pega(padrao: str, grupo=1) -> str:
+        m = re.search(padrao, norm_upper)
+        return m.group(grupo).strip() if m else ""
+
+    campos["avm_servidor"] = pega(r"SERVIDOR:\s*(.+?)(?:\s+CARGO/FUN|$)")
+    campos["avm_cargo_funcao"] = pega(r"CARGO/FUN\S*:\s*(.+?)(?:\s+MATR|$)")
+    campos["avm_matricula"] = pega(r"MATR\S*CULA:\s*(.+?)(?:\s+HABILITA|$)")
+    campos["avm_habilitacao"] = pega(r"HABILITA\S*:\s*(.+?)(?:\s+-\s*CATEGORIA:|$)")
+    campos["avm_categoria"] = pega(r"CATEGORIA:\s*(.+?)(?:\s+-\s*VALIDADE:|$)")
+    campos["avm_validade"] = pega(r"VALIDADE:\s*(.+?)(?:\s+SA|$)")
+    campos["avm_responsavel_transporte"] = pega(
+        r"RESPONS\S*VEL\s+TRANSPORTE:\s*(.+?)(?:\s+CHEGADA:|\s+OBS:|$)"
+    )
 
     return campos
 
