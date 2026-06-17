@@ -6,7 +6,7 @@ from services.constants import MESES, ANOS_OPCOES
 
 
 def render_lista_presenca():
-    col_left, col_mid, col_right = st.columns([1, 2, 1])
+    col_left, col_mid, col_right = st.columns([0.1, 8, 0.1])
     with col_mid:
         st.title("🗒️ Lista de Presença")
 
