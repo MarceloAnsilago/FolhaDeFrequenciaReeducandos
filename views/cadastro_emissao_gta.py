@@ -673,7 +673,7 @@ def render_cadastro_emissao_gta():
         for perm_key, _ in PERMISSAO_COLUNAS:
             st.session_state.setdefault(f"gta_perm_{item_num}_{perm_key}", defaults_item.get(perm_key, False))
 
-    col_left, col_mid, col_right = st.columns([1, 2, 1])
+    col_left, col_mid, col_right = st.columns([0.1, 8, 0.1])
     with col_mid:
         st.title("Cadastro de Emissão de GTA")
 
