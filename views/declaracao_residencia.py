@@ -107,7 +107,7 @@ def build_pdf_declaracao_residencia(data: dict, logo_path: Path) -> bytes:
 
 
 def render_declaracao_residencia():
-    col_esq, col_meio, col_dir = st.columns([1, 2, 1])
+    col_esq, col_meio, col_dir = st.columns([0.1, 8, 0.1])
     with col_meio:
         st.markdown("## Declaração de residência")
         with st.form("form_declaracao_residencia"):
