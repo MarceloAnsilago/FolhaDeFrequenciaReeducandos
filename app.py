@@ -52,7 +52,6 @@ with st.sidebar:
         "Navegação",
         [
             "Folha Reeducandos",
-            "FAI vazio sanitário",
             "Lista de Presença",
             "Controle de Veículos",
             "Cadastro de Emissão de GTA",
@@ -64,10 +63,10 @@ with st.sidebar:
             "Etiqueta de arquivo",
             "Guia de malote",
             "Autorização de viagem manual",
+            "FAI vazio sanitário",
         ],
         icons=[
             "file-earmark-text",
-            "clipboard2-check",
             "card-checklist",
             "truck",
             "person-vcard",
@@ -79,6 +78,7 @@ with st.sidebar:
             "tag",
             "inbox",
             "car-front",
+            "clipboard2-check",
         ],
         menu_icon="cast",
         default_index=0,
@@ -93,8 +93,6 @@ with st.sidebar:
 
 if destino == "Folha Reeducandos":
     render_folha_ponto()
-elif destino == "FAI vazio sanitário":
-    render_fai_vazio_sanitario()
 elif destino == "Lista de Presença":
     render_lista_presenca()
 elif destino == "Controle de Veículos":
@@ -115,5 +113,7 @@ elif destino == "Etiqueta de arquivo":
     render_etiqueta_arquivo()
 elif destino == "Guia de malote":
     render_guia_malote()
-else:
+elif destino == "Autorização de viagem manual":
     render_autorizacao_viagem_manual()
+else:
+    render_fai_vazio_sanitario()
