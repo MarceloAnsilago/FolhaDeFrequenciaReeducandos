@@ -122,7 +122,7 @@ def build_pdf_declaracao_nada_consta(data: dict, logo_path: Path) -> bytes:
     return buffer.read()
 
 def render_declaracao_nada_consta():
-    col_esq, col_meio, col_dir = st.columns([1, 2, 1])
+    col_esq, col_meio, col_dir = st.columns([0.1, 8, 0.1])
     with col_meio:
         st.markdown("## Declaração de nada consta")
         st.session_state.setdefault("dnc_show_page", False)
