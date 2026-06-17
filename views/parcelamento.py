@@ -78,7 +78,7 @@ def render_parcelamento():
             return "0"
         return f"{valor:.2f}".rstrip("0").rstrip(".")
 
-    col_left, col_mid, col_right = st.columns([1, 2, 1])
+    col_left, col_mid, col_right = st.columns([0.1, 8, 0.1])
     with col_mid:
         st.title("Parcelar Auto de Infração")
         tabs = st.tabs(["Preencher Requerimento", "Tabela de Descontos"])
