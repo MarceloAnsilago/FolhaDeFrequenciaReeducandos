@@ -339,7 +339,7 @@ def render_declaracao_cadastral_suinos():
         + _safe_int(st.session_state.get("dcs_idade_sexo_nao_relevante"))
     )
 
-    col_esq, col_meio, col_dir = st.columns([1, 2, 1])
+    col_esq, col_meio, col_dir = st.columns([0.1, 8, 0.1])
     with col_meio:
         st.markdown("## Declaração cadastral - suínos")
 
