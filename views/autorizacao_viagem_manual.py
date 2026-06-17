@@ -279,7 +279,7 @@ def build_pdf_autorizacao_viagem_manual(data: dict, logo_path: Path) -> bytes:
 def render_autorizacao_viagem_manual():
     st.session_state.setdefault("avm_observacao", "VEÍCULO ENTREGUE EM PERFEITO ESTADO DE CONSERVAÇÃO")
 
-    col_esq, col_meio, col_dir = st.columns([1, 2, 1])
+    col_esq, col_meio, col_dir = st.columns([0.1, 8, 0.1])
     with col_meio:
         st.markdown("## Autorização de viagem manual")
         st.caption("O PDF replica o primeiro quadro do modelo duas vezes na mesma folha.")
