@@ -17,7 +17,7 @@ from services.pdf_builders import (
 )
 
 def render_folha_ponto():
-    col_left, col_mid, col_right = st.columns([1, 2, 1])
+    col_left, col_mid, col_right = st.columns([0.1, 8, 0.1])
     with col_mid:
         st.title("📄 Gerador de Folha de Ponto de Reeducandos")
 
