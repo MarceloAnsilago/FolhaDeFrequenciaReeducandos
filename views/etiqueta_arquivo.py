@@ -540,7 +540,7 @@ def render_etiqueta_arquivo():
         st.session_state.setdefault(f"etiqueta_mes_{month.lower()}", False)
         st.session_state.setdefault(f"etiqueta_ano_{month.lower()}", CURRENT_YEAR)
 
-    col_left, col_mid, col_right = st.columns([1, 2, 1])
+    col_left, col_mid, col_right = st.columns([0.1, 8, 0.1])
     with col_mid:
         st.title("Etiqueta de Arquivo")
 
