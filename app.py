@@ -8,6 +8,7 @@ from views.declaracao_cadastral_suinos import render_declaracao_cadastral_suinos
 from views.declaracao_nada_consta import render_declaracao_nada_consta
 from views.declaracao_residencia import render_declaracao_residencia
 from views.etiqueta_arquivo import render_etiqueta_arquivo
+from views.fai_vazio_sanitario import render_fai_vazio_sanitario
 from views.guia_malote import render_guia_malote
 from views.lista_presenca import render_lista_presenca
 from views.parcelamento import render_parcelamento
@@ -51,6 +52,7 @@ with st.sidebar:
         "Navegação",
         [
             "Folha Reeducandos",
+            "FAI vazio sanitário",
             "Lista de Presença",
             "Controle de Veículos",
             "Cadastro de Emissão de GTA",
@@ -65,6 +67,7 @@ with st.sidebar:
         ],
         icons=[
             "file-earmark-text",
+            "clipboard2-check",
             "card-checklist",
             "truck",
             "person-vcard",
@@ -90,6 +93,8 @@ with st.sidebar:
 
 if destino == "Folha Reeducandos":
     render_folha_ponto()
+elif destino == "FAI vazio sanitário":
+    render_fai_vazio_sanitario()
 elif destino == "Lista de Presença":
     render_lista_presenca()
 elif destino == "Controle de Veículos":
