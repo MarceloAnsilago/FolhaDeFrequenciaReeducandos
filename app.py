@@ -27,6 +27,17 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    .stApp .block-container {
+        max-width: 1280px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+    .stApp .block-container h1,
+    .stApp .block-container h2 {
+        text-align: center;
+    }
     [data-testid="stSidebar"] {
         min-width: 430px;
         max-width: 430px;
