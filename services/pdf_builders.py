@@ -89,7 +89,6 @@ def gerar_lista_presenca_pdf(
     local,
     municipio,
     tipo_publico,
-    tipo_publico_outra,
     qual,
 ):
     return gerar_pdf_lista_presenca(
@@ -110,7 +109,6 @@ def gerar_lista_presenca_pdf(
         local=local,
         municipio=municipio,
         tipo_publico=tipo_publico,
-        tipo_publico_outra=tipo_publico_outra,
         qual=qual,
     )
 

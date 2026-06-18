@@ -113,7 +113,6 @@ def _draw_header(
     local,
     municipio,
     tipo_publico,
-    tipo_publico_outra,
     qual,
 ):
     largura_pagina, altura_pagina = A4
@@ -362,7 +361,6 @@ def desenhar_lista_presenca(
     local="",
     municipio="",
     tipo_publico="",
-    tipo_publico_outra="",
     qual="",
     total_linhas=30,
 ):
@@ -385,7 +383,6 @@ def desenhar_lista_presenca(
         local=local,
         municipio=municipio,
         tipo_publico=tipo_publico,
-        tipo_publico_outra=tipo_publico_outra,
         qual=qual,
     )
 
@@ -451,7 +448,6 @@ def gerar_pdf_lista_presenca(
     local,
     municipio,
     tipo_publico,
-    tipo_publico_outra,
     qual,
 ):
     from io import BytesIO
@@ -480,7 +476,6 @@ def gerar_pdf_lista_presenca(
         local=local,
         municipio=municipio,
         tipo_publico=tipo_publico,
-        tipo_publico_outra=tipo_publico_outra,
         qual=qual,
     )
 

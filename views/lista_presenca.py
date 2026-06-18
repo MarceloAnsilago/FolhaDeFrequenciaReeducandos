@@ -64,8 +64,7 @@ def render_lista_presenca():
             with tipo8:
                 tipo_outro = st.checkbox("Outro")
 
-            tipo_publico_outra = st.text_input("Outro (se aplicável)")
-            qual = st.text_input("Qual?")
+            qual = st.text_input("Outro (se aplicável) qual?")
 
         with st.expander("Competência", expanded=True):
             col_mes, col_ano = st.columns(2)
@@ -108,7 +107,6 @@ def render_lista_presenca():
                         if checked
                     ]
                 ),
-                tipo_publico_outra=tipo_publico_outra,
                 qual=qual,
             )
             st.success("Lista de presença gerada.")
