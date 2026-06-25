@@ -20,7 +20,7 @@ from views.veiculos import render_veiculos
 st.set_page_config(
     page_title="Utilitários IDARON",
     page_icon="\U0001F4C4",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="expanded",
 )
 
@@ -28,9 +28,6 @@ st.markdown(
     """
     <style>
     .stApp .block-container {
-        max-width: 1280px;
-        margin-left: auto;
-        margin-right: auto;
         padding-left: 2rem;
         padding-right: 2rem;
     }

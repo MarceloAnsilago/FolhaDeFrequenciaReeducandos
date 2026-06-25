@@ -17,16 +17,13 @@ from reportlab.pdfgen import canvas
 
 st.set_page_config(
     page_title="FAI Vegetal | PDF",
-    layout="wide",
+    layout="centered",
 )
 
 st.markdown(
     """
     <style>
     .stApp .block-container {
-        max-width: 1100px;
-        margin-left: auto;
-        margin-right: auto;
         padding-top: 1.5rem;
     }
     .stApp h1,
