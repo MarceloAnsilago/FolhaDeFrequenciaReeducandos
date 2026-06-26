@@ -25,7 +25,6 @@ OUTPUT_FILENAME = "modelo etiqueta para caixa arquivo.pdf"
 TEXT_FONT = "Helvetica-Bold"
 TEXT_SIZE = 12
 MIN_TEXT_SIZE = 6
-BORDER_INSET_MM = 1.2
 MONTHS = [
     "Janeiro",
     "Fevereiro",
@@ -61,20 +60,15 @@ def _fit_single_line_text(text: str, max_width: float, font_name: str, base_size
 
 def _draw_double_line(c: canvas.Canvas, x1: float, y1: float, x2: float, y2: float):
     c.line(x1, y1, x2, y2)
-    if y1 == y2:
-        c.line(x1, y1 - BORDER_INSET_MM * mm, x2, y2 - BORDER_INSET_MM * mm)
-    elif x1 == x2:
-        c.line(x1 + BORDER_INSET_MM * mm, y1, x2 + BORDER_INSET_MM * mm, y2)
 
 
 def _draw_inner_horizontal_line(c: canvas.Canvas, x: float, y: float, width: float):
-    inset = BORDER_INSET_MM * mm
-    _draw_double_line(c, x + inset, y, x + width - inset, y)
+    _draw_double_line(c, x, y, x + width, y)
 
 
 def _draw_vertical_borders(c: canvas.Canvas, x: float, y_top: float, y_bottom: float, width: float):
     _draw_double_line(c, x, y_top, x, y_bottom)
-    _draw_double_line(c, x + width - BORDER_INSET_MM * mm, y_top, x + width - BORDER_INSET_MM * mm, y_bottom)
+    _draw_double_line(c, x + width, y_top, x + width, y_bottom)
 
 
 def _draw_row(c: canvas.Canvas, label: str, value: str, x: float, y_top: float, width: float, height: float):
@@ -157,9 +151,8 @@ def _draw_month_section(
     separator_height: float,
 ):
     padding_x = 5 * mm
-    border_inset = BORDER_INSET_MM * mm
-    inner_x = x + border_inset
-    inner_width = width - (2 * border_inset)
+    inner_x = x
+    inner_width = width
     header_y = y_top - (header_height / 2) - (TEXT_SIZE / 3)
     body_top = y_top - header_height
     body_bottom = body_top - body_height
