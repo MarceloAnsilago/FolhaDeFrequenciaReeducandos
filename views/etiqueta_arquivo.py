@@ -25,6 +25,7 @@ OUTPUT_FILENAME = "modelo etiqueta para caixa arquivo.pdf"
 TEXT_FONT = "Helvetica-Bold"
 TEXT_SIZE = 12
 MIN_TEXT_SIZE = 6
+BORDER_INSET_MM = 1.2
 MONTHS = [
     "Janeiro",
     "Fevereiro",
@@ -61,19 +62,19 @@ def _fit_single_line_text(text: str, max_width: float, font_name: str, base_size
 def _draw_double_line(c: canvas.Canvas, x1: float, y1: float, x2: float, y2: float):
     c.line(x1, y1, x2, y2)
     if y1 == y2:
-        c.line(x1, y1 - 1.2 * mm, x2, y2 - 1.2 * mm)
+        c.line(x1, y1 - BORDER_INSET_MM * mm, x2, y2 - BORDER_INSET_MM * mm)
     elif x1 == x2:
-        c.line(x1 + 1.2 * mm, y1, x2 + 1.2 * mm, y2)
+        c.line(x1 + BORDER_INSET_MM * mm, y1, x2 + BORDER_INSET_MM * mm, y2)
 
 
 def _draw_inner_horizontal_line(c: canvas.Canvas, x: float, y: float, width: float):
-    inset = 1.2 * mm
+    inset = BORDER_INSET_MM * mm
     _draw_double_line(c, x + inset, y, x + width - inset, y)
 
 
 def _draw_vertical_borders(c: canvas.Canvas, x: float, y_top: float, y_bottom: float, width: float):
     _draw_double_line(c, x, y_top, x, y_bottom)
-    _draw_double_line(c, x + width - 1.2 * mm, y_top, x + width - 1.2 * mm, y_bottom)
+    _draw_double_line(c, x + width - BORDER_INSET_MM * mm, y_top, x + width - BORDER_INSET_MM * mm, y_bottom)
 
 
 def _draw_row(c: canvas.Canvas, label: str, value: str, x: float, y_top: float, width: float, height: float):
@@ -156,6 +157,9 @@ def _draw_month_section(
     separator_height: float,
 ):
     padding_x = 5 * mm
+    border_inset = BORDER_INSET_MM * mm
+    inner_x = x + border_inset
+    inner_width = width - (2 * border_inset)
     header_y = y_top - (header_height / 2) - (TEXT_SIZE / 3)
     body_top = y_top - header_height
     body_bottom = body_top - body_height
@@ -173,9 +177,16 @@ def _draw_month_section(
         c.drawString(x + padding_x, cursor_y, line)
         cursor_y -= line_height
 
-    c.rect(x, separator_bottom, width, separator_height, stroke=1, fill=0)
+    c.rect(inner_x, separator_bottom, inner_width, separator_height, stroke=1, fill=0)
     c.setFillColorRGB(127 / 255, 127 / 255, 127 / 255)
-    c.rect(x + 0.4, separator_bottom + 0.4, width - 0.8, separator_height - 0.8, stroke=0, fill=1)
+    c.rect(
+        inner_x + 0.4,
+        separator_bottom + 0.4,
+        inner_width - 0.8,
+        separator_height - 0.8,
+        stroke=0,
+        fill=1,
+    )
     c.setFillColorRGB(0, 0, 0)
     return separator_bottom
 
@@ -193,7 +204,7 @@ def _draw_fixed_header(
 ):
     c.setLineWidth(0.8)
     c.setFillColorRGB(0, 0, 0)
-    _draw_double_line(c, x, y_top, x + width, y_top)
+    _draw_inner_horizontal_line(c, x, y_top, width)
 
     rows = [
         ("SUPERVISÃO REGIONAL:", supervisao_regional),
