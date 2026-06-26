@@ -25,6 +25,8 @@ OUTPUT_FILENAME = "modelo etiqueta para caixa arquivo.pdf"
 TEXT_FONT = "Helvetica-Bold"
 TEXT_SIZE = 12
 MIN_TEXT_SIZE = 6
+INNER_LINE_WIDTH = 0.8
+BORDER_LINE_WIDTH = 1.6
 MONTHS = [
     "Janeiro",
     "Fevereiro",
@@ -58,7 +60,15 @@ def _fit_single_line_text(text: str, max_width: float, font_name: str, base_size
     return min_size, normalized
 
 
-def _draw_double_line(c: canvas.Canvas, x1: float, y1: float, x2: float, y2: float):
+def _draw_double_line(
+    c: canvas.Canvas,
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
+    line_width: float = INNER_LINE_WIDTH,
+):
+    c.setLineWidth(line_width)
     c.line(x1, y1, x2, y2)
 
 
@@ -66,9 +76,13 @@ def _draw_inner_horizontal_line(c: canvas.Canvas, x: float, y: float, width: flo
     _draw_double_line(c, x, y, x + width, y)
 
 
+def _draw_outer_horizontal_line(c: canvas.Canvas, x: float, y: float, width: float):
+    _draw_double_line(c, x, y, x + width, y, BORDER_LINE_WIDTH)
+
+
 def _draw_vertical_borders(c: canvas.Canvas, x: float, y_top: float, y_bottom: float, width: float):
-    _draw_double_line(c, x, y_top, x, y_bottom)
-    _draw_double_line(c, x + width, y_top, x + width, y_bottom)
+    _draw_double_line(c, x, y_top, x, y_bottom, BORDER_LINE_WIDTH)
+    _draw_double_line(c, x + width, y_top, x + width, y_bottom, BORDER_LINE_WIDTH)
 
 
 def _draw_row(c: canvas.Canvas, label: str, value: str, x: float, y_top: float, width: float, height: float):
@@ -195,9 +209,8 @@ def _draw_fixed_header(
     width: float,
     row_heights: list[float],
 ):
-    c.setLineWidth(0.8)
     c.setFillColorRGB(0, 0, 0)
-    _draw_inner_horizontal_line(c, x, y_top, width)
+    _draw_outer_horizontal_line(c, x, y_top, width)
 
     rows = [
         ("SUPERVISÃO REGIONAL:", supervisao_regional),
@@ -331,7 +344,7 @@ def build_pdf_etiqueta_arquivo(
 
     def finish_card(y_start: float, y_bottom: float):
         _draw_vertical_borders(c, x, y_start, y_bottom, label_width)
-        _draw_inner_horizontal_line(c, x, y_bottom, label_width)
+        _draw_outer_horizontal_line(c, x, y_bottom, label_width)
 
     def draw_header(card: dict, y_top: float):
         return _draw_fixed_header(
