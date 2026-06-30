@@ -585,7 +585,7 @@ def render_etiqueta_arquivo():
                 text_key = f"etiqueta_texto_{month_key}"
                 default_text = f"{month} / {year}"
                 st.session_state.setdefault(text_key, "")
-                with st.expander(default_text, expanded=True):
+                with st.expander(default_text, expanded=False):
                     st.text_area(
                         "Texto",
                         key=text_key,

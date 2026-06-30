@@ -343,7 +343,7 @@ def render_declaracao_cadastral_suinos():
     with col_meio:
         st.markdown("## Declaração cadastral - suínos")
 
-        with st.expander("Dados do produtor", expanded=True):
+        with st.expander("Dados do produtor", expanded=False):
             st.text_input("ULSAV", key="dcs_ulsav")
             st.text_input("Número da declaração (ex.: 0165/2026)", key="dcs_numero_declaracao")
             st.text_input("Nome do produtor", key="dcs_nome")
@@ -370,7 +370,7 @@ def render_declaracao_cadastral_suinos():
             with col_local[1]:
                 st.text_input("UF", key="dcs_uf", value="RO")
 
-        with st.expander("Estratificação - suínos", expanded=True):
+        with st.expander("Estratificação - suínos", expanded=False):
             col_animais = st.columns(3)
             with col_animais[0]:
                 st.number_input("Reprodutor", key="dcs_reprodutor", min_value=0, step=1)
@@ -382,7 +382,7 @@ def render_declaracao_cadastral_suinos():
                 st.number_input("Idade e sexo não relevante", key="dcs_idade_sexo_nao_relevante", min_value=0, step=1)
                 st.text_input("Total de animais", value=str(total_animais), disabled=True)
 
-        with st.expander("Dados do imóvel rural", expanded=True):
+        with st.expander("Dados do imóvel rural", expanded=False):
             st.caption("Nome e CPF/CNPJ do proprietário são preenchidos automaticamente com os dados do produtor, mas podem ser alterados se necessário.")
             _sync_field_from_source("dcs_nome", "dcs_nome_prop_imovel")
             _sync_field_from_source("dcs_cpf_cnpj", "dcs_cpf_cnpj_prop")
@@ -400,7 +400,7 @@ def render_declaracao_cadastral_suinos():
 
             st.text_area("Observações", key="dcs_observacoes", height=70)
 
-        with st.expander("Identificação do emitente", expanded=True):
+        with st.expander("Identificação do emitente", expanded=False):
             st.text_input("Nome do emitente", key="dcs_emitente_nome")
             col_emit = st.columns(2)
             with col_emit[0]:

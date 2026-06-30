@@ -39,7 +39,7 @@ def render_folha_ponto():
                         st.session_state["_upload_aplicado"] = True
                         st.success("Campos preenchidos a partir do arquivo.")
 
-        with st.expander("Dados do Reeducando", expanded=True):
+        with st.expander("Dados do Reeducando", expanded=False):
             secretaria_input = st.text_input("Secretaria", key="secretaria")
             reeducando_input = st.text_input("Reeducando", key="reeducando")
             funcao_input = st.text_input("Função", key="funcao")
@@ -82,14 +82,14 @@ def render_folha_ponto():
             with col_contato[2]:
                 data_input = st.text_input("Data", key="data_preenchimento")
 
-        with st.expander("Rodapé (ULSAV/IDARON)", expanded=True):
+        with st.expander("Rodapé (ULSAV/IDARON)", expanded=False):
             rodape_titulo_input = st.text_input("Título do rodapé", key="rodape_titulo")
             rodape_endereco_input = st.text_input("Endereço (rodapé)", key="rodape_endereco")
             rodape_fone_input = st.text_input("Fone/Fax (rodapé)", key="rodape_fone")
             rodape_cep_input = st.text_input("CEP / Cidade (rodapé)", key="rodape_cep")
             rodape_email_input = st.text_input("Email (rodapé)", key="rodape_email")
 
-        with st.expander("Preencher dados da folha", expanded=True):
+        with st.expander("Preencher dados da folha", expanded=False):
             # saneia valores de mês/ano antes de criar os widgets
             if st.session_state.get("mes_label") not in MESES:
                 st.session_state["mes_label"] = list(MESES.keys())[0]

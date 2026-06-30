@@ -10,12 +10,12 @@ def render_lista_presenca():
     with col_mid:
         st.title("🗒️ Lista de Presença")
 
-        with st.expander("Identificação", expanded=True):
+        with st.expander("Identificação", expanded=False):
             regional = st.text_input("Regional")
             unidade = st.text_input("Unidade")
             atividade = st.text_input("Atividade")
 
-        with st.expander("Atividade (marque as opções)", expanded=True):
+        with st.expander("Atividade (marque as opções)", expanded=False):
             col1, col2, col3, col4 = st.columns(4)
             with col1:
                 atividade_palestra = st.checkbox("Palestra")
@@ -27,7 +27,7 @@ def render_lista_presenca():
                 atividade_encontro = st.checkbox("Encontro")
             outro_qual = st.text_input("Outro - Qual?")
 
-        with st.expander("Tema, Data e Local", expanded=True):
+        with st.expander("Tema, Data e Local", expanded=False):
             tema = st.text_input("Tema")
             col_data, col_hora1, col_hora2 = st.columns([1, 1, 1])
             with col_data:
@@ -43,7 +43,7 @@ def render_lista_presenca():
             with col_municipio:
                 municipio = st.text_input("Município")
 
-        with st.expander("Tipo de Público", expanded=True):
+        with st.expander("Tipo de Público", expanded=False):
             tipo1, tipo2, tipo3, tipo4 = st.columns(4)
             with tipo1:
                 tipo_produtor = st.checkbox("Produtor")
@@ -66,7 +66,7 @@ def render_lista_presenca():
 
             qual = st.text_input("Outro (se aplicável) qual?")
 
-        with st.expander("Competência", expanded=True):
+        with st.expander("Competência", expanded=False):
             col_mes, col_ano = st.columns(2)
             with col_mes:
                 mes_label = st.selectbox("Mês", list(MESES.keys()))

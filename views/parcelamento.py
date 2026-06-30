@@ -84,7 +84,7 @@ def render_parcelamento():
         tabs = st.tabs(["Preencher Requerimento", "Tabela de Descontos"])
 
     with tabs[0]:
-        with st.expander("Dados do Auto de Infração", expanded=True):
+        with st.expander("Dados do Auto de Infração", expanded=False):
             st.subheader("Dados do Auto de Infração")
             with st.form("form_auto_info"):
                 col1, col2 = st.columns(2)
@@ -119,7 +119,7 @@ def render_parcelamento():
         data_requerimento = st.session_state[k("data_requerimento")]
         data_auto = st.session_state[k("data_auto")]
 
-        with st.expander("Dados do Autuado", expanded=True):
+        with st.expander("Dados do Autuado", expanded=False):
             st.subheader("Dados do Autuado")
             with st.form("form_requerimento"):
                 nome_completo = st.text_input("Nome completo:", key=k("nome_completo"))
@@ -233,7 +233,7 @@ def render_parcelamento():
         valor_parcela_final = 0
 
         if num_max_parcelas > 0:
-            with st.expander("Opcoes de Parcelamento", expanded=True):
+            with st.expander("Opcoes de Parcelamento", expanded=False):
                 data_dict = {
                     "Quantidade de Parcelas": list(range(1, 32)),
                     "Desconto Concedido (Integral)": [

@@ -849,7 +849,7 @@ yes_no_options = ["", "SIM", "NÃO"]
 
 st.header("FAI - Fiscalização do vazio sanitário da Soja")
 with st.container():
-    with st.expander("Da IDARON:", expanded=True):
+    with st.expander("Da IDARON:", expanded=False):
         col_a, col_b, col_c = st.columns(3)
         with col_a:
             numero = st.text_input("Número da FAI", value="")
@@ -864,7 +864,7 @@ with st.container():
             hod_final = st.text_input("HOD. final", value="")
             dist_ulsav_km = st.text_input("Dist. da ULSAV (km)", value="")
 
-    with st.expander("Identificação", expanded=True):
+    with st.expander("Identificação", expanded=False):
         col_a, col_b, col_c = st.columns(3)
         with col_a:
             sojicultor = st.text_input("Sojicultor", value="")
@@ -885,7 +885,7 @@ with st.container():
             coord_confere = st.selectbox("Coordenada confere no sistema", yes_no_options, index=0)
             uf = st.text_input("UF", value="")
 
-    with st.expander("Situações verificadas", expanded=True):
+    with st.expander("Situações verificadas", expanded=False):
         cadastro_idaron_cols = st.columns([2, 1, 1])
         with cadastro_idaron_cols[0]:
             st.write("Área fiscalizada possui cadastro no sistema da Agência IDARON")
@@ -910,7 +910,7 @@ with st.container():
         cadastro_idaron_status = "SIM" if cadastro_idaron_sim else "NÃO" if cadastro_idaron_nao else ""
         cadastro_prazo_status = "SIM" if cadastro_prazo_sim else "NÃO" if cadastro_prazo_nao else ""
 
-    with st.expander("Inf. notificações", expanded=True):
+    with st.expander("Inf. notificações", expanded=False):
         irregularidade_checked = st.checkbox(
             "A(s) notificação(ões) não foi(ram) atendida(s) dentro do prazo",
             value=False,
@@ -921,7 +921,7 @@ with st.container():
         with infracao_col_b:
             auto_infracao_data = st.text_input("Data do Auto de Infração", value="", placeholder="__/___/20__")
 
-    with st.expander("OBSERVAÇÕES ADICIONAIS", expanded=True):
+    with st.expander("OBSERVAÇÕES ADICIONAIS", expanded=False):
         titulo = st.text_input("Título", value="FISCALIZAÇÃO DO VAZIO SANITÁRIO DA SOJA")
         subtitulo = st.text_input(
             "Subtítulo",
@@ -956,7 +956,7 @@ with st.container():
             placeholder="Digite aqui o conteúdo que deve sair no campo Outras observações do PDF.",
         )
 
-    with st.expander("Assinatura e responsável", expanded=True):
+    with st.expander("Assinatura e responsável", expanded=False):
         usar_dados_sojicultor = st.checkbox("Usar dados do sojicultor", value=True, key="usar_dados_sojicultor")
         usar_dados_anterior = st.session_state.get("_usar_dados_sojicultor_anterior")
         if usar_dados_sojicultor:
